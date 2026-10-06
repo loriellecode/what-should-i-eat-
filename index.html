@@ -11,7 +11,8 @@
   }
   * { box-sizing:border-box; }
   body { margin:0; background:var(--bg); color:var(--ink); font:16px/1.45 system-ui,sans-serif; }
-  main { max-width:560px; margin:0 auto; padding:24px 16px 64px; display:grid; gap:16px; }
+  main { max-width:560px; margin:0 auto; padding:20px 16px 100px; display:grid; gap:16px; }
+  .tab { display:grid; gap:16px; } .tab[hidden] { display:none; }
   h1 { margin:0; font-size:1.6rem; } header p { margin:4px 0 0; color:var(--muted); }
   .slot { background:var(--card); border:1px solid var(--line); border-radius:14px; padding:16px 18px; }
   .slot h2 { margin:0; font-size:.8rem; letter-spacing:.12em; color:var(--muted); }
@@ -21,6 +22,21 @@
   .meta { margin-top:8px; color:var(--muted); font-size:.85rem; }
   .swap { float:right; background:none; border:0; color:var(--muted); cursor:pointer; font:inherit; font-size:.85rem; padding:0; }
   .snack { border-style:dashed; }
+  .pagehead h2 { margin:0; font-size:1.35rem; } .pagehead p { margin:2px 0 0; color:var(--muted); font-size:.92rem; }
+  #plan { display:grid; gap:16px; } #overview { display:grid; gap:12px; }
+  .ov { display:block; width:100%; text-align:left; font:inherit; color:var(--ink); background:var(--card); border:1px solid var(--line);
+    border-radius:14px; padding:14px 16px; cursor:pointer; }
+  .ov:hover { border-color:var(--accent); }
+  .ov .k { font-size:.75rem; letter-spacing:.12em; color:var(--muted); font-weight:700; }
+  .ov .t { font-size:1.2rem; font-weight:700; margin:2px 0; } .ov .s { color:var(--muted); font-size:.9rem; }
+  .ov .go-link { float:right; color:var(--accent); font-weight:700; font-size:.9rem; }
+  .ov.done .t { color:var(--accent); }
+  .tabbar { position:fixed; left:0; right:0; bottom:0; z-index:5; display:flex; justify-content:center; background:var(--card); border-top:1px solid var(--line);
+    padding-bottom:env(safe-area-inset-bottom); }
+  .tabbar button { flex:1; max-width:112px; background:none; border:0; padding:8px 0 9px; font:inherit; font-size:.72rem; font-weight:600; color:var(--muted); cursor:pointer; }
+  .tabbar button span { display:block; font-size:1.35rem; line-height:1.2; }
+  .tabbar button.on { color:var(--accent); }
+  .tabbar button .badge { display:inline-block; background:var(--warn); color:#fff; border-radius:99px; font-size:.65rem; padding:0 6px; margin-left:3px; vertical-align:top; }
   .groc { background:var(--card); border:1px solid var(--line); border-radius:14px; padding:16px 18px; }
   .groc h2 { margin:0 0 2px; font-size:.8rem; letter-spacing:.12em; color:var(--muted); }
   .groc .say { margin:2px 0 8px; font-weight:700; font-size:1.25rem; }
@@ -70,25 +86,39 @@
     <p id="today"></p>
   </header>
 
-  <section id="plan" style="display:grid;gap:16px"></section>
+  <div class="tab" data-tab="today">
+    <div class="pagehead"><h2>Today</h2><p>Your whole day, decided. Tap a card for the details.</p></div>
+    <section id="overview"></section>
+  </div>
 
-  <section id="move" class="groc"></section>
+  <div class="tab" data-tab="eat" hidden>
+    <div class="pagehead"><h2>Eat</h2><p>Breakfast, lunch, dinner and a snack. Tap “✓ I ate this” as you go.</p></div>
+    <section id="plan"></section>
+  </div>
 
-  <section id="groceries" class="groc"></section>
+  <div class="tab" data-tab="move" hidden>
+    <div class="pagehead"><h2>Move</h2><p>Exactly what to do. Press START and follow along.</p></div>
+    <section id="move" class="groc"></section>
+  </div>
 
-  <details id="kitchen">
-    <summary>🧺 What’s in your kitchen</summary>
-    <div id="stock"></div>
-    <form id="addForm" class="addrow" autocomplete="off">
-      <input id="addName" placeholder="Add an item (e.g. rice)" required>
-      <input id="addQty" type="number" min="1" value="4" title="servings">
-      <button class="go" type="submit">Add</button>
-    </form>
-    <small>Numbers are servings. Each meal you plan or eat uses 1 of each ingredient.</small>
-  </details>
+  <div class="tab" data-tab="groceries" hidden>
+    <div class="pagehead"><h2>Groceries</h2><p>What to buy for the next 7 days, based on what’s already in your kitchen.</p></div>
+    <section id="groceries" class="groc"></section>
+    <details id="kitchen" open>
+      <summary>🧺 What’s in your kitchen</summary>
+      <div id="stock"></div>
+      <form id="addForm" class="addrow" autocomplete="off">
+        <input id="addName" placeholder="Add an item (e.g. rice)" required>
+        <input id="addQty" type="number" min="1" value="4" title="servings">
+        <button class="go" type="submit">Add</button>
+      </form>
+      <small>Numbers are servings. Each meal you eat uses 1 of each ingredient.</small>
+    </details>
+  </div>
 
-  <details id="setup">
-    <summary>⚙️ Your setup</summary>
+  <div class="tab" data-tab="setup" hidden>
+    <div class="pagehead"><h2>Setup</h2><p>Tell it once. It remembers.</p></div>
+    <section id="setup" class="groc">
     <form id="form" autocomplete="off">
       <label>Foods you like <small>(optional)</small><input id="likes" placeholder="pasta, salmon"></label>
       <label>Foods you dislike / avoid<input id="dislikes" placeholder="mushrooms, tofu"></label>
@@ -124,8 +154,17 @@
       </div>
       <button class="go" type="submit">Save &amp; update today</button>
     </form>
-  </details>
+    </section>
+  </div>
 </main>
+
+<nav class="tabbar" id="tabbar">
+  <button data-go="today"><span>🏠</span>Today</button>
+  <button data-go="eat"><span>🍽️</span>Eat</button>
+  <button data-go="move"><span>🏋🏽‍♀️</span>Move</button>
+  <button data-go="groceries"><span>🛒</span>Groceries</button>
+  <button data-go="setup"><span>⚙️</span>Setup</button>
+</nav>
 
 <div id="run" class="run" hidden></div>
 
@@ -310,7 +349,7 @@ let current = null;
 function render() {
   current = planWeek(swaps);
   const { days, buy, near } = current, items = days[0], st = days[0].st;
-  $("today").textContent = new Date().toLocaleDateString(undefined, { weekday:"long", month:"long", day:"numeric" }) + " — the system already knows.";
+  $("today").textContent = new Date().toLocaleDateString(undefined, { weekday:"long", month:"long", day:"numeric" });
   let cal = 0, pro = 0;
 
   $("plan").innerHTML = items.map(({ slot, pick }) => {
@@ -329,6 +368,7 @@ function render() {
 
   renderMove();
   renderGroceries(strict() ? near : buy);
+  renderOverview(items, strict() ? near : buy);
   renderStock();
 
   // remember what we served so tomorrow can vary
@@ -703,9 +743,53 @@ $("run").addEventListener("click", e => {
   showRun();
 });
 
+
+// ---- Tabs + Today overview -----------------------------------------------
+const TABS = ["today", "eat", "move", "groceries", "setup"];
+function showTab(name) {
+  if (!TABS.includes(name)) name = "today";
+  document.querySelectorAll(".tab").forEach(t => t.hidden = t.dataset.tab !== name);
+  document.querySelectorAll("#tabbar button").forEach(b => b.classList.toggle("on", b.dataset.go === name));
+  try { history.replaceState(null, "", "#" + name); } catch {}
+  window.scrollTo(0, 0);
+}
+
+function renderOverview(items, buy) {
+  const next = items.find(x => x.pick), sc = schedule(), w = WORKOUTS[sc.type];
+  const need = Object.keys(buy).length, cards = [];
+
+  cards.push(next
+    ? `<button class="ov" data-go="eat"><span class="go-link">Meals →</span><div class="k">🍽️ EAT NEXT · ${next.slot.label}</div>
+        <div class="t">${esc(next.pick.meal.name)}</div>
+        <div class="s">${next.pick.meal.ing.map(i => emoji(i)).join(" ")} · ${next.pick.meal.cal} kcal · ${next.pick.meal.pro} g protein</div></button>`
+    : `<button class="ov done" data-go="eat"><span class="go-link">Meals →</span><div class="k">🍽️ EAT</div>
+        <div class="t">${items.length ? "Nothing fits your limits." : "All meals eaten today ✓"}</div>
+        <div class="s">${items.length ? "Try more time or a bigger budget in Setup." : "Nice. Tomorrow’s plan is ready then."}</div></button>`);
+
+  let mv, mvSub;
+  if (sc.doneToday) { mv = "Workout done ✓"; mvSub = `Next: ${w.title}${sc.next ? " · " + sc.next : ""}`; }
+  else if (!sc.isTrainDay) { mv = "Rest day"; mvSub = `Next: ${w.title}${sc.next ? " · " + sc.next : ""}`; }
+  else { mv = w.title; mvSub = `About ${Math.round(buildWorkout(sc.type).items.reduce((a, it) => a + (it.kind === "ex" ? it.sets * (it.unit === "s" ? it.reps / 60 + 1 : 1.6) : it.kind === "iv" ? it.rounds * (it.fast + it.easy) / 60 : it.secs / 60), 0))} min · treadmill, dumbbells, bands`; }
+  cards.push(`<button class="ov ${sc.doneToday ? "done" : ""}" data-go="move"><span class="go-link">${!sc.doneToday && sc.isTrainDay ? "Start →" : "Details →"}</span>
+    <div class="k">🏋🏽‍♀️ MOVE ${sc.doneToday || !sc.isTrainDay ? "" : "· NOW"}</div><div class="t">${esc(mv)}</div><div class="s">${esc(mvSub)}</div></button>`);
+
+  cards.push(`<button class="ov ${need ? "" : "done"}" data-go="groceries"><span class="go-link">${need ? "Buy →" : "Kitchen →"}</span>
+    <div class="k">🛒 GROCERIES</div><div class="t">${need ? `You’re low on ${need} thing${need > 1 ? "s" : ""}` : "You’re stocked ✓"}</div>
+    <div class="s">${need ? Object.keys(buy).slice(0, 4).map(n => emoji(n) + " " + cap(n)).join(", ") + (need > 4 ? ` +${need - 4} more` : "") : "Everything for the next 7 days is in your kitchen."}</div></button>`);
+
+  $("overview").innerHTML = cards.join("");
+  const badge = $("tabbar").querySelector('[data-go="groceries"]');
+  badge.innerHTML = `<span>🛒</span>Groceries${need ? `<i class="badge">${need}</i>` : ""}`;
+}
+
+document.addEventListener("click", e => {
+  const g = e.target.closest("[data-go]"); if (g) showTab(g.dataset.go);
+});
+window.addEventListener("hashchange", () => showTab(location.hash.slice(1)));
+
 // ---- Events --------------------------------------------------------------
 const update = () => { save(); render(); };
-$("form").addEventListener("submit", e => { e.preventDefault(); Object.keys(swaps).forEach(k => delete swaps[k]); update(); $("setup").open = false; });
+$("form").addEventListener("submit", e => { e.preventDefault(); Object.keys(swaps).forEach(k => delete swaps[k]); update(); showTab("today"); });
 $("plan").addEventListener("click", e => {
   const sw = e.target.closest(".swap"), eat = e.target.closest(".eat");
   if (sw) { swaps[sw.dataset.slot] = (swaps[sw.dataset.slot] || 0) + 1; render(); }
@@ -744,8 +828,9 @@ $("addForm").addEventListener("submit", e => {
   addStock($("addName").value, Math.max(1, +$("addQty").value || 1));
   $("addName").value = ""; update();
 });
-$("setup").open = !load();   // first visit: show setup
+const returning = load();
 render();
+showTab(returning ? (location.hash.slice(1) || "today") : "setup");   // first visit: set things up
 </script>
 </body>
 </html>
