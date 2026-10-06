@@ -34,6 +34,23 @@
   .groc .row2 { display:flex; gap:8px; flex-wrap:wrap; margin-top:12px; }
   .groc .row2 button { flex:1; padding:9px; font:inherit; font-weight:600; border-radius:8px; cursor:pointer; border:1px solid var(--line); background:none; color:var(--ink); }
   .groc .row2 .primary { background:var(--accent); color:#fff; border-color:var(--accent); }
+  .move-title { font-size:1.1rem; font-weight:700; margin-bottom:4px; }
+  ol.steps { margin:6px 0 8px; padding-left:22px; } ol.steps li { padding:2px 0; }
+  ul.plain { margin:4px 0 12px; padding:0; list-style:none; } ul.plain li { padding:2px 0; }
+  .run { position:fixed; inset:0; z-index:10; background:var(--bg); overflow:auto; }
+  .run[hidden] { display:none; }
+  .runbox { max-width:560px; margin:0 auto; padding:16px; min-height:100%; display:flex; flex-direction:column; }
+  .runbar { display:flex; align-items:center; gap:12px; justify-content:space-between; color:var(--muted); font-size:.9rem; }
+  .runbar button { background:none; border:0; color:var(--muted); font-size:1.2rem; cursor:pointer; }
+  .runbody { flex:1; display:flex; flex-direction:column; justify-content:center; text-align:center; gap:8px; padding-bottom:40px; }
+  .kicker { letter-spacing:.12em; font-size:.85rem; color:var(--muted); font-weight:700; }
+  .big { font-size:2.6rem; font-weight:800; line-height:1.1; } .big small { font-size:1rem; font-weight:500; color:var(--muted); }
+  .timer { font-size:4rem; font-weight:800; font-variant-numeric:tabular-nums; }
+  .phase { font-size:1.4rem; font-weight:800; color:var(--muted); } .phase.fast { color:var(--accent); }
+  .cue { color:var(--muted); margin:4px 0 8px; }
+  .run .go { padding:16px; font-size:1.2rem; }
+  .feel { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin-top:16px; }
+  .feel button, .run .row2 button { padding:12px; font:inherit; font-weight:600; border-radius:8px; cursor:pointer; border:1px solid var(--line); background:var(--card); color:var(--ink); }
   .shop, .note { border:1px dashed var(--line); border-radius:12px; padding:12px 14px; color:var(--muted); }
   details { background:var(--card); border:1px solid var(--line); border-radius:12px; padding:12px 16px; }
   summary { cursor:pointer; font-weight:700; }
@@ -54,6 +71,8 @@
   </header>
 
   <section id="plan" style="display:grid;gap:16px"></section>
+
+  <section id="move" class="groc"></section>
 
   <section id="groceries" class="groc"></section>
 
@@ -77,6 +96,14 @@
         <label>Budget per meal ($)<input id="budget" type="number" min="1" step="0.5" value="8"></label>
         <label>Time per meal (min)<input id="time" type="number" min="5" step="5" value="30"></label>
       </div>
+      <div class="row">
+        <label>Training experience
+          <select id="level"><option value="new" selected>Just starting</option><option value="some">Some experience</option><option value="exp">Experienced</option></select></label>
+        <label>Workouts per week
+          <select id="daysPerWeek"><option value="3">3</option><option value="4" selected>4</option><option value="5">5</option></select></label>
+      </div>
+      <label>Dumbbells you own <small>(lb, comma separated)</small>
+        <input id="dumbbells" value="5,8,10,12,15,20,25,30,35,40,50"></label>
       <label>Fitness goal
         <select id="goal">
           <option value="lose">Lose fat</option>
@@ -99,6 +126,8 @@
     </form>
   </details>
 </main>
+
+<div id="run" class="run" hidden></div>
 
 <script>
 // ---- Meal database -------------------------------------------------------
@@ -298,6 +327,7 @@ function render() {
   }).join("") +
   (items.some(i => i.pick) ? `<div class="note">Today’s plan: <b>${cal} kcal</b>, <b>${pro} g protein</b>.</div>` : "");
 
+  renderMove();
   renderGroceries(strict() ? near : buy);
   renderStock();
 
@@ -338,15 +368,16 @@ function renderStock() {
 }
 
 // ---- Persistence ---------------------------------------------------------
-const FIELDS = ["likes","dislikes","budget","time","goal","eaten","eatenCal","eatenPro"];
+const FIELDS = ["likes","dislikes","budget","time","goal","eaten","eatenCal","eatenPro","level","daysPerWeek","dumbbells"];
 const CHECKS = SLOTS.map(s => "m_" + s.key);
-const KEY = "wsie-v3", HKEY = "wsie-history", SKEY = "wsie-stock";
+const KEY = "wsie-v3", HKEY = "wsie-history", SKEY = "wsie-stock", FKEY = "wsie-fit";
 function save() {
   try {
     const d = Object.fromEntries(FIELDS.map(f => [f, $(f).value]));
     CHECKS.forEach(c => d[c] = $(c).checked);
     d.day = dayKey(); localStorage.setItem(KEY, JSON.stringify(d));
     localStorage.setItem(SKEY, JSON.stringify(state));
+    localStorage.setItem(FKEY, JSON.stringify(fit));
   } catch {}
 }
 function load() {
@@ -354,6 +385,10 @@ function load() {
   try {
     const s = JSON.parse(localStorage.getItem(SKEY) || "null");
     if (s) { state.stock = s.stock || {}; state.shopped = s.shopped || null; found = true; }
+  } catch {}
+  try {
+    const f = JSON.parse(localStorage.getItem(FKEY) || "null");
+    if (f) Object.assign(fit, f);
   } catch {}
   try {
     const d = JSON.parse(localStorage.getItem(KEY) || "null");
@@ -376,6 +411,297 @@ function saveHistory(h) {
     localStorage.setItem(HKEY, JSON.stringify(Object.fromEntries(keep.map(k => [k, h[k]]))));
   } catch {}
 }
+
+// ---- Body movement -------------------------------------------------------
+// Equipment: treadmill, dumbbells, small (mini loop) resistance bands. Nothing else.
+// Each movement has variants, easiest first. t: bw = bodyweight, db = dumbbells, band = mini band.
+// two = dumbbell in each hand, side = reps per side, unit "s" = seconds, w0 = starting weight (lb).
+const LIB = {
+  squat: { name:"Squat", sets:3, v:[
+    { n:"Bodyweight squat", t:"bw", min:12, max:20, cue:"Feet shoulder-width. Sit back and down, chest tall, knees track over toes." },
+    { n:"Goblet squat", t:"db", min:8, max:12, w0:10, cue:"Hold one dumbbell against your chest. Sit between your heels." },
+    { n:"Banded goblet squat", t:"db", band:true, min:10, max:15, w0:15, cue:"Mini band just above your knees. Hold one dumbbell at your chest and push your knees out into the band." } ] },
+  hinge: { name:"Hinge", sets:3, v:[
+    { n:"Romanian deadlift", t:"db", two:true, min:8, max:12, w0:8, cue:"Soft knees. Push hips back, slide dumbbells down your thighs until you feel hamstrings stretch. Flat back." },
+    { n:"Single-leg Romanian deadlift", t:"db", side:true, min:8, max:12, w0:10, cue:"One dumbbell in the hand opposite your standing leg. Hinge and reach long, hips square." } ] },
+  bridge: { name:"Bridge", sets:3, v:[
+    { n:"Glute bridge", t:"bw", min:12, max:20, cue:"Lie on your back, feet flat. Drive through heels, squeeze glutes at the top for 1 second." },
+    { n:"Banded glute bridge", t:"bw", band:true, min:12, max:20, cue:"Mini band above your knees. Keep knees pressed out as you lift." },
+    { n:"Single-leg glute bridge", t:"bw", side:true, min:8, max:12, cue:"One foot on the floor, other leg extended. Keep hips level." } ] },
+  lunge: { name:"Lunge", sets:2, v:[
+    { n:"Reverse lunge", t:"bw", side:true, min:8, max:12, cue:"Step back, lower until both knees are about 90°. Push through the front heel." },
+    { n:"Dumbbell reverse lunge", t:"db", two:true, side:true, min:8, max:12, w0:5, cue:"Dumbbells at your sides. Step back and lower under control." },
+    { n:"Dumbbell walking lunge", t:"db", two:true, side:true, min:10, max:14, w0:8, cue:"Step forward into each lunge and keep walking. Use a long hallway or the room." } ] },
+  bandwalk: { name:"Band walk", sets:2, v:[
+    { n:"Banded lateral walk", t:"bw", band:true, side:true, min:10, max:16, cue:"Mini band above your knees, slight squat. Take a step to the side each rep, keep tension in the band." },
+    { n:"Banded lateral walk (band at ankles)", t:"bw", band:true, side:true, min:12, max:20, cue:"Mini band around your ankles. Small, controlled steps, don’t let your feet touch." } ] },
+  calf: { name:"Calf raise", sets:2, v:[
+    { n:"Calf raise", t:"bw", min:15, max:25, cue:"Rise onto your toes, pause 1 second, lower slowly." },
+    { n:"Dumbbell calf raise", t:"db", two:true, min:12, max:20, w0:10, cue:"Dumbbells at your sides. Full range, slow lowering." },
+    { n:"Single-leg dumbbell calf raise", t:"db", side:true, min:10, max:15, w0:10, cue:"One dumbbell, one foot. Hold a wall lightly for balance." } ] },
+  press: { name:"Press", sets:3, v:[
+    { n:"Dumbbell floor press", t:"db", two:true, min:8, max:12, w0:8, cue:"Lie on the floor, knees bent. Press dumbbells up from chest height, elbows at 45°." } ] },
+  pushup: { name:"Push-up", sets:3, v:[
+    { n:"Knee push-up", t:"bw", min:8, max:15, cue:"Hands under shoulders, body straight from head to knees. Lower chest to the floor." },
+    { n:"Push-up", t:"bw", min:8, max:15, cue:"Full plank position, body in a straight line. Chest to the floor, press back up." },
+    { n:"Slow push-up (3 sec down)", t:"bw", min:6, max:12, cue:"Lower for a slow count of three, press up strong." } ] },
+  ohp: { name:"Overhead press", sets:3, v:[
+    { n:"Dumbbell overhead press", t:"db", two:true, min:8, max:12, w0:8, cue:"Stand tall, ribs down. Press straight overhead without arching your back." } ] },
+  lateral: { name:"Lateral raise", sets:2, v:[
+    { n:"Dumbbell lateral raise", t:"db", two:true, min:10, max:15, w0:5, cue:"Slight elbow bend. Raise to shoulder height, lower slowly." } ] },
+  tri: { name:"Triceps", sets:2, v:[
+    { n:"Overhead triceps extension", t:"db", min:10, max:15, w0:8, cue:"Hold one dumbbell with both hands overhead. Bend elbows, keep them pointing forward." } ] },
+  row: { name:"Row", sets:3, v:[
+    { n:"Dumbbell bent-over row", t:"db", two:true, min:8, max:12, w0:10, cue:"Hinge forward with a flat back. Pull elbows toward your hips." },
+    { n:"Single-arm dumbbell row", t:"db", side:true, min:8, max:12, w0:12, cue:"Hand on your thigh for support. Pull the dumbbell to your hip, squeeze your shoulder blade." } ] },
+  pullapart: { name:"Pull-apart", sets:3, v:[
+    { n:"Banded pull-apart", t:"bw", band:true, min:12, max:20, cue:"Hold a mini band at chest height, arms straight. Pull it apart, squeezing shoulder blades." },
+    { n:"Banded pull-apart with 2-sec pause", t:"bw", band:true, min:10, max:15, cue:"Same, but hold the band wide for 2 seconds each rep." } ] },
+  rfly: { name:"Reverse fly", sets:2, v:[
+    { n:"Dumbbell reverse fly", t:"db", two:true, min:10, max:15, w0:5, cue:"Hinge forward, raise arms out to the sides, lead with elbows." } ] },
+  curl: { name:"Biceps", sets:2, v:[
+    { n:"Dumbbell biceps curl", t:"db", two:true, min:8, max:12, w0:8, cue:"Elbows pinned to your sides. Curl up, lower slowly." } ] },
+  deadbug: { name:"Dead bug", sets:2, v:[
+    { n:"Dead bug", t:"bw", side:true, min:8, max:12, cue:"Back flat on the floor. Lower opposite arm and leg slowly, keep your lower back pressed down." } ] },
+  plank: { name:"Plank", sets:2, v:[
+    { n:"Plank", t:"bw", unit:"s", step:5, min:20, max:60, cue:"Forearms on the floor, body in a straight line. Squeeze glutes and abs." } ] },
+  thruster: { name:"Squat to press", sets:3, v:[
+    { n:"Dumbbell squat to press", t:"db", two:true, min:8, max:12, w0:8, cue:"Squat with dumbbells at your shoulders, then stand and press overhead in one motion." } ] },
+  climber: { name:"Mountain climbers", sets:2, v:[
+    { n:"Mountain climbers", t:"bw", unit:"s", step:5, min:20, max:45, cue:"High plank. Drive knees to your chest, quick and controlled." } ] },
+};
+const WORKOUTS = {
+  lower:  { title:"Lower Body",   moves:["squat","hinge","bridge","lunge","bandwalk"], walk:true },
+  upper:  { title:"Upper Body",   moves:["press","row","ohp","pullapart","curl","plank"], walk:true },
+  cardio: { title:"Treadmill Intervals + Core", moves:["deadbug","plank"], cardio:true },
+  full:   { title:"Full Body",    moves:["thruster","row","pushup","hinge","climber"], walk:true },
+};
+const CYCLE = ["lower", "upper", "cardio", "full"];
+const TRAIN_DAYS = { 3:[1,3,5], 4:[1,2,4,6], 5:[1,2,3,5,6] };   // getDay(): 0 = Sunday
+const DOW = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
+const LEVEL = { new:1, some:1.5, exp:2 };
+const REST_SEC = 60;
+
+const fit = { prog:{}, walk:{ min:10, incline:0 }, iv:{ rounds:5, fast:45 }, log:[] };
+
+const dumbbells = () => {
+  const l = [...new Set(list($("dumbbells").value).map(Number).filter(n => n > 0))].sort((a, b) => a - b);
+  return l.length ? l : [5, 8, 10, 12, 15, 20, 25, 30, 35, 40, 50];
+};
+const snapDb = x => { const l = dumbbells(); return l.filter(n => n <= x).pop() || l[0]; };
+const nextDb = w => dumbbells().find(n => n > w);
+const prog = key => fit.prog[key] || (fit.prog[key] = (() => {
+  const v = LIB[key].v[0];
+  return { v:0, w: v.w0 ? snapDb(v.w0 * (LEVEL[$("level").value] || 1)) : 0, reps: v.min, sets: LIB[key].sets };
+})());
+
+function describe(item) {
+  if (item.kind === "tm") return `${Math.round(item.secs / 60)}-minute ${item.name.toLowerCase()}${item.incline ? ` · ${item.incline}% incline` : ""}`;
+  if (item.kind === "iv") return `Treadmill intervals — ${item.rounds} × (${item.fast} sec fast + ${item.easy} sec easy)`;
+  const wt = item.t === "db" ? ` · ${item.w} lb${item.two ? " each hand" : ""}` : item.band ? " · mini band" : "";
+  return `${item.name} — ${item.sets} × ${item.reps}${item.unit === "s" ? " sec" : ""}${item.side ? " each side" : ""}${wt}`;
+}
+
+function buildWorkout(type) {
+  const def = WORKOUTS[type], items = [];
+  const muscle = $("goal").value === "muscle";
+  items.push({ kind:"tm", id:"warm", name:"Warm-up walk", secs: def.cardio ? 300 : 180, cue:"Easy pace. Let your heart rate rise gradually." });
+  for (const key of def.moves) {
+    const p = prog(key), v = LIB[key].v[p.v];
+    items.push({ kind:"ex", key, name:v.n, sets: p.sets + (muscle && p.sets < 4 && ["squat","hinge","press","row"].includes(key) ? 1 : 0),
+      reps:p.reps, w:p.w, t:v.t, two:v.two, side:v.side, band:v.band, unit:v.unit, cue:v.cue });
+  }
+  if (def.cardio) {
+    items.splice(1, 0, { kind:"iv", id:"iv", rounds:fit.iv.rounds, fast:fit.iv.fast, easy:90,
+      cue:"Fast = a jog or brisk incline walk you could hold for about a minute, but not chat through. Easy = comfortable walk." });
+    items.push({ kind:"tm", id:"cool", name:"Cool-down walk", secs:300, cue:"Slow it down and breathe." });
+  } else {
+    const extra = $("goal").value === "lose" ? 5 : 0;
+    items.push({ kind:"tm", id:"walk", name:"Walk", secs:(fit.walk.min + extra) * 60, incline:fit.walk.incline, cue:"Steady, brisk pace you can hold a conversation at." });
+  }
+  return { type, title:def.title, items };
+}
+
+// The next workout in the rotation, whether today is a training day, and when the next one is.
+function schedule() {
+  const today = dayKey(), doneToday = fit.log.some(l => l.day === today);
+  const days = TRAIN_DAYS[+$("daysPerWeek").value] || TRAIN_DAYS[4];
+  const isTrainDay = days.includes(new Date().getDay());
+  let next = null;
+  for (let i = 1; i <= 7 && !next; i++) if (days.includes(addDays(i).getDay())) next = i === 1 ? "tomorrow" : DOW[addDays(i).getDay()];
+  return { type: CYCLE[fit.log.length % CYCLE.length], doneToday, isTrainDay, next };
+}
+
+function renderMove() {
+  const sc = schedule(), week = fit.log.filter(l => (Date.now() - new Date(l.day)) / 864e5 < 7).length;
+  const nextTitle = WORKOUTS[sc.type].title;
+  let html = `<h2>🏋🏽‍♀️ BODY MOVEMENT</h2>`;
+  if (sc.doneToday) {
+    html += `<div class="say">Done for today. ✓</div><div class="meta">Next: ${nextTitle}${sc.next ? ` · ${sc.next}` : ""}.</div>`;
+  } else if (!sc.isTrainDay && !move.force) {
+    html += `<div class="say">Rest day.</div><div class="meta">Recover. An easy walk is fine. Next workout: ${nextTitle}${sc.next ? ` · ${sc.next}` : ""}.</div>
+      <div class="row2"><button data-run="force">Train anyway</button></div>`;
+  } else {
+    const w = buildWorkout(sc.type), mins = Math.round(w.items.reduce((a, it) =>
+      a + (it.kind === "ex" ? it.sets * (it.unit === "s" ? it.reps / 60 + 1 : 1.6) : it.kind === "iv" ? it.rounds * (it.fast + it.easy) / 60 : it.secs / 60), 0));
+    html += `<div class="say">NOW</div><div class="move-title">Workout: ${w.title}</div>
+      <ol class="steps">${w.items.map(it => `<li>${esc(describe(it))}</li>`).join("")}</ol>
+      <div class="meta">About ${mins} min · treadmill, dumbbells, mini band</div>
+      <div class="row2"><button class="primary" data-run="start">START</button></div>`;
+  }
+  html += `<div class="meta" style="margin-top:10px">${fit.log.length} workout${fit.log.length === 1 ? "" : "s"} done · ${week} in the last 7 days. It gets harder as you finish them.</div>`;
+  $("move").innerHTML = html;
+}
+const move = { force:false };
+
+// ---- Guided run ----------------------------------------------------------
+let run = null, tick = null;
+const fmtT = s => Math.floor(s / 60) + ":" + String(s % 60).padStart(2, "0");
+const buzz = () => { try { navigator.vibrate && navigator.vibrate(200); } catch {} };
+
+function startRun() {
+  run = { w: buildWorkout(schedule().type), i:-1, s:0, mode:"", left:0, running:false, res:{}, t0:Date.now(), msgs:[] };
+  nextItem();
+  clearInterval(tick); tick = setInterval(onTick, 1000);
+  $("run").hidden = false; document.body.style.overflow = "hidden";
+}
+function closeRun() { clearInterval(tick); run = null; $("run").hidden = true; document.body.style.overflow = ""; }
+
+function nextItem() {
+  run.i++; run.s = 0; run.running = false;
+  const it = run.w.items[run.i];
+  if (!it) { run.mode = "finish"; return showRun(); }
+  if (it.kind === "tm") { run.mode = "tm"; run.left = it.secs; }
+  else if (it.kind === "iv") {
+    run.mode = "iv";
+    run.phases = Array.from({ length: it.rounds }, (_, r) => [{ n:`FAST  ${r + 1}/${it.rounds}`, s:it.fast }, { n:`EASY  ${r + 1}/${it.rounds}`, s:it.easy }]).flat();
+    run.pi = 0; run.left = run.phases[0].s;
+  } else enterSet();
+  showRun();
+}
+function enterSet() {
+  const it = run.w.items[run.i];
+  run.mode = "work"; run.running = false; run.left = it.unit === "s" ? it.reps : 0;
+}
+function setDone(ok) {
+  const it = run.w.items[run.i], r = run.res[it.key] || (run.res[it.key] = { done:0, planned:it.sets });
+  if (ok) r.done++;
+  if (run.s + 1 < it.sets) {
+    run.s++;
+    if (ok) { run.mode = "rest"; run.left = REST_SEC; run.running = true; } else enterSet();
+    showRun();
+  } else nextItem();
+}
+function onTick() {
+  if (!run || !run.running) return;
+  run.left--;
+  if (run.left <= 0) {
+    buzz();
+    if (run.mode === "tm") { run.res[run.w.items[run.i].id] = true; return nextItem(); }
+    if (run.mode === "iv") {
+      if (++run.pi >= run.phases.length) { run.res.iv = true; return nextItem(); }
+      run.left = run.phases[run.pi].s;
+    } else if (run.mode === "rest") enterSet();
+    else if (run.mode === "work") return setDone(true);   // timed hold finished
+  }
+  showRun();
+}
+
+function showRun() {
+  if (!run) return;
+  const items = run.w.items, it = items[run.i], total = items.length;
+  const bar = `<div class="runbar"><span>${run.w.title}</span><span>${Math.min(run.i + 1, total)} / ${total}</span><button data-r="close" title="Quit">✕</button></div>`;
+  let body = "";
+  if (run.mode === "finish") {
+    const mins = Math.max(1, Math.round((Date.now() - run.t0) / 60000));
+    body = run.msgs.length ? `<div class="big">Nice work. 💪</div><div class="meta">${mins} min</div>
+        <div class="meta" style="margin-top:12px"><b>Next time:</b></div><ul class="plain">${run.msgs.map(m => `<li>${esc(m)}</li>`).join("")}</ul>
+        <button class="go" data-r="close">Done</button>`
+      : `<div class="big">Workout complete. 💪</div><div class="meta">${mins} min · How did that feel?</div>
+        <div class="feel"><button data-r="feel" data-f="easy">Too easy</button><button data-r="feel" data-f="right">Just right</button><button data-r="feel" data-f="hard">Too hard</button></div>`;
+  } else if (run.mode === "tm") {
+    body = `<div class="kicker">${esc(it.name.toUpperCase())}</div><div class="timer">${fmtT(run.left)}</div>
+      <div class="meta">${it.incline ? `Incline ${it.incline}%. ` : ""}${esc(it.cue)}</div>
+      <button class="go" data-r="toggle">${run.running ? "Pause" : "Start"}</button>
+      <div class="row2"><button data-r="skip">Skip</button><button data-r="done">Done</button></div>`;
+  } else if (run.mode === "iv") {
+    const ph = run.phases[run.pi], fast = ph.n.startsWith("FAST");
+    body = `<div class="kicker">TREADMILL INTERVALS</div><div class="phase ${fast ? "fast" : ""}">${ph.n}</div><div class="timer">${fmtT(run.left)}</div>
+      <div class="meta">${esc(it.cue)}</div>
+      <button class="go" data-r="toggle">${run.running ? "Pause" : "Start"}</button>
+      <div class="row2"><button data-r="skip">Skip</button><button data-r="done">Done</button></div>`;
+  } else if (run.mode === "rest") {
+    const nx = it;
+    body = `<div class="kicker">REST</div><div class="timer">${fmtT(run.left)}</div>
+      <div class="meta">Next: set ${run.s + 1} of ${nx.sets} · ${esc(nx.name)}</div>
+      <button class="go" data-r="skiprest">Skip rest</button>`;
+  } else {  // work
+    const timed = it.unit === "s", wt = it.t === "db" ? `${it.w} lb${it.two ? " in each hand" : ""}` : it.band ? "mini band" : "bodyweight";
+    body = `<div class="kicker">${esc(it.name.toUpperCase())}</div>
+      <div class="meta">Set ${run.s + 1} of ${it.sets}</div>
+      <div class="big">${timed ? fmtT(run.left) : it.reps + " reps"}${it.side && !timed ? " <small>each side</small>" : ""}</div>
+      <div class="meta"><b>${wt}</b></div><div class="cue">${esc(it.cue)}</div>
+      ${timed ? `<button class="go" data-r="toggle">${run.running ? "Pause" : "Start"}</button><div class="row2"><button data-r="skipset">Skip set</button><button data-r="doneset">Done</button></div>`
+              : `<button class="go" data-r="doneset">Done — set ${run.s + 1}</button><div class="row2"><button data-r="skipset">Skip set</button></div>`}`;
+  }
+  $("run").innerHTML = `<div class="runbox">${bar}<div class="runbody">${body}</div></div>`;
+}
+
+// Observe how the workout went and adjust each movement for next time.
+function applyProgress(feel) {
+  const msgs = [];
+  for (const it of run.w.items) {
+    if (it.kind === "ex") {
+      const r = run.res[it.key]; if (!r || r.done === 0) continue;
+      const p = prog(it.key), m = LIB[it.key], v = m.v[p.v], step = v.step || 1, frac = r.done / r.planned;
+      const before = describe({ ...it, sets:p.sets, reps:p.reps, w:p.w });
+      if (frac < 1 || feel === "hard") {
+        if (frac < .67) p.reps = Math.max(v.min, p.reps - step);                 // struggled: back off a little
+      } else if (p.reps >= v.max) {                                              // hit the top of the range: level up
+        const nw = v.t === "db" ? nextDb(p.w) : null;
+        if (nw) { p.w = nw; p.reps = v.min; }
+        else if (m.v[p.v + 1]) {
+          p.v++; const nv = m.v[p.v]; p.reps = nv.min;
+          p.w = nv.w0 ? snapDb(nv.w0 * (LEVEL[$("level").value] || 1)) : 0;
+        } else if (p.sets < 4) { p.sets++; p.reps = v.min; }
+      } else p.reps = Math.min(v.max, p.reps + (feel === "easy" ? 2 : 1) * step);
+      const after = describe({ ...it, name:m.v[p.v].n, t:m.v[p.v].t, two:m.v[p.v].two, side:m.v[p.v].side, band:m.v[p.v].band, unit:m.v[p.v].unit, sets:p.sets, reps:p.reps, w:p.w });
+      if (after !== before) msgs.push(after);
+    } else if (it.kind === "tm" && it.id === "walk" && run.res.walk && feel !== "hard") {
+      const w = fit.walk;
+      if (w.min < 20) w.min++; else if (w.incline < 5) { w.incline++; w.min = 12; }
+      msgs.push(`Walk — ${w.min} min${w.incline ? ` at ${w.incline}% incline` : ""}`);
+    } else if (it.kind === "iv" && run.res.iv && feel !== "hard") {
+      const v = fit.iv;
+      if (v.rounds < 10) v.rounds++; else if (v.fast < 120) { v.fast += 15; v.rounds = 6; }
+      msgs.push(`Intervals — ${v.rounds} × (${v.fast} sec fast + 90 sec easy)`);
+    }
+  }
+  if (feel === "hard" && !msgs.length) msgs.push("Same again — we’ll hold steady until it feels solid.");
+  if (!msgs.length) msgs.push("Same again — finish every set to move up.");
+  fit.log.push({ day: dayKey(), type: run.w.type, feel });
+  fit.log = fit.log.slice(-200);
+  run.msgs = msgs;
+}
+
+$("move").addEventListener("click", e => {
+  const b = e.target.closest("[data-run]"); if (!b) return;
+  if (b.dataset.run === "force") { move.force = true; renderMove(); }
+  if (b.dataset.run === "start") startRun();
+});
+$("run").addEventListener("click", e => {
+  const b = e.target.closest("[data-r]"); if (!b || !run) return;
+  const a = b.dataset.r, it = run.w.items[run.i];
+  if (a === "close") { const fin = run.mode === "finish" && run.msgs.length; closeRun(); if (fin) { move.force = false; update(); } return; }
+  if (a === "toggle") { run.running = !run.running; }
+  else if (a === "done") { if (it) run.res[it.id] = true; return nextItem(); }
+  else if (a === "skip") return nextItem();
+  else if (a === "doneset") return setDone(true);
+  else if (a === "skipset") return setDone(false);
+  else if (a === "skiprest") enterSet();
+  else if (a === "feel") { applyProgress(b.dataset.f); save(); }
+  showRun();
+});
 
 // ---- Events --------------------------------------------------------------
 const update = () => { save(); render(); };
