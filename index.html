@@ -283,6 +283,9 @@
       </div>
       <label>Dumbbells you own <small>(lb, comma separated)</small>
         <input id="dumbbells" value="5,8,10,12,15,20,25,30,35,40,50"></label>
+      <label>Max calories per day <small>(optional, leave blank for none)</small>
+        <input id="calLimit" type="number" min="0" step="50" value="900" placeholder="e.g. 900"></label>
+      <small id="calNote"></small>
       <label>Fitness goal
         <select id="goal">
           <option value="lose">Lose fat</option>
@@ -370,6 +373,19 @@ const MEALS = [
   { name:"Cheesy broccoli rice", slots:["lunch","dinner"], ing:["rice","broccoli","cheese"], time:15, cost:3, cal:430, pro:18 },
   { name:"Cheesy spinach pasta", slots:["dinner"], ing:["pasta","spinach","cheese"], time:15, cost:3, cal:520, pro:22 },
   { name:"Cheesy chicken & broccoli", slots:["dinner"], ing:["chicken","broccoli","cheese"], time:20, cost:5, cal:430, pro:45 },
+  { name:"Spinach scramble", slots:["breakfast"], ing:["eggs","spinach"], time:6, cost:2, cal:170, pro:14 },
+  { name:"Greek yogurt & berries", slots:["breakfast","snack"], ing:["greek yogurt","berries"], time:3, cost:3, cal:150, pro:15 },
+  { name:"Chicken lettuce wraps", slots:["lunch","dinner"], ing:["chicken","lettuce","soy sauce"], time:15, cost:3.5, cal:250, pro:30 },
+  { name:"Cucumber tuna bowl", slots:["lunch"], ing:["tuna","cucumber","tomato"], time:5, cost:3, cal:190, pro:28 },
+  { name:"Turkey lettuce wraps", slots:["lunch"], ing:["turkey","lettuce","tomato"], time:5, cost:3.5, cal:160, pro:18 },
+  { name:"Shrimp cucumber salad", slots:["lunch","dinner"], ing:["shrimp","lettuce","cucumber"], time:10, cost:5, cal:200, pro:24 },
+  { name:"Veggie broth soup", slots:["lunch","dinner"], ing:["broth","carrot","onion","spinach"], time:20, cost:2, cal:90, pro:4 },
+  { name:"Lemon chicken & asparagus", slots:["dinner"], ing:["chicken","asparagus","olive oil"], time:20, cost:5, cal:320, pro:36 },
+  { name:"Baked salmon & broccoli", slots:["dinner"], ing:["salmon","broccoli"], time:20, cost:8, cal:340, pro:36 },
+  { name:"Garlic shrimp & zucchini", slots:["dinner"], ing:["shrimp","zucchini","garlic"], time:15, cost:5, cal:220, pro:26 },
+  { name:"Chicken veggie stir-fry (no rice)", slots:["dinner"], ing:["chicken","bell pepper","broccoli","soy sauce"], time:20, cost:5, cal:290, pro:36 },
+  { name:"Apple slices", slots:["snack"], ing:["apple"], time:1, cost:.8, cal:95, pro:0 },
+  { name:"Handful of berries", slots:["snack"], ing:["berries"], time:1, cost:1.5, cal:70, pro:1 },
 ];
 
 // ---- Goal targets (daily) ------------------------------------------------
@@ -532,15 +548,18 @@ function score(meal, slot, st) {
 // offset 0 = today (respects what's eaten / which meals are left / today's mood); 1..6 = full future days.
 function settings(offset) {
   const v = id => $(id).value;
-  const goal = v("goal"), g = GOALS[goal], today = offset === 0;
+  const goal = v("goal"), today = offset === 0;
+  const limit = +v("calLimit") || 0;                                   // hard daily cap, 0 = none
+  const g = limit ? { cal: limit, pro: Math.round(limit * 0.3 / 4) } : GOALS[goal];
+  const snackCal = limit ? 100 : SNACK_CAL, snackPro = limit ? 5 : SNACK_PRO;
   const want = Object.fromEntries(SLOTS.map(s => [s.key, today ? $("m_" + s.key).checked : true]));
   const mains = SLOTS.filter(s => s.share && want[s.key]);
   const eatCal = today ? +v("eatenCal") || 0 : 0, eatPro = today ? +v("eatenPro") || 0 : 0;
   const n = Math.max(mains.length, 1);
-  const remCal = Math.max(g.cal - eatCal - (want.snack ? SNACK_CAL : 0), 250 * n);
-  const remPro = Math.max(g.pro - eatPro - (want.snack ? SNACK_PRO : 0), 15 * n);
+  const remCal = Math.max(g.cal - eatCal - (want.snack ? snackCal : 0), (limit ? 100 : 250) * n);
+  const remPro = Math.max(g.pro - eatPro - (want.snack ? snackPro : 0), (limit ? 8 : 15) * n);
   const shareSum = mains.reduce((a, s) => a + s.share, 0) || 1;
-  const targets = { snack: { cal: SNACK_CAL, pro: SNACK_PRO } };
+  const targets = { snack: { cal: snackCal, pro: snackPro } };
   mains.forEach(s => targets[s.key] = { cal: remCal * s.share / shareSum, pro: remPro * s.share / shareSum });
   const day = dayKey(addDays(offset));
   const moodOn = today && state.mood && state.mood.day === dayKey() && state.mood.text.trim();
@@ -548,18 +567,28 @@ function settings(offset) {
     likes: list(v("likes")), dislikes: list(v("dislikes")), eatenFoods: today ? list(v("eaten")) : [],
     budget: +v("budget") || 999, time: +v("time") || 999, goal, want, targets, day,
     yesterday: history()[dayKey(addDays(offset - 1))] || [],
-    remCal, remPro, missPenalty: strict() ? 60 : 2,
+    remCal, remPro, limit, eatCal, missPenalty: strict() ? 60 : 2,
     mood: moodOn ? parseMood(state.mood.text) : null,
     choice: today && state.choice && state.choice.day === dayKey() ? state.choice : {},
   };
 }
 
 // Each meal gets 4 options. The first is the top pick, unless you tapped a different card.
+const MIN_CAL = { breakfast:150, lunch:200, dinner:250, snack:70 };   // least each later meal needs, so the day can't overshoot
 function planDay(st) {
   const usedNames = new Set(), usedMain = new Set(), out = [];
-  for (const slot of SLOTS) {
-    if (!st.want[slot.key]) continue;
-    const ranked = MEALS.map(m => score(m, slot, st)).filter(Boolean).sort((a, b) => b.score - a.score);
+  let budget = st.limit ? st.limit - st.eatCal : Infinity;
+  const slots = SLOTS.filter(x => st.want[x.key]);
+  for (const slot of slots) {
+    const later = slots.slice(slots.indexOf(slot) + 1).reduce((a, x) => a + MIN_CAL[x.key], 0);
+    const maxCal = budget - later;
+    let ranked = MEALS.map(m => score(m, slot, st)).filter(Boolean).sort((a, b) => b.score - a.score);
+    if (st.limit) {
+      const fit = ranked.filter(r => r.meal.cal <= maxCal);
+      // if too few fit, top up with the lightest meals rather than going over
+      const light = ranked.filter(r => !fit.includes(r)).sort((a, b) => a.meal.cal - b.meal.cal);
+      ranked = fit.length >= 4 ? fit : [...fit, ...light.slice(0, 4 - fit.length)];
+    }
     const fresh = ranked.filter(r => !usedNames.has(r.meal.name) && !(slot.key !== "snack" && usedMain.has(r.meal.ing[0])));
     const order = [...fresh, ...ranked.filter(r => !fresh.includes(r))];
     // Mix it up: at most 2 options for the same first reason (e.g. two smoothies), unless nothing else is left.
@@ -567,7 +596,7 @@ function planDay(st) {
     for (const r of order) { const k = r.why[0] || ""; if (options.length < 4 && (seen[k] || 0) < 2) { options.push(r); seen[k] = (seen[k] || 0) + 1; } }
     for (const r of order) if (options.length < 4 && !options.includes(r)) options.push(r);
     const pick = options.find(o => o.meal.name === st.choice[slot.key]) || options[0] || null;
-    if (pick) { usedNames.add(pick.meal.name); usedMain.add(pick.meal.ing[0]); st.consume(pick); }
+    if (pick) { usedNames.add(pick.meal.name); usedMain.add(pick.meal.ing[0]); st.consume(pick); budget -= pick.meal.cal; }
     out.push({ slot, options, pick });
   }
   return out;
@@ -625,7 +654,8 @@ function render() {
     ? `<div class="moodbar"><span>Picked for your mood:</span> ${st.mood.chips.map(c => `<span class="chip">${esc(c)}</span>`).join("")} <button class="linkbtn" data-go="today">Change</button></div>`
     : `<div class="moodbar"><span>Tell the Today page what you’re craving and these meals will follow.</span> <button class="linkbtn" data-go="today">Set my mood</button></div>`;
 
-  $("plan").innerHTML = moodBar + items.map(({ slot, options, pick }) => {
+  const limitBar = st.limit ? `<div class="moodbar">Daily limit: <b>${st.limit} kcal</b>${st.eatCal ? ` · eaten so far ${Math.round(st.eatCal)}` : ""} · your picks add up to <b id="pickCal">…</b></div>` : "";
+  $("plan").innerHTML = moodBar + limitBar + items.map(({ slot, options, pick }) => {
     if (!options.length) return `<section class="mealgroup"><div class="mg-head"><h3>${slot.label}</h3></div><div class="note">Nothing fits your limits. Try more time, a bigger budget, or fewer dislikes.</div></section>`;
     cal += pick.meal.cal; pro += pick.meal.pro;
     return `<section class="mealgroup"><div class="mg-head"><h3>${slot.label}</h3><span>${slot.key === "snack" ? "Have this if you’re hungry" : "Pick one"} · tap a card</span></div>
@@ -640,7 +670,10 @@ function render() {
           <button class="eat" data-slot="${slot.key}" data-meal="${esc(o.meal.name)}">✓ I ate this</button>
         </article>`).join("")}</div></section>`;
   }).join("") +
-  (items.some(i => i.pick) ? `<div class="note">Your picks today: <b>${cal} kcal</b>, <b>${pro} g protein</b>.</div>` : "");
+  (items.some(i => i.pick) ? `<div class="note">Your picks today: <b>${cal} kcal</b>, <b>${pro} g protein</b>${st.limit ? ` · limit ${st.limit} kcal${cal + st.eatCal > st.limit ? " (over)" : ""}` : ""}.</div>` : "");
+  const pc = $("pickCal"); if (pc) pc.textContent = cal + " kcal";
+  $("calNote").textContent = +$("calLimit").value && +$("calLimit").value < 1200
+    ? "Under about 1,200 kcal a day is very low, especially with workouts. It’s worth checking with a doctor or dietitian." : "";
 
   // Today: mood form reflects what's active
   if (document.activeElement !== $("mood")) $("mood").value = state.mood && state.mood.day === dayKey() ? state.mood.text : "";
@@ -699,7 +732,7 @@ function renderStock() {
 }
 
 // ---- Persistence ---------------------------------------------------------
-const FIELDS = ["likes","dislikes","budget","time","goal","eaten","eatenCal","eatenPro","level","daysPerWeek","dumbbells"];
+const FIELDS = ["calLimit","likes","dislikes","budget","time","goal","eaten","eatenCal","eatenPro","level","daysPerWeek","dumbbells"];
 const CHECKS = SLOTS.map(s => "m_" + s.key);
 const KEY = "wsie-v3", HKEY = "wsie-history", SKEY = "wsie-stock", FKEY = "wsie-fit";
 function save() {
