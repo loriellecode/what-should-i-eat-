@@ -34,7 +34,7 @@
 
   main { max-width:1120px; margin:0 auto; padding:8px 20px 120px; position:relative; z-index:1; }
   .tab[hidden] { display:none; }
-  .tab { display:grid; gap:22px; }
+  .tab { display:grid; grid-template-columns:minmax(0,1fr); gap:22px; } .tab > * { min-width:0; }
   :focus-visible { outline:2px solid #fff; outline-offset:3px; }
 
   /* hero (Today) */
@@ -146,7 +146,7 @@
 
 
   /* slot-machine reel */
-  :root { --rh:58px; }
+  :root { --rh:52px; }
   .reel { position:relative; height:calc(var(--rh) * 5); overflow:hidden; margin:8px 0 4px;
     -webkit-mask-image:linear-gradient(to bottom,transparent 0,#000 22%,#000 78%,transparent 100%); mask-image:linear-gradient(to bottom,transparent 0,#000 22%,#000 78%,transparent 100%); }
   .reel::before { content:""; position:absolute; left:0; right:0; top:calc(var(--rh) * 2); height:var(--rh); border-top:1px solid rgba(255,255,255,.35); border-bottom:1px solid rgba(255,255,255,.35); pointer-events:none; }
@@ -163,6 +163,21 @@
   .reel.full::before { display:none; }
   .reel.full .rrow { height:auto; padding:7px 6px; }
   .reel.full .rrow.d1 { opacity:.6; } .reel.full .rrow.d2 { opacity:.5; } .reel.full .rrow.d3 { opacity:.42; }
+
+
+  /* exercise demos */
+  .rrow { flex-direction:row !important; align-items:center; gap:10px; }
+  .rfig { flex:0 0 auto; width:var(--figw,40px); height:var(--figw,40px); }
+  .rfig svg, .bigfig svg { width:100%; height:100%; display:block; }
+  .rtext { flex:1; min-width:0; display:flex; flex-direction:column; justify-content:center; }
+  .reel.full { --figw:60px; }
+  .reel.full .rrow { padding:6px; } .reel.full .rname, .reel.full .rsub { white-space:normal; }
+  .vid { color:#fff; font-size:.78rem; text-decoration:underline; text-underline-offset:3px; white-space:nowrap; flex:0 0 auto; }
+  .vid:hover { opacity:.8; }
+  .reel:not(.full) .vid { display:none; }
+  .bigfig { display:flex; align-items:center; justify-content:center; gap:16px; margin:4px 0; }
+  .bigfig[hidden] { display:none; }
+  .bigfig svg { width:112px; height:112px; flex:0 0 auto; background:rgba(10,28,110,.35); border:1px solid var(--line); border-radius:16px; }
 
   /* guided workout (full screen) */
   .run { position:fixed; inset:0; z-index:20; overflow:auto; background:linear-gradient(172deg,#3f8fe8 0%,#3a5df8 35%,#5a90fb 70%,#3dc6fb 100%); }
@@ -926,14 +941,160 @@ function renderMove() {
 const move = { force:false };
 
 
+// ---- Animated exercise demos ---------------------------------------------
+// A stick figure (side view, facing right) moves between a start and an end pose.
+// Angles are in degrees. Torso `t`: 0 = upright, 90 = leaning forward, -90 = lying on your back.
+// Limbs `u/f` (arm) and `th/sh` (leg): 0 = hanging straight down, 90 = pointing forward, 180 = straight up.
+const FIG = (() => {
+  const A = (u, f) => [u, f], Lg = (th, sh, fo = 90) => [th, sh, fo];
+  const STAND = { t:0, arms:[A(0,0)], legs:[Lg(0,0)] };
+  const P = (a, b) => [a, b];
+  // key: [start pose, end pose]
+  const POSES = {
+    squat:    P({ t:5,  arms:[A(75,80)],  legs:[Lg(0,0)] },   { t:38, arms:[A(75,80)],  legs:[Lg(85,-10)] }),
+    goblet:   P({ t:5,  arms:[A(12,150)], legs:[Lg(0,0)] },   { t:32, arms:[A(12,150)], legs:[Lg(82,-10)] }),
+    rdl:      P({ t:0,  arms:[A(0,0)],    legs:[Lg(0,0)] },   { t:72, arms:[A(0,0)],    legs:[Lg(14,-6)] }),
+    slrdl:    P({ t:0,  arms:[A(0,0)],    legs:[Lg(0,0),Lg(0,0)] }, { t:80, arms:[A(0,0)], legs:[Lg(8,-4),Lg(-88,-88,0)] }),
+    bridge:   P({ t:-100, hx:10, arms:[A(88,88)], legs:[Lg(120,35)] }, { t:-125, hx:10, arms:[A(88,88)], legs:[Lg(100,25)] }),
+    bridge1:  P({ t:-100, hx:10, arms:[A(88,88)], legs:[Lg(120,35),Lg(150,150)] }, { t:-125, hx:10, arms:[A(88,88)], legs:[Lg(100,25),Lg(130,130)] }),
+    lunge:    P({ t:2, arms:[A(0,0)], legs:[Lg(0,0),Lg(0,0)] }, { t:4, arms:[A(0,0)], legs:[Lg(82,0),Lg(-22,-85,40)] }),
+    bandwalk: P({ t:12, arms:[A(70,80)], legs:[Lg(38,-22),Lg(28,-18)] }, { t:12, arms:[A(70,80)], legs:[Lg(26,-18),Lg(44,-24)] }),
+    calf:     P({ t:0, arms:[A(0,0)], legs:[Lg(0,0,90)] }, { t:0, arms:[A(0,0)], legs:[Lg(0,0,12)] }),
+    calf1:    P({ t:0, arms:[A(0,0)], legs:[Lg(0,0,90),Lg(-5,-60,90)] }, { t:0, arms:[A(0,0)], legs:[Lg(0,0,12),Lg(-5,-60,90)] }),
+    floorpress: P({ t:-92, hx:8, arms:[A(95,180)], legs:[Lg(125,20)] }, { t:-92, hx:8, arms:[A(180,180)], legs:[Lg(125,20)] }),
+    pushup:   P({ t:80, hx:0, arms:[A(0,0)], legs:[Lg(-80,-80,0)] }, { t:87, hx:0, arms:[A(-55,35)], legs:[Lg(-87,-87,0)] }),
+    pushupK:  P({ t:80, hx:6, arms:[A(0,0)], legs:[Lg(-80,-150,0)] }, { t:87, hx:6, arms:[A(-55,35)], legs:[Lg(-87,-160,0)] }),
+    ohp:      P({ t:0, arms:[A(15,150)], legs:[Lg(0,0)] }, { t:0, arms:[A(172,176)], legs:[Lg(0,0)] }),
+    lateral:  P({ t:0, arms:[A(0,0)], legs:[Lg(0,0)] }, { t:0, arms:[A(88,90)], legs:[Lg(0,0)] }),
+    triext:   P({ t:0, arms:[A(172,-35)], legs:[Lg(0,0)] }, { t:0, arms:[A(175,178)], legs:[Lg(0,0)] }),
+    row:      P({ t:68, arms:[A(0,0)], legs:[Lg(18,-8)] }, { t:68, arms:[A(-62,-20)], legs:[Lg(18,-8)] }),
+    pull:     P({ t:0, arms:[A(88,90),A(88,90)], legs:[Lg(0,0)] }, { t:0, arms:[A(70,100),A(-70,-100)], legs:[Lg(0,0)] }),
+    rfly:     P({ t:68, arms:[A(0,0)], legs:[Lg(18,-8)] }, { t:68, arms:[A(-40,-40)], legs:[Lg(18,-8)] }),
+    curl:     P({ t:0, arms:[A(4,4)], legs:[Lg(0,0)] }, { t:0, arms:[A(4,160)], legs:[Lg(0,0)] }),
+    deadbug:  P({ t:-92, hx:6, arms:[A(180,180),A(180,180)], legs:[Lg(180,90),Lg(180,90)] }, { t:-92, hx:6, arms:[A(180,180),A(-92,-92)], legs:[Lg(180,90),Lg(92,92)] }),
+    plank:    P({ t:80, hx:4, arms:[A(0,90)], legs:[Lg(-80,-80,0)] }, { t:82, hx:4, arms:[A(0,90)], legs:[Lg(-82,-82,0)] }),
+    thruster: P({ t:28, arms:[A(15,150)], legs:[Lg(82,-10)] }, { t:0, arms:[A(172,176)], legs:[Lg(0,0)] }),
+    climber:  P({ t:76, arms:[A(0,0)], legs:[Lg(-76,-76,0),Lg(42,-45,60)] }, { t:76, arms:[A(0,0)], legs:[Lg(42,-45,60),Lg(-76,-76,0)] }),
+    walk:     P({ t:2, arms:[A(-28,-20),A(28,60)], legs:[Lg(26,4),Lg(-22,-34,40)] }, { t:2, arms:[A(28,60),A(-28,-20)], legs:[Lg(-22,-34,40),Lg(26,4)] }),
+    run:      P({ t:12, arms:[A(-45,50),A(45,110)], legs:[Lg(55,-45,60),Lg(-32,-75,30)] }, { t:12, arms:[A(45,110),A(-45,50)], legs:[Lg(-32,-75,30),Lg(55,-45,60)] }),
+  };
+
+  // Which demo to use for an exercise name, plus what it holds.
+  function spec(name, kind) {
+    const n = (name || "").toLowerCase();
+    const o = (pose, db = 0, band = "") => ({ pose, db, band });
+    if (kind === "iv") return o("run");
+    if (kind === "tm" || /walk$|^walk|warm|cool/.test(n) && !/lunge|band/.test(n)) return o("walk");
+    if (/goblet/.test(n)) return o("goblet", 1, /band/.test(n) ? "knees" : "");
+    if (/squat to press/.test(n)) return o("thruster", 2);
+    if (/squat/.test(n)) return o("squat");
+    if (/single-leg romanian/.test(n)) return o("slrdl", 1);
+    if (/romanian/.test(n)) return o("rdl", 2);
+    if (/single-leg glute/.test(n)) return o("bridge1");
+    if (/glute bridge/.test(n)) return o("bridge", 0, /band/.test(n) ? "knees" : "");
+    if (/lunge/.test(n)) return o("lunge", /dumbbell/.test(n) ? 2 : 0);
+    if (/lateral walk/.test(n)) return o("bandwalk", 0, /ankle/.test(n) ? "ankles" : "knees");
+    if (/single-leg dumbbell calf/.test(n)) return o("calf1", 1);
+    if (/calf/.test(n)) return o("calf", /dumbbell/.test(n) ? 2 : 0);
+    if (/floor press/.test(n)) return o("floorpress", 2);
+    if (/knee push/.test(n)) return o("pushupK");
+    if (/push-up/.test(n)) return o("pushup");
+    if (/overhead press/.test(n)) return o("ohp", 2);
+    if (/lateral raise/.test(n)) return o("lateral", 2);
+    if (/triceps/.test(n)) return o("triext", 1);
+    if (/row/.test(n)) return o("row", /single-arm/.test(n) ? 1 : 2);
+    if (/pull-apart/.test(n)) return o("pull", 0, "hands");
+    if (/reverse fly/.test(n)) return o("rfly", 2);
+    if (/curl/.test(n)) return o("curl", 2);
+    if (/dead bug/.test(n)) return o("deadbug");
+    if (/plank/.test(n)) return o("plank");
+    if (/mountain/.test(n)) return o("climber");
+    return o("squat");
+  }
+  const attrs = (name, kind) => { const s = spec(name, kind); return `data-pose="${s.pose}" data-db="${s.db}" data-band="${s.band}"`; };
+
+  const S = 0.9, GROUND = 90, SVGNS = "http://www.w3.org/2000/svg";
+  const rad = d => d * Math.PI / 180, up = a => [Math.sin(rad(a)), -Math.cos(rad(a))], dn = a => [Math.sin(rad(a)), Math.cos(rad(a))];
+  const add = (p, v, k) => [p[0] + v[0] * k, p[1] + v[1] * k];
+  const lerp = (a, b, k) => a + (b - a) * k;
+  const two = (arr, d) => [arr[0] || d, arr[1] || arr[0] || d];
+  function mix(a, b, k) {
+    const aa = two(a.arms, A(0,0)), ba = two(b.arms, A(0,0)), al = two(a.legs, Lg(0,0)), bl = two(b.legs, Lg(0,0));
+    return { t:lerp(a.t, b.t, k), hx:lerp(a.hx || 0, b.hx || 0, k),
+      arms: aa.map((x, i) => x.map((v, j) => lerp(v, ba[i][j], k))), legs: al.map((x, i) => x.map((v, j) => lerp(v, bl[i][j], k))) };
+  }
+  function joints(p) {
+    const hip = [0, 0], sh = add(hip, up(p.t), 28), head = add(sh, up(p.t), 11);
+    const arms = p.arms.map(([u, f]) => { const e = add(sh, dn(u), 14), h = add(e, dn(f), 13); return [sh, e, h]; });
+    const legs = p.legs.map(([th, s, fo]) => { const k = add(hip, dn(th), 22), a = add(k, dn(s), 22), t = add(a, dn(fo), 8); return [hip, k, a, t]; });
+    const all = [hip, sh, head, ...arms.flat(), ...legs.flat()];
+    const maxY = Math.max(...all.map(q => q[1]));
+    const tr = q => [50 + (p.hx || 0) + q[0] * S, GROUND - (maxY - q[1]) * S];
+    return { head: tr(head), sh: tr(sh), hip: tr(hip), arms: arms.map(a => a.map(tr)), legs: legs.map(l => l.map(tr)) };
+  }
+
+  function build(svg) {
+    const mk = (tag, attrs) => { const e = document.createElementNS(SVGNS, tag); for (const k in attrs) e.setAttribute(k, attrs[k]); svg.appendChild(e); return e; };
+    const line = (cls, w = 3.6) => mk("path", { class: cls, fill: "none", stroke: "#fff", "stroke-width": w, "stroke-linecap": "round", "stroke-linejoin": "round" });
+    svg.setAttribute("viewBox", "0 0 100 100"); svg.setAttribute("aria-hidden", "true");
+    mk("line", { x1:6, x2:94, y1:GROUND + 2.5, y2:GROUND + 2.5, stroke:"rgba(255,255,255,.45)", "stroke-width":1.2, "stroke-linecap":"round" });
+    svg.__e = {
+      farLeg: line("l2", 3.4), farArm: line("a2", 3.2), torso: line("tr", 4.2), nearLeg: line("l1"), nearArm: line("a1"),
+      head: mk("circle", { r: 5.2, fill: "none", stroke: "#fff", "stroke-width": 3.2 }),
+      band: mk("path", { fill: "none", stroke: "#ffd98a", "stroke-width": 2.6, "stroke-linecap": "round", "stroke-dasharray": "none" }),
+      db: [0, 1].map(() => mk("path", { fill: "none", stroke: "#ffd98a", "stroke-width": 4.6, "stroke-linecap": "round" })),
+    };
+    [svg.__e.farLeg, svg.__e.farArm].forEach(e => e.setAttribute("opacity", ".5"));
+  }
+  const pts = a => "M" + a.map(q => q[0].toFixed(1) + " " + q[1].toFixed(1)).join(" L");
+  function draw(svg, k) {
+    if (!svg.__e) build(svg);
+    const d = svg.dataset, pair = POSES[d.pose] || POSES.squat, p = mix(pair[0], pair[1], k), j = joints(p), e = svg.__e;
+    const L1 = j.legs[0], L2 = j.legs[1], A1 = j.arms[0], A2 = j.arms[1];
+    e.nearLeg.setAttribute("d", pts(L1)); e.farLeg.setAttribute("d", pts(L2)); e.farLeg.style.display = pair[0].legs.length > 1 || pair[1].legs.length > 1 ? "" : "none";
+    e.nearArm.setAttribute("d", pts(A1)); e.farArm.setAttribute("d", pts(A2)); e.farArm.style.display = pair[0].arms.length > 1 || pair[1].arms.length > 1 ? "" : "none";
+    e.torso.setAttribute("d", pts([j.hip, j.sh]));
+    const hv = [j.head[0] - j.sh[0], j.head[1] - j.sh[1]], hl = Math.hypot(...hv) || 1;
+    e.head.setAttribute("cx", (j.sh[0] + hv[0] / hl * 8).toFixed(1)); e.head.setAttribute("cy", (j.sh[1] + hv[1] / hl * 8).toFixed(1));
+    // dumbbells sit in the hand(s)
+    const n = +d.db || 0;
+    e.db.forEach((el, i) => {
+      const h = i === 0 ? A1 : A2, show = n === 2 || (n === 1 && i === 0);
+      el.style.display = show ? "" : "none";
+      if (show) { const hand = h[2]; el.setAttribute("d", `M${(hand[0] - 3).toFixed(1)} ${(hand[1] - 0.5).toFixed(1)} L${(hand[0] + 3).toFixed(1)} ${(hand[1] + 0.5).toFixed(1)}`); }
+    });
+    // mini band: around the knees / ankles, or stretched between the hands
+    const b = d.band;
+    if (b === "knees" || b === "ankles") {
+      const i = b === "knees" ? 1 : 2, a = L1[i], c = L2[i];
+      e.band.style.display = ""; e.band.setAttribute("d", `M${a[0].toFixed(1)} ${a[1].toFixed(1)} L${c[0].toFixed(1)} ${c[1].toFixed(1)}`);
+    } else if (b === "hands") { e.band.style.display = ""; e.band.setAttribute("d", pts([A1[2], A2[2]])); }
+    else e.band.style.display = "none";
+  }
+  const reduced = () => { try { return matchMedia("(prefers-reduced-motion: reduce)").matches; } catch { return false; } };
+  function frame(ts) {
+    if (!document.hidden) {
+      const k = reduced() ? 0 : 0.5 - 0.5 * Math.cos(ts / 1000 * Math.PI * 2 / 2.6);   // smooth back and forth, 2.6 s per rep
+      document.querySelectorAll("svg.fig").forEach(svg => { if (svg.getBoundingClientRect().width) draw(svg, k); });
+    }
+    requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+  return { attrs, spec, draw, POSES };
+})();
+const figSVG = (name, kind, cls = "") => `<svg class="fig ${cls}" ${FIG.attrs(name, kind)}></svg>`;
+const videoURL = name => "https://www.youtube.com/results?search_query=" + encodeURIComponent(name + " proper form");
+
 // ---- Slot-machine reel: the station you're on is bold and centered, the rest fade ----
-const RH = 58;   // row height in px (matches --rh in the CSS)
+const RH = 52;   // row height in px (matches --rh in the CSS)
 const reelName = it => it.kind === "ex" ? it.name : it.kind === "iv" ? "Treadmill intervals" : it.name;
 const reelSub = it => (it.kind === "ex"
   ? `${it.sets} × ${it.reps}${it.unit === "s" ? " sec" : ""}${it.side ? " each side" : ""}${it.t === "db" ? ` · ${it.w} lb${it.two ? " each hand" : ""}` : it.band ? " · mini band" : ""}`
   : it.kind === "iv" ? `${it.rounds} × ${it.fast} sec fast, ${it.easy} sec easy`
   : `${it.incline ? `${it.incline}% incline` : "easy pace"}${it.speed ? ` · ${it.speed.toFixed(1)} mph` : ""}`) + ` · ≈${itemMin(it)} min`;
-const reelRows = items => items.map((it, i) => `<div class="rrow"><div class="rname">${esc(reelName(it))}</div><div class="rsub">${esc(reelSub(it))}</div></div>`).join("");
+const reelRows = items => items.map(it => `<div class="rrow"><div class="rfig">${figSVG(reelName(it), it.kind)}</div>
+  <div class="rtext"><div class="rname">${esc(reelName(it))}</div><div class="rsub">${esc(reelSub(it))}</div></div>
+  ${it.kind === "ex" ? `<a class="vid" href="${videoURL(it.name)}" target="_blank" rel="noopener" title="Watch a video demo">▶ video</a>` : ""}</div>`).join("");
 function paintReel(reel, active) {
   const track = reel.querySelector(".reel-track");
   [...track.children].forEach((row, i) => {
@@ -950,7 +1111,7 @@ const buzz = () => { try { navigator.vibrate && navigator.vibrate(200); } catch 
 
 function startRun() {
   run = { w: buildWorkout(schedule().type), i:-1, s:0, mode:"", left:0, running:false, res:{}, t0:Date.now(), msgs:[] };
-  $("run").innerHTML = `<div class="runbox"><div class="runbar"></div><div class="reel"><div class="reel-track">${reelRows(run.w.items)}</div></div><div class="runbody"></div></div>`;
+  $("run").innerHTML = `<div class="runbox"><div class="runbar"></div><div class="reel"><div class="reel-track">${reelRows(run.w.items)}</div></div><div class="bigfig"><svg class="fig big" data-pose="squat" data-db="0" data-band=""></svg><a class="vid" target="_blank" rel="noopener">▶ Watch a video demo</a></div><div class="runbody"></div></div>`;
   nextItem();
   clearInterval(tick); tick = setInterval(onTick, 1000);
   $("run").hidden = false; document.body.style.overflow = "hidden";
@@ -1037,6 +1198,13 @@ function showRun() {
   $("run").querySelector(".runbar").innerHTML = bar;
   $("run").querySelector(".runbody").innerHTML = body;
   paintReel($("run").querySelector(".reel"), run.mode === "finish" ? items.length + 2 : run.i);
+  const bf = $("run").querySelector(".bigfig"), cur = run.mode === "finish" ? null : it;
+  bf.hidden = !cur;
+  if (cur) {
+    const sp = FIG.spec(reelName(cur), cur.kind), sv = bf.querySelector("svg"), va = bf.querySelector(".vid");
+    sv.dataset.pose = sp.pose; sv.dataset.db = sp.db; sv.dataset.band = sp.band;
+    va.hidden = cur.kind !== "ex"; if (cur.kind === "ex") va.href = videoURL(cur.name);
+  }
 }
 
 // Observe how the workout went and adjust each movement for next time.
