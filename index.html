@@ -11,49 +11,48 @@
   }
   * { box-sizing:border-box; }
   body { margin:0; background:var(--bg); color:var(--ink); font:16px/1.45 system-ui,sans-serif; }
-  main { max-width:960px; margin:0 auto; padding:24px 16px 64px; display:grid; gap:20px; }
-  @media (min-width:800px) { main { grid-template-columns:340px 1fr; align-items:start; } header { grid-column:1/-1; } }
-  h1 { margin:0; font-size:1.7rem; } header p { margin:4px 0 0; color:var(--muted); }
-  form, .meal { background:var(--card); border:1px solid var(--line); border-radius:12px; padding:16px; }
+  main { max-width:560px; margin:0 auto; padding:24px 16px 64px; display:grid; gap:16px; }
+  h1 { margin:0; font-size:1.6rem; } header p { margin:4px 0 0; color:var(--muted); }
+  .slot { background:var(--card); border:1px solid var(--line); border-radius:14px; padding:16px 18px; }
+  .slot h2 { margin:0; font-size:.8rem; letter-spacing:.12em; color:var(--muted); }
+  .slot .say { margin:2px 0 8px; font-weight:700; font-size:1.25rem; }
+  .slot ul { list-style:none; margin:0; padding:0; font-size:1.1rem; }
+  .slot li { padding:2px 0; } .slot li.miss::after { content:" 🛒"; font-size:.8rem; }
+  .meta { margin-top:8px; color:var(--muted); font-size:.85rem; }
+  .swap { float:right; background:none; border:0; color:var(--muted); cursor:pointer; font:inherit; font-size:.85rem; padding:0; }
+  .snack { border-style:dashed; }
+  .shop, .note { border:1px dashed var(--line); border-radius:12px; padding:12px 14px; color:var(--muted); }
+  details { background:var(--card); border:1px solid var(--line); border-radius:12px; padding:12px 16px; }
+  summary { cursor:pointer; font-weight:700; }
   label { display:block; font-weight:600; font-size:.9rem; margin-top:12px; }
-  label:first-child { margin-top:0; }
   small { font-weight:400; color:var(--muted); }
-  input, select, textarea { width:100%; margin-top:4px; padding:8px 10px; font:inherit; color:var(--ink);
+  input:not([type=checkbox]), select, textarea { width:100%; margin-top:4px; padding:8px 10px; font:inherit; color:var(--ink);
     background:var(--bg); border:1px solid var(--line); border-radius:8px; }
   .row { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
-  button { margin-top:16px; width:100%; padding:11px; font:inherit; font-weight:700; color:#fff; background:var(--accent);
-    border:0; border-radius:8px; cursor:pointer; }
-  button.ghost { background:none; color:var(--muted); border:1px solid var(--line); margin-top:8px; font-weight:500; }
-  #results { display:grid; gap:14px; }
-  .meal h2 { margin:0 0 2px; font-size:1.15rem; }
-  .meta { color:var(--muted); font-size:.88rem; }
-  .pill { display:inline-block; padding:1px 8px; margin:6px 6px 0 0; border-radius:99px; background:var(--bg); border:1px solid var(--line); font-size:.8rem; }
-  .pill.miss { color:var(--warn); border-color:var(--warn); }
-  .pill.have { color:var(--accent); border-color:var(--accent); }
-  .summary { color:var(--muted); } .empty { color:var(--muted); padding:24px; text-align:center; }
-  .shop { background:var(--card); border:1px dashed var(--line); border-radius:12px; padding:14px; }
+  .checks label { display:inline-block; margin:12px 14px 0 0; font-weight:500; }
+  button.go { margin-top:16px; width:100%; padding:11px; font:inherit; font-weight:700; color:#fff; background:var(--accent); border:0; border-radius:8px; cursor:pointer; }
 </style>
 </head>
 <body>
 <main>
   <header>
     <h1>🥗 What Should I Eat?</h1>
-    <p>Tell me what you have and what you need. I'll decide.</p>
+    <p id="today"></p>
   </header>
 
-  <form id="form" autocomplete="off">
-    <label>Groceries you have <small>(comma separated)</small>
-      <textarea id="groceries" rows="3" placeholder="eggs, rice, chicken, spinach, bread"></textarea></label>
-    <label>Foods you like <small>(optional)</small>
-      <input id="likes" placeholder="pasta, salmon"></label>
-    <label>Foods you dislike / avoid
-      <input id="dislikes" placeholder="mushrooms, tofu"></label>
-    <div class="row">
-      <label>Budget per meal ($)<input id="budget" type="number" min="1" step="0.5" value="8"></label>
-      <label>Meals needed<input id="meals" type="number" min="1" max="6" value="3"></label>
-    </div>
-    <div class="row">
-      <label>Time per meal (min)<input id="time" type="number" min="5" step="5" value="30"></label>
+  <section id="plan" style="display:grid;gap:16px"></section>
+
+  <details id="setup">
+    <summary>⚙️ Your setup</summary>
+    <form id="form" autocomplete="off">
+      <label>Groceries you have <small>(comma separated)</small>
+        <textarea id="groceries" rows="3" placeholder="eggs, rice, chicken, spinach, bread"></textarea></label>
+      <label>Foods you like <small>(optional)</small><input id="likes" placeholder="pasta, salmon"></label>
+      <label>Foods you dislike / avoid<input id="dislikes" placeholder="mushrooms, tofu"></label>
+      <div class="row">
+        <label>Budget per meal ($)<input id="budget" type="number" min="1" step="0.5" value="8"></label>
+        <label>Time per meal (min)<input id="time" type="number" min="5" step="5" value="30"></label>
+      </div>
       <label>Fitness goal
         <select id="goal">
           <option value="lose">Lose fat</option>
@@ -61,54 +60,63 @@
           <option value="muscle">Build muscle</option>
           <option value="gain">Gain weight</option>
         </select></label>
-    </div>
-    <label>Already eaten today <small>(foods)</small>
-      <input id="eaten" placeholder="oatmeal, banana"></label>
-    <div class="row">
-      <label>Calories so far<input id="eatenCal" type="number" min="0" value="0"></label>
-      <label>Protein so far (g)<input id="eatenPro" type="number" min="0" value="0"></label>
-    </div>
-    <button type="submit">Tell me what to eat</button>
-    <button type="button" class="ghost" id="reset">Clear saved inputs</button>
-  </form>
-
-  <section id="results"><div class="empty">Fill in the form and hit the button.</div></section>
+      <div class="checks"><small>Meals I still need today</small><br>
+        <label><input type="checkbox" id="m_breakfast" checked> Breakfast</label>
+        <label><input type="checkbox" id="m_lunch" checked> Lunch</label>
+        <label><input type="checkbox" id="m_dinner" checked> Dinner</label>
+        <label><input type="checkbox" id="m_snack" checked> Snack</label>
+      </div>
+      <label>Already eaten today <small>(foods)</small><input id="eaten" placeholder="oatmeal, banana"></label>
+      <div class="row">
+        <label>Calories so far<input id="eatenCal" type="number" min="0" value="0"></label>
+        <label>Protein so far (g)<input id="eatenPro" type="number" min="0" value="0"></label>
+      </div>
+      <button class="go" type="submit">Save &amp; update today</button>
+    </form>
+  </details>
 </main>
 
 <script>
 // ---- Meal database -------------------------------------------------------
 // cost = approx. USD to buy every ingredient from scratch, per serving.
 const MEALS = [
-  { name:"Veggie omelette", ing:["eggs","spinach","cheese","onion"], time:10, cost:3, cal:380, pro:26 },
-  { name:"Scrambled eggs on toast", ing:["eggs","bread","butter"], time:10, cost:2, cal:350, pro:20 },
-  { name:"Oatmeal with banana", ing:["oats","banana","milk"], time:7, cost:1.5, cal:330, pro:11 },
-  { name:"Greek yogurt parfait", ing:["greek yogurt","berries","granola"], time:5, cost:3.5, cal:320, pro:20 },
-  { name:"Peanut butter banana toast", ing:["bread","peanut butter","banana"], time:5, cost:1.5, cal:360, pro:12 },
-  { name:"Protein smoothie", ing:["protein powder","banana","milk","peanut butter"], time:5, cost:3, cal:420, pro:35 },
-  { name:"Chicken & rice bowl", ing:["chicken","rice","broccoli","soy sauce"], time:30, cost:5, cal:560, pro:45 },
-  { name:"Chicken stir-fry", ing:["chicken","bell pepper","onion","soy sauce","rice"], time:25, cost:5.5, cal:520, pro:40 },
-  { name:"Chicken salad", ing:["chicken","lettuce","tomato","cucumber","olive oil"], time:15, cost:5, cal:380, pro:38 },
-  { name:"Turkey sandwich", ing:["turkey","bread","lettuce","tomato"], time:5, cost:4, cal:390, pro:28 },
-  { name:"Tuna salad wrap", ing:["tuna","tortilla","lettuce","mayo"], time:8, cost:3.5, cal:400, pro:30 },
-  { name:"Spaghetti with meat sauce", ing:["pasta","ground beef","tomato sauce","onion"], time:30, cost:5, cal:680, pro:36 },
-  { name:"Garlic pasta with veggies", ing:["pasta","garlic","olive oil","zucchini"], time:20, cost:2.5, cal:520, pro:15 },
-  { name:"Beef tacos", ing:["ground beef","tortilla","cheese","lettuce","salsa"], time:20, cost:5, cal:560, pro:30 },
-  { name:"Black bean burrito", ing:["black beans","rice","tortilla","cheese","salsa"], time:15, cost:3, cal:540, pro:22 },
-  { name:"Lentil soup", ing:["lentils","carrot","onion","garlic","broth"], time:35, cost:2.5, cal:360, pro:22 },
-  { name:"Chickpea curry", ing:["chickpeas","tomato sauce","onion","rice","curry powder"], time:30, cost:3, cal:520, pro:18 },
-  { name:"Baked salmon with potatoes", ing:["salmon","potato","broccoli","olive oil"], time:35, cost:9, cal:610, pro:42 },
-  { name:"Shrimp fried rice", ing:["shrimp","rice","eggs","peas","soy sauce"], time:20, cost:7, cal:500, pro:34 },
-  { name:"Egg fried rice", ing:["rice","eggs","peas","soy sauce","onion"], time:15, cost:2.5, cal:470, pro:16 },
-  { name:"Cottage cheese & fruit bowl", ing:["cottage cheese","berries","honey"], time:3, cost:3, cal:250, pro:25 },
-  { name:"Grilled cheese & tomato soup", ing:["bread","cheese","butter","tomato soup"], time:15, cost:3, cal:520, pro:19 },
-  { name:"Sweet potato & black bean bowl", ing:["sweet potato","black beans","avocado","salsa"], time:30, cost:4, cal:480, pro:16 },
-  { name:"Steak with veggies", ing:["steak","asparagus","potato","butter"], time:25, cost:11, cal:640, pro:50 },
-  { name:"Turkey chili", ing:["ground turkey","kidney beans","tomato sauce","onion","chili powder"], time:40, cost:4.5, cal:450, pro:40 },
-  { name:"Avocado toast with egg", ing:["bread","avocado","eggs"], time:10, cost:3.5, cal:400, pro:17 },
-  { name:"Hummus veggie plate", ing:["hummus","carrot","cucumber","pita"], time:5, cost:3, cal:340, pro:12 },
-  { name:"Quesadilla", ing:["tortilla","cheese","chicken","salsa"], time:12, cost:4, cal:530, pro:32 },
-  { name:"Veggie pizza (flatbread)", ing:["flatbread","tomato sauce","cheese","bell pepper"], time:20, cost:4, cal:560, pro:24 },
-  { name:"Instant ramen upgrade", ing:["ramen","eggs","spinach","soy sauce"], time:10, cost:2, cal:480, pro:18 },
+  { name:"Veggie omelette", slots:["breakfast"], ing:["eggs","spinach","cheese","onion"], time:10, cost:3, cal:380, pro:26 },
+  { name:"Scrambled eggs on toast", slots:["breakfast"], ing:["eggs","bread","butter"], time:10, cost:2, cal:350, pro:20 },
+  { name:"Oatmeal with banana", slots:["breakfast"], ing:["oats","banana","milk"], time:7, cost:1.5, cal:330, pro:11 },
+  { name:"Greek yogurt parfait", slots:["breakfast"], ing:["greek yogurt","berries","granola"], time:5, cost:3.5, cal:320, pro:20 },
+  { name:"Peanut butter banana toast", slots:["breakfast"], ing:["bread","peanut butter","banana"], time:5, cost:1.5, cal:360, pro:12 },
+  { name:"Protein smoothie", slots:["breakfast"], ing:["protein powder","banana","milk","peanut butter"], time:5, cost:3, cal:420, pro:35 },
+  { name:"Chicken & rice bowl", slots:["dinner"], ing:["chicken","rice","broccoli","soy sauce"], time:30, cost:5, cal:560, pro:45 },
+  { name:"Chicken stir-fry", slots:["dinner"], ing:["chicken","bell pepper","onion","soy sauce","rice"], time:25, cost:5.5, cal:520, pro:40 },
+  { name:"Chicken salad", slots:["lunch","dinner"], ing:["chicken","lettuce","tomato","cucumber","olive oil"], time:15, cost:5, cal:380, pro:38 },
+  { name:"Turkey sandwich", slots:["lunch","dinner"], ing:["turkey","bread","lettuce","tomato"], time:5, cost:4, cal:390, pro:28 },
+  { name:"Tuna salad wrap", slots:["lunch","dinner"], ing:["tuna","tortilla","lettuce","mayo"], time:8, cost:3.5, cal:400, pro:30 },
+  { name:"Spaghetti with meat sauce", slots:["dinner"], ing:["pasta","ground beef","tomato sauce","onion"], time:30, cost:5, cal:680, pro:36 },
+  { name:"Garlic pasta with veggies", slots:["dinner"], ing:["pasta","garlic","olive oil","zucchini"], time:20, cost:2.5, cal:520, pro:15 },
+  { name:"Beef tacos", slots:["dinner"], ing:["ground beef","tortilla","cheese","lettuce","salsa"], time:20, cost:5, cal:560, pro:30 },
+  { name:"Black bean burrito", slots:["lunch","dinner"], ing:["black beans","rice","tortilla","cheese","salsa"], time:15, cost:3, cal:540, pro:22 },
+  { name:"Lentil soup", slots:["lunch","dinner"], ing:["lentils","carrot","onion","garlic","broth"], time:35, cost:2.5, cal:360, pro:22 },
+  { name:"Chickpea curry", slots:["dinner"], ing:["chickpeas","tomato sauce","onion","rice","curry powder"], time:30, cost:3, cal:520, pro:18 },
+  { name:"Baked salmon with potatoes", slots:["dinner"], ing:["salmon","potato","broccoli","olive oil"], time:35, cost:9, cal:610, pro:42 },
+  { name:"Shrimp fried rice", slots:["dinner"], ing:["shrimp","rice","eggs","peas","soy sauce"], time:20, cost:7, cal:500, pro:34 },
+  { name:"Egg fried rice", slots:["lunch","dinner"], ing:["rice","eggs","peas","soy sauce","onion"], time:15, cost:2.5, cal:470, pro:16 },
+  { name:"Cottage cheese & fruit bowl", slots:["breakfast","snack"], ing:["cottage cheese","berries","honey"], time:3, cost:3, cal:250, pro:25 },
+  { name:"Grilled cheese & tomato soup", slots:["lunch","dinner"], ing:["bread","cheese","butter","tomato soup"], time:15, cost:3, cal:520, pro:19 },
+  { name:"Sweet potato & black bean bowl", slots:["dinner"], ing:["sweet potato","black beans","avocado","salsa"], time:30, cost:4, cal:480, pro:16 },
+  { name:"Steak with veggies", slots:["dinner"], ing:["steak","asparagus","potato","butter"], time:25, cost:11, cal:640, pro:50 },
+  { name:"Turkey chili", slots:["dinner"], ing:["ground turkey","kidney beans","tomato sauce","onion","chili powder"], time:40, cost:4.5, cal:450, pro:40 },
+  { name:"Avocado toast with egg", slots:["breakfast"], ing:["bread","avocado","eggs"], time:10, cost:3.5, cal:400, pro:17 },
+  { name:"Hummus veggie plate", slots:["lunch","dinner","snack"], ing:["hummus","carrot","cucumber","pita"], time:5, cost:3, cal:340, pro:12 },
+  { name:"Quesadilla", slots:["lunch","dinner"], ing:["tortilla","cheese","chicken","salsa"], time:12, cost:4, cal:530, pro:32 },
+  { name:"Veggie pizza (flatbread)", slots:["lunch","dinner"], ing:["flatbread","tomato sauce","cheese","bell pepper"], time:20, cost:4, cal:560, pro:24 },
+  { name:"Instant ramen upgrade", slots:["lunch","dinner"], ing:["ramen","eggs","spinach","soy sauce"], time:10, cost:2, cal:480, pro:18 },
+  { name:"Apple with peanut butter", slots:["snack"], ing:["apple","peanut butter"], time:2, cost:1, cal:230, pro:7 },
+  { name:"Greek yogurt cup", slots:["snack"], ing:["greek yogurt","honey"], time:1, cost:1.2, cal:150, pro:15 },
+  { name:"Hard-boiled eggs", slots:["snack"], ing:["eggs","salt"], time:12, cost:1, cal:160, pro:12 },
+  { name:"Cheese & fruit", slots:["snack"], ing:["cheese","grapes"], time:2, cost:1.5, cal:210, pro:9 },
+  { name:"Trail mix handful", slots:["snack"], ing:["almonds","raisins"], time:1, cost:1, cal:200, pro:6 },
+  { name:"Carrots & hummus", slots:["snack"], ing:["carrot","hummus"], time:2, cost:1, cal:130, pro:4 },
+  { name:"Popcorn", slots:["snack"], ing:["popcorn"], time:5, cost:.5, cal:120, pro:3 },
 ];
 
 // ---- Goal targets (daily) ------------------------------------------------
@@ -118,105 +126,154 @@ const GOALS = {
   muscle:   { cal:2600, pro:160 },
   gain:     { cal:3000, pro:120 },
 };
+const SLOTS = [
+  { key:"breakfast", label:"BREAKFAST", say:"Eat this.",              share:.25 },
+  { key:"lunch",     label:"LUNCH",     say:"Eat this.",              share:.35 },
+  { key:"dinner",    label:"DINNER",    say:"Eat this.",              share:.40 },
+  { key:"snack",     label:"SNACK",     say:"Have this if you’re hungry.", share:0 },
+];
+const SNACK_CAL = 180, SNACK_PRO = 8;
+
+const EMOJI = [
+  ["egg","🍳"],["bread","🍞"],["toast","🍞"],["tortilla","🌯"],["pita","🫓"],["flatbread","🫓"],["rice","🍚"],["pasta","🍝"],
+  ["ramen","🍜"],["oat","🥣"],["granola","🥣"],["chicken","🍗"],["turkey","🦃"],["beef","🥩"],["steak","🥩"],["salmon","🐟"],
+  ["tuna","🐟"],["shrimp","🍤"],["broccoli","🥦"],["spinach","🥬"],["lettuce","🥬"],["asparagus","🥬"],["tomato","🍅"],["salsa","🍅"],
+  ["cucumber","🥒"],["zucchini","🥒"],["carrot","🥕"],["potato","🥔"],["onion","🧅"],["garlic","🧄"],["pepper","🫑"],["avocado","🥑"],
+  ["banana","🍌"],["apple","🍎"],["berr","🍓"],["grape","🍇"],["raisin","🍇"],["cheese","🧀"],["yogurt","🥛"],["milk","🥛"],
+  ["honey","🍯"],["peanut","🥜"],["butter","🧈"],["almond","🥜"],["bean","🫘"],["lentil","🫘"],["chickpea","🫘"],["hummus","🫘"],["popcorn","🍿"],
+  ["pea","🟢"],["soup","🥣"],["broth","🥣"],["protein powder","💪"],["olive oil","🫒"],["soy sauce","🥢"],
+];
+const emoji = ing => (EMOJI.find(([k]) => ing.includes(k)) || [,"🍽️"])[1];
 
 // ---- Helpers -------------------------------------------------------------
 const $ = id => document.getElementById(id);
-const list = s => s.split(/[,\n]/).map(x => x.trim().toLowerCase()).filter(Boolean);
+const list = s => (s || "").split(/[,\n]/).map(x => x.trim().toLowerCase()).filter(Boolean);
 const norm = s => s.toLowerCase().replace(/ies$/,"y").replace(/(es|s)$/,"");
-// "egg" matches "eggs", "chicken breast" matches "chicken", etc.
 const matches = (a, b) => { a = norm(a); b = norm(b); return a === b || a.includes(b) || b.includes(a); };
 const anyMatch = (items, term) => items.some(i => matches(i, term));
+const esc = s => s.replace(/[&<>"]/g, c => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;" }[c]));
+const dayKey = (d = new Date()) => d.getFullYear() + "-" + String(d.getMonth()+1).padStart(2,"0") + "-" + String(d.getDate()).padStart(2,"0");
+// Stable per-day "randomness": same day + same meal => same number, so the plan doesn't reshuffle on reload.
+function hash01(str) { let h = 2166136261; for (const c of str) { h ^= c.charCodeAt(0); h = Math.imul(h, 16777619); } return ((h >>> 0) % 1000) / 1000; }
 
-function score(meal, st) {
+function score(meal, slot, st) {
+  if (!meal.slots.includes(slot.key)) return null;
   const have = meal.ing.filter(i => anyMatch(st.pantry, i));
   const miss = meal.ing.filter(i => !have.includes(i));
   const text = [meal.name, ...meal.ing];
 
   if (st.dislikes.some(d => text.some(t => matches(t, d)))) return null;
   if (meal.time > st.time) return null;
-
   const outOfPocket = meal.cost * (miss.length / meal.ing.length);
   if (outOfPocket > st.budget) return null;
 
-  let s = 0;
-  s += (have.length / meal.ing.length) * 50;                 // use what you own
-  s -= miss.length * 2;                                      // fewer shopping trips
-  s += st.likes.filter(l => text.some(t => matches(t, l))).length * 12;
-  s -= st.eatenFoods.some(e => text.some(t => matches(t, e))) ? 15 : 0; // variety
-
-  // Calorie fit: how close is it to what's left per meal?
-  const calGap = Math.abs(meal.cal - st.perMealCal) / st.perMealCal;
-  s += (1 - Math.min(calGap, 1)) * 25;
-
-  // Protein density
-  const proTarget = st.perMealPro;
-  s += Math.min(meal.pro / proTarget, 1.3) * 15;
-  if (st.goal === "lose") s -= meal.cal > st.perMealCal * 1.25 ? 10 : 0;
-  if (st.goal === "muscle" && meal.pro < 25) s -= 8;
-
-  s -= (meal.time / st.time) * 3;                            // slight preference for quick
+  const t = st.targets[slot.key];
+  let s = (have.length / meal.ing.length) * 50 - miss.length * 2;
+  s += st.likes.filter(l => text.some(x => matches(x, l))).length * 12;
+  if (st.eatenFoods.some(e => text.some(x => matches(x, e)))) s -= 15;       // already had it today
+  if (st.yesterday.includes(meal.name)) s -= 20;                              // variety across days
+  s += (1 - Math.min(Math.abs(meal.cal - t.cal) / t.cal, 1)) * 25;           // calorie fit
+  s += Math.min(meal.pro / t.pro, 1.3) * 15;                                  // protein fit
+  if (st.goal === "lose" && meal.cal > t.cal * 1.25) s -= 10;
+  if (st.goal === "muscle" && slot.key !== "snack" && meal.pro < 25) s -= 8;
+  s += hash01(st.day + slot.key + meal.name) * 10;                            // daily rotation
   return { meal, have, miss, outOfPocket, score: s };
 }
 
-function recommend() {
-  const goal = $("goal").value, g = GOALS[goal];
-  const n = Math.max(1, Math.min(6, +$("meals").value || 1));
-  const remCal = Math.max(g.cal - (+$("eatenCal").value || 0), 250 * n);
-  const remPro = Math.max(g.pro - (+$("eatenPro").value || 0), 15 * n);
-  const st = {
-    pantry: list($("groceries").value), likes: list($("likes").value), dislikes: list($("dislikes").value),
-    eatenFoods: list($("eaten").value), budget: +$("budget").value || 999, time: +$("time").value || 999,
-    goal, n, remCal, remPro, perMealCal: remCal / n, perMealPro: remPro / n,
+function settings() {
+  const v = id => $(id).value;
+  const goal = v("goal"), g = GOALS[goal];
+  const want = Object.fromEntries(SLOTS.map(s => [s.key, $("m_" + s.key).checked]));
+  const mains = SLOTS.filter(s => s.share && want[s.key]);
+  const reserve = want.snack ? SNACK_CAL : 0;
+  const remCal = Math.max(g.cal - (+v("eatenCal") || 0) - reserve, 250 * Math.max(mains.length, 1));
+  const remPro = Math.max(g.pro - (+v("eatenPro") || 0) - (want.snack ? SNACK_PRO : 0), 15 * Math.max(mains.length, 1));
+  const shareSum = mains.reduce((a, s) => a + s.share, 0) || 1;
+  const targets = { snack: { cal: SNACK_CAL, pro: SNACK_PRO } };
+  mains.forEach(s => targets[s.key] = { cal: remCal * s.share / shareSum, pro: remPro * s.share / shareSum });
+  return {
+    pantry: list(v("groceries")), likes: list(v("likes")), dislikes: list(v("dislikes")), eatenFoods: list(v("eaten")),
+    budget: +v("budget") || 999, time: +v("time") || 999, goal, want, targets, day: dayKey(),
+    yesterday: (history()[dayKey(new Date(Date.now() - 864e5))] || []),
   };
-  const ranked = MEALS.map(m => score(m, st)).filter(Boolean).sort((a, b) => b.score - a.score);
-
-  // Greedy pick with variety: avoid repeating the same main ingredient.
-  const picks = [], used = new Set();
-  for (const r of ranked) {
-    if (picks.length >= n) break;
-    if (used.has(r.meal.ing[0])) continue;
-    picks.push(r); used.add(r.meal.ing[0]);
-  }
-  for (const r of ranked) { if (picks.length >= n) break; if (!picks.includes(r)) picks.push(r); }
-  return { st, picks };
 }
 
-function render({ st, picks }) {
-  const out = $("results");
-  if (!picks.length) {
-    out.innerHTML = `<div class="empty">Nothing fits those limits. Try a higher budget, more time, or fewer dislikes.</div>`;
-    return;
+function plan(st, swaps) {
+  const used = new Set(), out = [];
+  for (const slot of SLOTS) {
+    if (!st.want[slot.key]) continue;
+    const ranked = MEALS.map(m => score(m, slot, st)).filter(Boolean).sort((a, b) => b.score - a.score);
+    // Don't serve the same dish (or same main ingredient) twice in one day.
+    const fresh = ranked.filter(r => !used.has(r.meal.name) && !(slot.key !== "snack" && used.has(r.meal.ing[0])));
+    const pool = fresh.length ? fresh : ranked;
+    const pick = pool.length ? pool[(swaps[slot.key] || 0) % pool.length] : null;
+    if (pick) { used.add(pick.meal.name); used.add(pick.meal.ing[0]); }
+    out.push({ slot, pick });
   }
-  const totCal = picks.reduce((a, p) => a + p.meal.cal, 0), totPro = picks.reduce((a, p) => a + p.meal.pro, 0);
-  const shop = [...new Set(picks.flatMap(p => p.miss))];
-  const cost = picks.reduce((a, p) => a + p.outOfPocket, 0);
-  const esc = s => s.replace(/[&<>"]/g, c => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;" }[c]));
+  return out;
+}
 
-  out.innerHTML =
-    `<div class="summary">Left for today: ~${Math.round(st.remCal)} kcal, ~${Math.round(st.remPro)} g protein.
-     Plan: <b>${totCal} kcal</b>, <b>${totPro} g protein</b>, ~$${cost.toFixed(2)} out of pocket.</div>` +
-    picks.map((p, i) => `
-      <article class="meal">
-        <h2>${i + 1}. ${esc(p.meal.name)}</h2>
-        <div class="meta">${p.meal.time} min · ${p.meal.cal} kcal · ${p.meal.pro} g protein · ~$${p.outOfPocket.toFixed(2)} to buy</div>
-        ${p.have.map(x => `<span class="pill have">✓ ${esc(x)}</span>`).join("")}
-        ${p.miss.map(x => `<span class="pill miss">+ ${esc(x)}</span>`).join("")}
-      </article>`).join("") +
-    (shop.length ? `<div class="shop"><b>🛒 Shopping list:</b> ${shop.map(esc).join(", ")}</div>`
-                  : `<div class="shop">🎉 You have everything already.</div>`);
+// ---- Rendering -----------------------------------------------------------
+const swaps = {};
+function render() {
+  const st = settings(), items = plan(st, swaps);
+  $("today").textContent = new Date().toLocaleDateString(undefined, { weekday:"long", month:"long", day:"numeric" }) + " — the system already knows.";
+  const shop = new Set(); let cal = 0, pro = 0;
+
+  $("plan").innerHTML = items.map(({ slot, pick }) => {
+    if (!pick) return `<div class="slot"><h2>${slot.label}</h2><div class="say">Nothing fits your limits.</div>
+      <div class="meta">Try more time, a bigger budget, or fewer dislikes.</div></div>`;
+    pick.miss.forEach(m => shop.add(m)); cal += pick.meal.cal; pro += pick.meal.pro;
+    return `<div class="slot ${slot.key === "snack" ? "snack" : ""}">
+      <button class="swap" data-slot="${slot.key}" title="Show me something else">↻ swap</button>
+      <h2>${slot.label}</h2><div class="say">${slot.say}</div>
+      <ul>${pick.meal.ing.map(i => `<li class="${pick.have.includes(i) ? "" : "miss"}">${emoji(i)} ${esc(i[0].toUpperCase() + i.slice(1))}</li>`).join("")}</ul>
+      <div class="meta">${esc(pick.meal.name)} · ${pick.meal.time} min · ${pick.meal.cal} kcal · ${pick.meal.pro} g protein</div>
+    </div>`;
+  }).join("") +
+  (items.some(i => i.pick) ? `<div class="note">Today’s plan: <b>${cal} kcal</b>, <b>${pro} g protein</b>.</div>` : "") +
+  (shop.size ? `<div class="shop">🛒 Need to buy: ${[...shop].map(esc).join(", ")}</div>` : "");
+
+  // remember what we served so tomorrow can vary
+  const h = history(); h[st.day] = items.filter(i => i.pick).map(i => i.pick.meal.name); saveHistory(h);
 }
 
 // ---- Persistence ---------------------------------------------------------
-const FIELDS = ["groceries","likes","dislikes","budget","meals","time","goal","eaten","eatenCal","eatenPro"];
-const KEY = "wsie-v1";
-function save() { try { localStorage.setItem(KEY, JSON.stringify(Object.fromEntries(FIELDS.map(f => [f, $(f).value])))); } catch {} }
+const FIELDS = ["groceries","likes","dislikes","budget","time","goal","eaten","eatenCal","eatenPro"];
+const CHECKS = SLOTS.map(s => "m_" + s.key);
+const KEY = "wsie-v2", HKEY = "wsie-history";
+function save() {
+  try {
+    const d = Object.fromEntries(FIELDS.map(f => [f, $(f).value]));
+    CHECKS.forEach(c => d[c] = $(c).checked);
+    d.day = dayKey(); localStorage.setItem(KEY, JSON.stringify(d));
+  } catch {}
+}
 function load() {
-  try { const d = JSON.parse(localStorage.getItem(KEY) || "{}"); FIELDS.forEach(f => { if (d[f] != null) $(f).value = d[f]; }); } catch {}
+  try {
+    const d = JSON.parse(localStorage.getItem(KEY) || "null");
+    if (!d) return false;
+    FIELDS.forEach(f => { if (d[f] != null) $(f).value = d[f]; });
+    CHECKS.forEach(c => { if (d[c] != null) $(c).checked = d[c]; });
+    if (d.day !== dayKey()) { $("eaten").value = ""; $("eatenCal").value = 0; $("eatenPro").value = 0; } // new day, nothing eaten yet
+    return true;
+  } catch { return false; }
+}
+function history() { try { return JSON.parse(localStorage.getItem(HKEY) || "{}"); } catch { return {}; } }
+function saveHistory(h) {
+  try {
+    const keep = Object.keys(h).sort().slice(-14);
+    localStorage.setItem(HKEY, JSON.stringify(Object.fromEntries(keep.map(k => [k, h[k]]))));
+  } catch {}
 }
 
-$("form").addEventListener("submit", e => { e.preventDefault(); save(); render(recommend()); });
-$("reset").addEventListener("click", () => { try { localStorage.removeItem(KEY); } catch {} location.reload(); });
-load();
+$("form").addEventListener("submit", e => { e.preventDefault(); save(); Object.keys(swaps).forEach(k => delete swaps[k]); render(); $("setup").open = false; });
+$("plan").addEventListener("click", e => {
+  const b = e.target.closest(".swap"); if (!b) return;
+  swaps[b.dataset.slot] = (swaps[b.dataset.slot] || 0) + 1; render();
+});
+$("setup").open = !load();   // first visit: show setup
+render();
 </script>
 </body>
 </html>
