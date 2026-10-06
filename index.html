@@ -179,6 +179,24 @@
   .bigfig[hidden] { display:none; }
   .bigfig svg { width:112px; height:112px; flex:0 0 auto; background:rgba(10,28,110,.35); border:1px solid var(--line); border-radius:16px; }
 
+
+  /* in-app "how to do it" window */
+  button.vid { background:none; border:0; font-family:inherit; cursor:pointer; padding:2px 4px; }
+  .demo { position:fixed; inset:0; z-index:30; background:rgba(5,16,80,.72); -webkit-backdrop-filter:blur(8px); backdrop-filter:blur(8px);
+    display:flex; align-items:flex-start; justify-content:center; padding:16px; overflow:auto; }
+  .demo[hidden] { display:none; }
+  .demobox { width:100%; max-width:460px; margin:auto; background:linear-gradient(172deg,#3a5df8 0%,#3f8fe8 100%); border:1px solid var(--line);
+    border-radius:20px; padding:18px 18px 22px; box-shadow:0 24px 60px rgba(2,10,60,.5); }
+  .demohead { display:flex; justify-content:space-between; align-items:center; gap:12px; }
+  .demohead h3 { margin:0; font-weight:500; font-size:1.25rem; }
+  .demohead button { background:none; border:0; color:#fff; font-size:1.4rem; cursor:pointer; }
+  .demobox svg.huge { display:block; width:min(300px,72vw); height:min(300px,72vw); margin:12px auto; background:rgba(10,28,110,.4); border:1px solid var(--line); border-radius:18px; }
+  .democtl { display:flex; gap:8px; flex-wrap:wrap; justify-content:center; margin-bottom:12px; }
+  .democtl button { background:transparent; color:#fff; border:1px solid rgba(255,255,255,.7); border-radius:2px; padding:6px 14px; font-size:.85rem; cursor:pointer; }
+  .democtl button.on { background:#fff; color:var(--btn-ink); }
+  .demosteps { margin:0; padding-left:22px; display:grid; gap:8px; }
+  .demobox .meta { margin-top:12px; }
+
   /* guided workout (full screen) */
   .run { position:fixed; inset:0; z-index:20; overflow:auto; background:linear-gradient(172deg,#3f8fe8 0%,#3a5df8 35%,#5a90fb 70%,#3dc6fb 100%); }
   .run[hidden] { display:none; }
@@ -334,6 +352,7 @@
 </nav>
 
 <div id="run" class="run" hidden></div>
+<div id="demo" class="demo" hidden></div>
 
 <script>
 // ---- Meal database -------------------------------------------------------
@@ -1074,8 +1093,17 @@ const FIG = (() => {
   const reduced = () => { try { return matchMedia("(prefers-reduced-motion: reduce)").matches; } catch { return false; } };
   function frame(ts) {
     if (!document.hidden) {
-      const k = reduced() ? 0 : 0.5 - 0.5 * Math.cos(ts / 1000 * Math.PI * 2 / 2.6);   // smooth back and forth, 2.6 s per rep
-      document.querySelectorAll("svg.fig").forEach(svg => { if (svg.getBoundingClientRect().width) draw(svg, k); });
+      document.querySelectorAll("svg.fig").forEach(svg => {
+        if (!svg.getBoundingClientRect().width) return;
+        const d = svg.dataset, dt = Math.min(0.1, (ts - (svg.__t || ts)) / 1000); svg.__t = ts;
+        let k;
+        if (d.hold === "a") k = 0; else if (d.hold === "b") k = 1;
+        else {
+          if (d.paused !== "1" && !reduced()) svg.__ph = (svg.__ph || 0) + dt * (+d.speed || 1);
+          k = 0.5 - 0.5 * Math.cos((svg.__ph || 0) * Math.PI * 2 / 2.6);          // smooth back and forth, 2.6 s per rep
+        }
+        draw(svg, k);
+      });
     }
     requestAnimationFrame(frame);
   }
@@ -1083,7 +1111,6 @@ const FIG = (() => {
   return { attrs, spec, draw, POSES };
 })();
 const figSVG = (name, kind, cls = "") => `<svg class="fig ${cls}" ${FIG.attrs(name, kind)}></svg>`;
-const videoURL = name => "https://www.youtube.com/results?search_query=" + encodeURIComponent(name + " proper form");
 
 // ---- Slot-machine reel: the station you're on is bold and centered, the rest fade ----
 const RH = 52;   // row height in px (matches --rh in the CSS)
@@ -1092,9 +1119,16 @@ const reelSub = it => (it.kind === "ex"
   ? `${it.sets} × ${it.reps}${it.unit === "s" ? " sec" : ""}${it.side ? " each side" : ""}${it.t === "db" ? ` · ${it.w} lb${it.two ? " each hand" : ""}` : it.band ? " · mini band" : ""}`
   : it.kind === "iv" ? `${it.rounds} × ${it.fast} sec fast, ${it.easy} sec easy`
   : `${it.incline ? `${it.incline}% incline` : "easy pace"}${it.speed ? ` · ${it.speed.toFixed(1)} mph` : ""}`) + ` · ≈${itemMin(it)} min`;
-const reelRows = items => items.map(it => `<div class="rrow"><div class="rfig">${figSVG(reelName(it), it.kind)}</div>
+const DEMOS = {};
+function demoInfo(it) {
+  const equip = it.t === "db" ? `${it.w} lb dumbbell${it.two ? "s, one in each hand" : ""}` : it.band ? "a mini loop band" : "no equipment, just your body";
+  const plan = `${it.sets} sets of ${it.reps}${it.unit === "s" ? " seconds" : " reps"}${it.side ? " on each side" : ""}. Rest about ${restFor(it)} seconds between sets.`;
+  const feel = it.unit === "s" ? "Hold steady, keep your core tight and keep breathing." : "Go slowly: about 2 seconds up and 2 seconds down. Breathe out on the effort.";
+  return { name: it.name, kind: it.kind, steps: [`Set up with ${equip}.`, it.cue, plan, feel] };
+}
+const reelRows = items => items.map(it => (DEMOS[it.name] = demoInfo(it), `<div class="rrow"><div class="rfig">${figSVG(reelName(it), it.kind)}</div>
   <div class="rtext"><div class="rname">${esc(reelName(it))}</div><div class="rsub">${esc(reelSub(it))}</div></div>
-  ${it.kind === "ex" ? `<a class="vid" href="${videoURL(it.name)}" target="_blank" rel="noopener" title="Watch a video demo">▶ video</a>` : ""}</div>`).join("");
+  ${it.kind === "ex" ? `<button type="button" class="vid" data-demo="${esc(it.name)}" title="How to do it">▶ how to</button>` : ""}</div>`)).join("");
 function paintReel(reel, active) {
   const track = reel.querySelector(".reel-track");
   [...track.children].forEach((row, i) => {
@@ -1111,7 +1145,7 @@ const buzz = () => { try { navigator.vibrate && navigator.vibrate(200); } catch 
 
 function startRun() {
   run = { w: buildWorkout(schedule().type), i:-1, s:0, mode:"", left:0, running:false, res:{}, t0:Date.now(), msgs:[] };
-  $("run").innerHTML = `<div class="runbox"><div class="runbar"></div><div class="reel"><div class="reel-track">${reelRows(run.w.items)}</div></div><div class="bigfig"><svg class="fig big" data-pose="squat" data-db="0" data-band=""></svg><a class="vid" target="_blank" rel="noopener">▶ Watch a video demo</a></div><div class="runbody"></div></div>`;
+  $("run").innerHTML = `<div class="runbox"><div class="runbar"></div><div class="reel"><div class="reel-track">${reelRows(run.w.items)}</div></div><div class="bigfig"><svg class="fig big" data-pose="squat" data-db="0" data-band=""></svg><button type="button" class="vid big" data-demo="">▶ How to do it</button></div><div class="runbody"></div></div>`;
   nextItem();
   clearInterval(tick); tick = setInterval(onTick, 1000);
   $("run").hidden = false; document.body.style.overflow = "hidden";
@@ -1203,7 +1237,7 @@ function showRun() {
   if (cur) {
     const sp = FIG.spec(reelName(cur), cur.kind), sv = bf.querySelector("svg"), va = bf.querySelector(".vid");
     sv.dataset.pose = sp.pose; sv.dataset.db = sp.db; sv.dataset.band = sp.band;
-    va.hidden = cur.kind !== "ex"; if (cur.kind === "ex") va.href = videoURL(cur.name);
+    va.hidden = cur.kind !== "ex"; va.dataset.demo = cur.name;
   }
 }
 
@@ -1308,6 +1342,40 @@ document.addEventListener("click", e => {
   const g = e.target.closest("[data-go]"); if (g) showTab(g.dataset.go);
 });
 window.addEventListener("hashchange", () => showTab(location.hash.slice(1)));
+
+
+// ---- "How to do it" window ----
+const demo = { name:"" };
+function openDemo(name) {
+  const info = DEMOS[name]; if (!info) return;
+  demo.name = name;
+  const sp = FIG.spec(info.name, info.kind);
+  $("demo").innerHTML = `<div class="demobox" role="dialog" aria-modal="true" aria-label="How to do ${esc(info.name)}">
+    <div class="demohead"><h3>${esc(info.name)}</h3><button type="button" data-dm="close" aria-label="Close">✕</button></div>
+    <svg class="fig huge" data-pose="${sp.pose}" data-db="${sp.db}" data-band="${sp.band}" data-speed="1"></svg>
+    <div class="democtl">
+      <button type="button" data-dm="play">Pause</button><button type="button" data-dm="slow">Slow motion</button>
+      <button type="button" data-dm="a">Start position</button><button type="button" data-dm="b">End position</button>
+    </div>
+    <ol class="demosteps">${info.steps.map(x => `<li>${esc(x)}</li>`).join("")}</ol>
+    <div class="meta">Animated side-view demo. Move at a pace that keeps your form clean.</div></div>`;
+  $("demo").hidden = false;
+  $("demo").querySelector('[data-dm="close"]').focus();
+}
+const closeDemo = () => { $("demo").hidden = true; $("demo").innerHTML = ""; };
+document.addEventListener("click", e => {
+  const o = e.target.closest("[data-demo]");
+  if (o) { openDemo(o.dataset.demo); return; }
+  if (e.target === $("demo")) return closeDemo();
+  const b = e.target.closest("[data-dm]"); if (!b) return;
+  const svg = $("demo").querySelector("svg"), act = b.dataset.dm;
+  if (act === "close") return closeDemo();
+  const set = (btn, on) => btn.classList.toggle("on", on), btns = [...$("demo").querySelectorAll(".democtl button")];
+  if (act === "play") { svg.dataset.paused = svg.dataset.paused === "1" ? "0" : "1"; delete svg.dataset.hold; b.textContent = svg.dataset.paused === "1" ? "Play" : "Pause"; btns.forEach(x => set(x, false)); }
+  if (act === "slow") { svg.dataset.speed = svg.dataset.speed === "0.4" ? "1" : "0.4"; set(b, svg.dataset.speed === "0.4"); delete svg.dataset.hold; btns.forEach(x => x.dataset.dm !== "slow" && set(x, false)); }
+  if (act === "a" || act === "b") { svg.dataset.hold = act; btns.forEach(x => set(x, x === b)); }
+});
+document.addEventListener("keydown", e => { if (e.key === "Escape" && !$("demo").hidden) closeDemo(); });
 
 // ---- Events --------------------------------------------------------------
 const update = () => { save(); render(); };
