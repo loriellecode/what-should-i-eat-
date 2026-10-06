@@ -21,6 +21,19 @@
   .meta { margin-top:8px; color:var(--muted); font-size:.85rem; }
   .swap { float:right; background:none; border:0; color:var(--muted); cursor:pointer; font:inherit; font-size:.85rem; padding:0; }
   .snack { border-style:dashed; }
+  .groc { background:var(--card); border:1px solid var(--line); border-radius:14px; padding:16px 18px; }
+  .groc h2 { margin:0 0 2px; font-size:.8rem; letter-spacing:.12em; color:var(--muted); }
+  .groc .say { margin:2px 0 8px; font-weight:700; font-size:1.25rem; }
+  .groc ul, #stock { list-style:none; margin:0; padding:0; }
+  .item { display:flex; align-items:center; gap:8px; padding:5px 0; border-top:1px solid var(--line); font-size:1.05rem; }
+  .item:first-child { border-top:0; } .item .nm { flex:1; } .item .q { color:var(--muted); font-size:.85rem; min-width:2.4em; text-align:center; }
+  .item button, .eat { background:none; border:1px solid var(--line); color:var(--ink); border-radius:8px; padding:2px 10px; cursor:pointer; font:inherit; font-size:.85rem; }
+  .eat { margin-top:10px; }
+  .addrow { display:grid; grid-template-columns:1fr 70px auto; gap:8px; align-items:end; margin:10px 0 6px; }
+  .addrow .go { margin:0; width:auto; padding:8px 14px; }
+  .groc .row2 { display:flex; gap:8px; flex-wrap:wrap; margin-top:12px; }
+  .groc .row2 button { flex:1; padding:9px; font:inherit; font-weight:600; border-radius:8px; cursor:pointer; border:1px solid var(--line); background:none; color:var(--ink); }
+  .groc .row2 .primary { background:var(--accent); color:#fff; border-color:var(--accent); }
   .shop, .note { border:1px dashed var(--line); border-radius:12px; padding:12px 14px; color:var(--muted); }
   details { background:var(--card); border:1px solid var(--line); border-radius:12px; padding:12px 16px; }
   summary { cursor:pointer; font-weight:700; }
@@ -42,11 +55,22 @@
 
   <section id="plan" style="display:grid;gap:16px"></section>
 
+  <section id="groceries" class="groc"></section>
+
+  <details id="kitchen">
+    <summary>🧺 What’s in your kitchen</summary>
+    <div id="stock"></div>
+    <form id="addForm" class="addrow" autocomplete="off">
+      <input id="addName" placeholder="Add an item (e.g. rice)" required>
+      <input id="addQty" type="number" min="1" value="4" title="servings">
+      <button class="go" type="submit">Add</button>
+    </form>
+    <small>Numbers are servings. Each meal you plan or eat uses 1 of each ingredient.</small>
+  </details>
+
   <details id="setup">
     <summary>⚙️ Your setup</summary>
     <form id="form" autocomplete="off">
-      <label>Groceries you have <small>(comma separated)</small>
-        <textarea id="groceries" rows="3" placeholder="eggs, rice, chicken, spinach, bread"></textarea></label>
       <label>Foods you like <small>(optional)</small><input id="likes" placeholder="pasta, salmon"></label>
       <label>Foods you dislike / avoid<input id="dislikes" placeholder="mushrooms, tofu"></label>
       <div class="row">
@@ -132,7 +156,7 @@ const SLOTS = [
   { key:"dinner",    label:"DINNER",    say:"Eat this.",              share:.40 },
   { key:"snack",     label:"SNACK",     say:"Have this if you’re hungry.", share:0 },
 ];
-const SNACK_CAL = 180, SNACK_PRO = 8;
+const SNACK_CAL = 180, SNACK_PRO = 8, WEEK = 7;
 
 const EMOJI = [
   ["egg","🍳"],["bread","🍞"],["toast","🍞"],["tortilla","🌯"],["pita","🫓"],["flatbread","🫓"],["rice","🍚"],["pasta","🍝"],
@@ -150,15 +174,29 @@ const $ = id => document.getElementById(id);
 const list = s => (s || "").split(/[,\n]/).map(x => x.trim().toLowerCase()).filter(Boolean);
 const norm = s => s.toLowerCase().replace(/ies$/,"y").replace(/(es|s)$/,"");
 const matches = (a, b) => { a = norm(a); b = norm(b); return a === b || a.includes(b) || b.includes(a); };
-const anyMatch = (items, term) => items.some(i => matches(i, term));
 const esc = s => s.replace(/[&<>"]/g, c => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;" }[c]));
+const cap = s => s[0].toUpperCase() + s.slice(1);
 const dayKey = (d = new Date()) => d.getFullYear() + "-" + String(d.getMonth()+1).padStart(2,"0") + "-" + String(d.getDate()).padStart(2,"0");
+const addDays = n => new Date(Date.now() + n * 864e5);
 // Stable per-day "randomness": same day + same meal => same number, so the plan doesn't reshuffle on reload.
 function hash01(str) { let h = 2166136261; for (const c of str) { h ^= c.charCodeAt(0); h = Math.imul(h, 16777619); } return ((h >>> 0) % 1000) / 1000; }
 
+// ---- Kitchen stock -------------------------------------------------------
+// stock: { "chicken": 3, ... } in servings. shopped: day you last said "I went shopping".
+const state = { stock: {}, shopped: null };
+const stockKey = (obj, ing) => Object.keys(obj).find(k => matches(k, ing));
+const strict = () => !!state.shopped && (new Date(dayKey()) - new Date(state.shopped)) / 864e5 < WEEK;
+function addStock(name, qty) {
+  name = name.trim().toLowerCase(); if (!name) return;
+  const k = stockKey(state.stock, name) || name;
+  state.stock[k] = (state.stock[k] || 0) + qty;
+  if (state.stock[k] <= 0) delete state.stock[k];
+}
+
+// ---- Planning ------------------------------------------------------------
 function score(meal, slot, st) {
   if (!meal.slots.includes(slot.key)) return null;
-  const have = meal.ing.filter(i => anyMatch(st.pantry, i));
+  const have = meal.ing.filter(i => st.has(i));
   const miss = meal.ing.filter(i => !have.includes(i));
   const text = [meal.name, ...meal.ing];
 
@@ -168,7 +206,7 @@ function score(meal, slot, st) {
   if (outOfPocket > st.budget) return null;
 
   const t = st.targets[slot.key];
-  let s = (have.length / meal.ing.length) * 50 - miss.length * 2;
+  let s = (have.length / meal.ing.length) * 50 - miss.length * st.missPenalty;
   s += st.likes.filter(l => text.some(x => matches(x, l))).length * 12;
   if (st.eatenFoods.some(e => text.some(x => matches(x, e)))) s -= 15;       // already had it today
   if (st.yesterday.includes(meal.name)) s -= 20;                              // variety across days
@@ -180,25 +218,29 @@ function score(meal, slot, st) {
   return { meal, have, miss, outOfPocket, score: s };
 }
 
-function settings() {
+// offset 0 = today (respects what's eaten / which meals are left); 1..6 = full future days.
+function settings(offset) {
   const v = id => $(id).value;
-  const goal = v("goal"), g = GOALS[goal];
-  const want = Object.fromEntries(SLOTS.map(s => [s.key, $("m_" + s.key).checked]));
+  const goal = v("goal"), g = GOALS[goal], today = offset === 0;
+  const want = Object.fromEntries(SLOTS.map(s => [s.key, today ? $("m_" + s.key).checked : true]));
   const mains = SLOTS.filter(s => s.share && want[s.key]);
-  const reserve = want.snack ? SNACK_CAL : 0;
-  const remCal = Math.max(g.cal - (+v("eatenCal") || 0) - reserve, 250 * Math.max(mains.length, 1));
-  const remPro = Math.max(g.pro - (+v("eatenPro") || 0) - (want.snack ? SNACK_PRO : 0), 15 * Math.max(mains.length, 1));
+  const eatCal = today ? +v("eatenCal") || 0 : 0, eatPro = today ? +v("eatenPro") || 0 : 0;
+  const n = Math.max(mains.length, 1);
+  const remCal = Math.max(g.cal - eatCal - (want.snack ? SNACK_CAL : 0), 250 * n);
+  const remPro = Math.max(g.pro - eatPro - (want.snack ? SNACK_PRO : 0), 15 * n);
   const shareSum = mains.reduce((a, s) => a + s.share, 0) || 1;
   const targets = { snack: { cal: SNACK_CAL, pro: SNACK_PRO } };
   mains.forEach(s => targets[s.key] = { cal: remCal * s.share / shareSum, pro: remPro * s.share / shareSum });
+  const day = dayKey(addDays(offset));
   return {
-    pantry: list(v("groceries")), likes: list(v("likes")), dislikes: list(v("dislikes")), eatenFoods: list(v("eaten")),
-    budget: +v("budget") || 999, time: +v("time") || 999, goal, want, targets, day: dayKey(),
-    yesterday: (history()[dayKey(new Date(Date.now() - 864e5))] || []),
+    likes: list(v("likes")), dislikes: list(v("dislikes")), eatenFoods: today ? list(v("eaten")) : [],
+    budget: +v("budget") || 999, time: +v("time") || 999, goal, want, targets, day,
+    yesterday: history()[dayKey(addDays(offset - 1))] || [],
+    remCal, remPro, missPenalty: strict() ? 60 : 2,
   };
 }
 
-function plan(st, swaps) {
+function planDay(st, swaps) {
   const used = new Set(), out = [];
   for (const slot of SLOTS) {
     if (!st.want[slot.key]) continue;
@@ -207,57 +249,125 @@ function plan(st, swaps) {
     const fresh = ranked.filter(r => !used.has(r.meal.name) && !(slot.key !== "snack" && used.has(r.meal.ing[0])));
     const pool = fresh.length ? fresh : ranked;
     const pick = pool.length ? pool[(swaps[slot.key] || 0) % pool.length] : null;
-    if (pick) { used.add(pick.meal.name); used.add(pick.meal.ing[0]); }
+    if (pick) { used.add(pick.meal.name); used.add(pick.meal.ing[0]); st.consume(pick); }
     out.push({ slot, pick });
   }
   return out;
 }
 
+// Plan the next 7 days against the stock in the kitchen. Anything the plan needs
+// that the kitchen can't cover becomes the buy list.
+function planWeek(swaps) {
+  const left = { ...state.stock }, cart = new Set(), buy = {}, near = {}, days = [];
+  const hist = history();
+  for (let i = 0; i < WEEK; i++) {
+    const st = settings(i), day = i;
+    if (i > 0) st.yesterday = days[i - 1].filter(x => x.pick).map(x => x.pick.meal.name);
+    st.has = ing => { const k = stockKey(left, ing); return (k && left[k] > 0) || (!strict() && cart.has(ing)); };
+    st.consume = pick => pick.meal.ing.forEach(ing => {
+      const k = stockKey(left, ing);
+      if (k && left[k] > 0) left[k]--;
+      else { buy[ing] = (buy[ing] || 0) + 1; if (day < 2) near[ing] = (near[ing] || 0) + 1; if (!strict()) cart.add(ing); }
+    });
+    days.push(planDay(st, i === 0 ? swaps : {}));
+    days[i].st = st;
+  }
+  return { days, buy, near };
+}
+
 // ---- Rendering -----------------------------------------------------------
 const swaps = {};
+let current = null;
 function render() {
-  const st = settings(), items = plan(st, swaps);
+  current = planWeek(swaps);
+  const { days, buy, near } = current, items = days[0], st = days[0].st;
   $("today").textContent = new Date().toLocaleDateString(undefined, { weekday:"long", month:"long", day:"numeric" }) + " — the system already knows.";
-  const shop = new Set(); let cal = 0, pro = 0;
+  let cal = 0, pro = 0;
 
   $("plan").innerHTML = items.map(({ slot, pick }) => {
     if (!pick) return `<div class="slot"><h2>${slot.label}</h2><div class="say">Nothing fits your limits.</div>
       <div class="meta">Try more time, a bigger budget, or fewer dislikes.</div></div>`;
-    pick.miss.forEach(m => shop.add(m)); cal += pick.meal.cal; pro += pick.meal.pro;
+    cal += pick.meal.cal; pro += pick.meal.pro;
     return `<div class="slot ${slot.key === "snack" ? "snack" : ""}">
       <button class="swap" data-slot="${slot.key}" title="Show me something else">↻ swap</button>
       <h2>${slot.label}</h2><div class="say">${slot.say}</div>
-      <ul>${pick.meal.ing.map(i => `<li class="${pick.have.includes(i) ? "" : "miss"}">${emoji(i)} ${esc(i[0].toUpperCase() + i.slice(1))}</li>`).join("")}</ul>
+      <ul>${pick.meal.ing.map(i => `<li class="${pick.have.includes(i) ? "" : "miss"}">${emoji(i)} ${esc(cap(i))}</li>`).join("")}</ul>
       <div class="meta">${esc(pick.meal.name)} · ${pick.meal.time} min · ${pick.meal.cal} kcal · ${pick.meal.pro} g protein</div>
+      <button class="eat" data-slot="${slot.key}">✓ I ate this</button>
     </div>`;
   }).join("") +
-  (items.some(i => i.pick) ? `<div class="note">Today’s plan: <b>${cal} kcal</b>, <b>${pro} g protein</b>.</div>` : "") +
-  (shop.size ? `<div class="shop">🛒 Need to buy: ${[...shop].map(esc).join(", ")}</div>` : "");
+  (items.some(i => i.pick) ? `<div class="note">Today’s plan: <b>${cal} kcal</b>, <b>${pro} g protein</b>.</div>` : "");
+
+  renderGroceries(strict() ? near : buy);
+  renderStock();
 
   // remember what we served so tomorrow can vary
   const h = history(); h[st.day] = items.filter(i => i.pick).map(i => i.pick.meal.name); saveHistory(h);
 }
 
+function renderGroceries(buy) {
+  const names = Object.keys(buy).sort((a, b) => buy[b] - buy[a]);
+  const isStrict = strict();
+  let html = `<h2>🛒 GROCERIES</h2>`;
+  if (!names.length) {
+    html += `<div class="say">You’re stocked. 🎉</div>
+      <div class="meta">Everything in the next ${WEEK} days of meals is already in your kitchen.</div>`;
+  } else {
+    html += `<div class="say">${isStrict ? "Still missing" : "You’re low on"} ${names.length} thing${names.length > 1 ? "s" : ""}.</div>
+      <div class="meta">${isStrict
+        ? "Plan is adjusted around what you actually have. These are the gaps it couldn’t avoid in the next 2 days."
+        : "Here’s what you need for the next " + WEEK + " days (× = servings). BUY:"}</div>
+      <ul>${names.map(n => `<li class="item"><span class="nm">${emoji(n)} ${esc(cap(n))}</span>
+        <span class="q">×${buy[n]}</span><button data-got="${esc(n)}" data-qty="${buy[n]}">Got it</button></li>`).join("")}</ul>`;
+  }
+  html += `<div class="row2">`
+    + (names.length && !isStrict ? `<button class="primary" data-act="buyall">✓ Bought everything</button>` : "")
+    + (isStrict ? `<button data-act="unshop">Plan another shopping trip</button>`
+                : `<button data-act="shopped">I went shopping — adjust my plan</button>`)
+    + `</div>`;
+  if (isStrict) html += `<div class="meta" style="margin-top:8px">Not bought something? Meals that need it have been swapped out.</div>`;
+  $("groceries").innerHTML = html;
+}
+
+function renderStock() {
+  const keys = Object.keys(state.stock).sort();
+  $("stock").innerHTML = keys.length ? keys.map(k => `<div class="item"><span class="nm">${emoji(k)} ${esc(cap(k))}</span>
+      <button data-adj="-1" data-k="${esc(k)}">−</button><span class="q">${state.stock[k]}</span>
+      <button data-adj="1" data-k="${esc(k)}">+</button><button data-del="${esc(k)}" title="Remove">×</button></div>`).join("")
+    : `<div class="meta" style="margin:8px 0">Nothing yet. Add what you have, or buy from the list above.</div>`;
+}
+
 // ---- Persistence ---------------------------------------------------------
-const FIELDS = ["groceries","likes","dislikes","budget","time","goal","eaten","eatenCal","eatenPro"];
+const FIELDS = ["likes","dislikes","budget","time","goal","eaten","eatenCal","eatenPro"];
 const CHECKS = SLOTS.map(s => "m_" + s.key);
-const KEY = "wsie-v2", HKEY = "wsie-history";
+const KEY = "wsie-v3", HKEY = "wsie-history", SKEY = "wsie-stock";
 function save() {
   try {
     const d = Object.fromEntries(FIELDS.map(f => [f, $(f).value]));
     CHECKS.forEach(c => d[c] = $(c).checked);
     d.day = dayKey(); localStorage.setItem(KEY, JSON.stringify(d));
+    localStorage.setItem(SKEY, JSON.stringify(state));
   } catch {}
 }
 function load() {
+  let found = false;
+  try {
+    const s = JSON.parse(localStorage.getItem(SKEY) || "null");
+    if (s) { state.stock = s.stock || {}; state.shopped = s.shopped || null; found = true; }
+  } catch {}
   try {
     const d = JSON.parse(localStorage.getItem(KEY) || "null");
-    if (!d) return false;
-    FIELDS.forEach(f => { if (d[f] != null) $(f).value = d[f]; });
-    CHECKS.forEach(c => { if (d[c] != null) $(c).checked = d[c]; });
-    if (d.day !== dayKey()) { $("eaten").value = ""; $("eatenCal").value = 0; $("eatenPro").value = 0; } // new day, nothing eaten yet
-    return true;
-  } catch { return false; }
+    if (d) {
+      FIELDS.forEach(f => { if (d[f] != null) $(f).value = d[f]; });
+      CHECKS.forEach(c => { if (d[c] != null) $(c).checked = d[c]; });
+      if (d.day !== dayKey()) {            // new day: nothing eaten yet, all meals still to come
+        $("eaten").value = ""; $("eatenCal").value = 0; $("eatenPro").value = 0;
+        CHECKS.forEach(c => $(c).checked = true);
+      }
+      found = true;
+    }
+  } catch {}
+  return found;
 }
 function history() { try { return JSON.parse(localStorage.getItem(HKEY) || "{}"); } catch { return {}; } }
 function saveHistory(h) {
@@ -267,10 +377,46 @@ function saveHistory(h) {
   } catch {}
 }
 
-$("form").addEventListener("submit", e => { e.preventDefault(); save(); Object.keys(swaps).forEach(k => delete swaps[k]); render(); $("setup").open = false; });
+// ---- Events --------------------------------------------------------------
+const update = () => { save(); render(); };
+$("form").addEventListener("submit", e => { e.preventDefault(); Object.keys(swaps).forEach(k => delete swaps[k]); update(); $("setup").open = false; });
 $("plan").addEventListener("click", e => {
-  const b = e.target.closest(".swap"); if (!b) return;
-  swaps[b.dataset.slot] = (swaps[b.dataset.slot] || 0) + 1; render();
+  const sw = e.target.closest(".swap"), eat = e.target.closest(".eat");
+  if (sw) { swaps[sw.dataset.slot] = (swaps[sw.dataset.slot] || 0) + 1; render(); }
+  if (eat) {                                         // eating uses up the ingredients and counts toward today
+    const item = current.days[0].find(x => x.slot.key === eat.dataset.slot);
+    if (!item || !item.pick) return;
+    const m = item.pick.meal;
+    m.ing.forEach(i => { const k = stockKey(state.stock, i); if (k) addStock(k, -1); });
+    $("eatenCal").value = (+$("eatenCal").value || 0) + m.cal;
+    $("eatenPro").value = (+$("eatenPro").value || 0) + m.pro;
+    $("eaten").value = [$("eaten").value, m.name].filter(Boolean).join(", ");
+    $("m_" + eat.dataset.slot).checked = false;
+    Object.keys(swaps).forEach(k => delete swaps[k]);
+    update();
+  }
+});
+$("groceries").addEventListener("click", e => {
+  const got = e.target.closest("[data-got]"), act = e.target.closest("[data-act]");
+  if (got) addStock(got.dataset.got, +got.dataset.qty);
+  else if (act) {
+    if (act.dataset.act === "buyall") Object.entries(current.buy).forEach(([n, q]) => addStock(n, q));
+    if (act.dataset.act === "shopped") state.shopped = dayKey();
+    if (act.dataset.act === "unshop") state.shopped = null;
+  } else return;
+  update();
+});
+$("kitchen").addEventListener("click", e => {
+  const adj = e.target.closest("[data-adj]"), del = e.target.closest("[data-del]");
+  if (adj) addStock(adj.dataset.k, +adj.dataset.adj);
+  else if (del) delete state.stock[del.dataset.del];
+  else return;
+  update();
+});
+$("addForm").addEventListener("submit", e => {
+  e.preventDefault();
+  addStock($("addName").value, Math.max(1, +$("addQty").value || 1));
+  $("addName").value = ""; update();
 });
 $("setup").open = !load();   // first visit: show setup
 render();
