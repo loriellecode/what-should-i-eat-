@@ -2,7 +2,15 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Nourish">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="theme-color" content="#ffffff">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="icon" href="icon-192.png">
 <title>What Should I Eat?</title>
 <style>
 /* ---------- Nourish shell: white, bold type, black pills, soft rounded cards ---------- */
@@ -110,7 +118,7 @@ textarea.nr-input, .nr-box { border-radius:20px; resize:vertical; min-height:90p
 .nr-none { margin:auto; color:var(--n-faint); font-size:1rem; padding:40px 0; }
 .nr-pm { display:flex; align-items:center; gap:10px; border:1px solid #ececee; border-radius:18px; padding:10px 8px 10px 10px; background:#fff; cursor:grab; }
 .nr-pm.dragging { opacity:.4; }
-.nr-pm .nr-thumb { width:46px; height:46px; border-radius:13px; overflow:hidden; display:flex; align-items:center; justify-content:center; font-size:1.5rem; flex:0 0 auto; }
+.nr-pm .nr-thumb { display:flex; width:46px; height:46px; border-radius:13px; overflow:hidden; display:flex; align-items:center; justify-content:center; font-size:1.5rem; flex:0 0 auto; }
 .nr-pm .nr-thumb img { width:100%; height:100%; object-fit:cover; }
 .nr-pm .nm { flex:1; min-width:0; } .nr-pm .nm b { display:block; font-size:.98rem; font-weight:600; line-height:1.25; } .nr-pm .nm span { font-size:.82rem; color:var(--n-mute); }
 .nr-pm.done b { text-decoration:line-through; color:var(--n-faint); }
@@ -125,9 +133,9 @@ textarea.nr-input, .nr-box { border-radius:20px; resize:vertical; min-height:90p
 .nr-gcard h3 { margin:0 0 18px; font-size:1.5rem; font-weight:700; letter-spacing:-.02em; }
 .nr-gi { padding:9px 0; }
 .nr-gtop { display:flex; align-items:center; gap:14px; }
-.nr-gtop .nm { font-size:1.2rem; flex:0 1 auto; min-width:0; } .nr-gtop .qty { color:var(--n-mute); font-size:.95rem; }
+.nr-gtop .nm { font-size:1.2rem; flex:0 1 auto; min-width:0; } .nr-gtop .qty { color:var(--n-mute); font-size:.95rem; white-space:nowrap; } .nr-gtop { flex-wrap:wrap; row-gap:4px; }
 .nr-gtop.checked .nm { text-decoration:line-through; color:var(--n-faint); }
-.nr-mealchip { background:var(--n-soft); border:0; border-radius:99px; color:#8a8e95; padding:4px 12px; font-size:.82rem; cursor:pointer; display:flex; align-items:center; gap:4px; }
+.nr-mealchip { white-space:nowrap; flex:0 0 auto; background:var(--n-soft); border:0; border-radius:99px; color:#8a8e95; padding:4px 12px; font-size:.82rem; cursor:pointer; display:flex; align-items:center; gap:4px; }
 .nr-gx { margin-left:auto; background:none; border:0; color:var(--n-faint); cursor:pointer; border-radius:50%; width:30px; height:30px; display:flex; align-items:center; justify-content:center; }
 .nr-gx:hover { background:var(--n-soft); color:var(--n-ink); }
 .nr-ginfo { margin:8px 0 4px 44px; padding:12px 16px; background:#f8f8f9; border-radius:16px; font-size:.92rem; color:#60646b; display:grid; gap:4px; }
@@ -168,7 +176,7 @@ textarea.nr-input, .nr-box { border-radius:20px; resize:vertical; min-height:90p
 .nr-toast { position:fixed; left:50%; bottom:28px; transform:translateX(-50%); background:var(--n-black); color:#fff; padding:14px 24px; border-radius:99px; z-index:80; font-size:1rem; box-shadow:0 12px 30px rgba(0,0,0,.3); }
 .nr-toast[hidden] { display:none; }
 
-@media (max-width:1020px) { .nr-settings span { display:none; } }
+@media (max-width:1180px) { .nr-settings span { display:none; } }
 @media (max-width:900px) {
   .nr-nav { padding:12px 16px; gap:12px; flex-wrap:wrap; }
   .nr-logo { font-size:1.5rem; }
@@ -182,6 +190,79 @@ textarea.nr-input, .nr-box { border-radius:20px; resize:vertical; min-height:90p
   .nr-chat { padding:18px; }
   .nr-msg { max-width:94%; }
 }
+
+/* ---------- additions: details, forms, library panel, extra pages ---------- */
+.nr-link { background:none; border:0; padding:0; margin:0; text-align:left; cursor:pointer; font:inherit; color:inherit; }
+.nr-photo > .nr-link { position:absolute; inset:0; width:100%; display:flex; align-items:center; justify-content:center; }
+.nr-ctitle .nr-link { font-weight:inherit; }
+.nr-row .nr-link.nm, .nr-pm .nr-link.nm { flex:1; min-width:0; }
+.nr-row > .nr-link:not(.nm), .nr-pm > .nr-link:not(.nm) { flex:0 0 auto; }
+.nr-pm .nr-link.nm b { display:block; font-size:.98rem; font-weight:600; line-height:1.25; } .nr-pm .nr-link.nm span { font-size:.82rem; color:var(--n-mute); }
+.nr-muted { color:var(--n-mute); }
+.nr-menu .cap { color:var(--n-mute); font-size:.74rem; letter-spacing:.1em; text-transform:uppercase; padding:10px 14px 4px; }
+.nr-menu { max-height:calc(100vh - 100px); overflow:auto; }
+.nr-settings.on { color:var(--n-ink); }
+@media (min-width:760px) { .nr-grid { grid-template-columns:repeat(3, minmax(0, 1fr)); } }
+.nr-weekgrid { display:grid; grid-template-columns:repeat(auto-fill, minmax(200px, 1fr)); gap:16px; align-items:start; }
+.nr-weekgrid .nr-day { min-height:150px; }
+.nr-weekgrid .nr-none { padding:18px 0; }
+.nr-weekgrid .nr-dayadd { margin-top:8px; padding:11px; font-size:1rem; }
+.nr-weekgrid .nr-dayhead { padding:12px 16px; }
+.nr-pm.drop-before { box-shadow:0 -3px 0 var(--n-black); }
+.nr-daycol.drop .nr-day { outline:2px dashed #777; outline-offset:-6px; }
+.nr-thumb.sm { width:50px; height:50px; border-radius:14px; overflow:hidden; position:relative; display:flex; align-items:center; justify-content:center; font-size:1.6rem; flex:0 0 auto; }
+.nr-thumb img, .nr-thumb.sm img { width:100%; height:100%; object-fit:cover; position:relative; }
+.nr-btn.sm.nr-circle { width:40px; height:40px; padding:0; }
+.nr-btn.danger { color:var(--n-red) !important; }
+.nr-input.sq { border-radius:16px; }
+.nr-badge { font-size:.75rem; background:#e8f5ee; color:#1f7a49; border-radius:99px; padding:3px 10px; white-space:nowrap; }
+.nr-badge.warn { background:#fff4e0; color:#8a5a00; }
+.nr-back { background:none; border:0; display:inline-flex; align-items:center; gap:6px; color:var(--n-mute); font-size:1rem; cursor:pointer; padding:6px 0; margin-bottom:12px; }
+.nr-back:hover { color:var(--n-ink); }
+/* meal library side panel on Plan */
+.nr-lib { position:fixed; top:0; right:0; bottom:0; width:min(380px, 92vw); z-index:45; background:#fff; border-left:1px solid var(--n-line); box-shadow:-24px 0 50px rgba(0,0,0,.1); display:flex; flex-direction:column; gap:10px; padding:18px 18px 0; }
+.nr-lib[hidden] { display:none; }
+.nr-libhead { display:flex; justify-content:space-between; align-items:center; font-size:1.25rem; }
+.nr-liblabel { font-weight:600; font-size:.9rem; }
+.nr-libday { display:grid; grid-template-columns:1.3fr 1fr; gap:8px; }
+.nr-libday .nr-input { border-radius:14px; padding:11px 12px; font-size:.95rem; }
+.nr-libtip { margin:0; color:var(--n-mute); font-size:.88rem; }
+.nr-liblist { overflow-y:auto; display:grid; gap:8px; padding-bottom:18px; align-content:start; flex:1; }
+.nr-libi { display:flex; align-items:center; gap:12px; border:1px solid #ececee; border-radius:16px; padding:8px 8px 8px 8px; cursor:grab; background:#fff; }
+.nr-libi .nr-thumb { width:46px; height:46px; border-radius:12px; overflow:hidden; position:relative; display:flex; align-items:center; justify-content:center; font-size:1.5rem; flex:0 0 auto; }
+.nr-libi .nm { flex:1; min-width:0; } .nr-libi .nm b { display:block; font-size:.95rem; font-weight:600; line-height:1.2; } .nr-libi .nm span { font-size:.82rem; color:var(--n-mute); }
+@media (min-width:901px) { .nr-page.with-lib { margin-right:380px; } }
+/* meal details */
+.nr-detail { display:grid; grid-template-columns:minmax(0, 1fr) minmax(0, 1.1fr); gap:34px; align-items:start; }
+.nr-detail-photo { position:relative; height:340px; border-radius:30px; overflow:hidden; display:flex; align-items:center; justify-content:center; border:1px solid #ececee; }
+.nr-detail-photo img { width:100%; height:100%; object-fit:cover; }
+.nr-detail-meta { display:flex; flex-wrap:wrap; gap:8px; margin:14px 0 10px; }
+.nr-pill.light { background:#fff; border:1px solid var(--n-line); }
+.nr-detail-actions { display:flex; flex-wrap:wrap; gap:10px; margin:20px 0 8px; }
+.nr-ilist { list-style:none; margin:0; padding:0; }
+.nr-ilist li { display:flex; justify-content:space-between; gap:16px; padding:12px 0; border-top:1px solid var(--n-line); font-size:1.12rem; } .nr-ilist li:first-child { border-top:0; }
+@media (max-width:900px) { .nr-detail { grid-template-columns:1fr; } .nr-detail-photo { height:240px; } }
+/* forms */
+.nr-form { max-width:760px; }
+.nr-form label { display:block; font-weight:600; font-size:.95rem; margin:20px 0 7px; } .nr-form label small { font-weight:400; color:var(--n-mute); }
+.nr-form .row2 { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+.nr-form .actions { display:flex; gap:12px; justify-content:flex-end; margin-top:28px; flex-wrap:wrap; }
+.nr-newcat { display:flex; gap:10px; margin-top:10px; align-items:center; } .nr-newcat .nr-input { flex:1; }
+.nr-photorow { display:flex; gap:16px; align-items:flex-start; flex-wrap:wrap; }
+.nr-photoprev { width:170px; height:130px; border-radius:20px; border:1px dashed #d4d6da; overflow:hidden; display:flex; align-items:center; justify-content:center; text-align:center; font-size:.9rem; color:var(--n-mute); background:#fafafa; }
+.nr-photoprev img { width:100%; height:100%; object-fit:cover; }
+.nr-photoctl { display:flex; flex-direction:column; gap:10px; flex:1; min-width:240px; align-items:flex-start; }
+.nr-photoctl .nr-input { width:100%; }
+.nr-form label.nr-file { margin:0; display:inline-flex; font-weight:500; font-size:.95rem; }
+.nr-file input { position:absolute; width:1px; height:1px; opacity:0; }
+/* summary, categories, pantry */
+.nr-sumrow { display:grid; grid-template-columns:170px minmax(0, 1fr) 110px; gap:18px; align-items:center; padding:14px 0; border-bottom:1px solid var(--n-line); }
+.nr-bar.big { height:14px; margin:0; position:relative; overflow:visible; } .nr-bar.big i { position:relative; }
+.nr-bar.big em { position:absolute; top:-5px; bottom:-5px; width:2px; background:var(--n-red); opacity:.6; }
+.nr-sumcal { text-align:right; font-weight:700; font-size:1.15rem; font-variant-numeric:tabular-nums; }
+.nr-sumtotal { display:flex; flex-wrap:wrap; gap:10px 34px; padding-top:18px; color:var(--n-mute); } .nr-sumtotal b { color:var(--n-ink); }
+.nr-catrow { display:flex; align-items:center; gap:14px; padding:8px 0; border-top:1px solid var(--n-line); } .nr-catrow:first-child { border-top:0; }
+.nr-catrow .nr-input { flex:1; padding:11px 16px; }
 
 /* ---------- Daily Coach (the original app), scoped to #coach ---------- */
 @font-face{ font-family:"Lexend"; font-weight:100 900; font-style:normal; font-display:swap;
@@ -418,6 +499,13 @@ textarea.nr-input, .nr-box { border-radius:20px; resize:vertical; min-height:90p
       <div class="nr-more">
         <button type="button" id="nr-more-btn" aria-haspopup="menu" aria-expanded="false">More <svg class="i" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg></button>
         <div class="nr-menu" id="nr-more-menu" role="menu" hidden>
+          <div class="cap">Nourish</div>
+          <button data-nr="nutrition-summary" role="menuitem">Weekly Nutrition Summary <small>Calories for each day of your plan</small></button>
+          <button data-nr="recipe-ingredients" role="menuitem">Recipe Ingredients <small>Ingredient list for prep</small></button>
+          <button data-nr="meal-categories" role="menuitem">Categories <small>Make and rename your own</small></button>
+          <button data-nr="pantry-inventory" role="menuitem">Pantry Inventory <small>Staples you already have at home</small></button>
+          <button data-nr="add-meal" role="menuitem">Add New Meal <small>Name, calories, category, photo</small></button>
+          <div class="cap">Daily Coach</div>
           <button data-nr="coach-today" role="menuitem">Today’s picks <small>Tell Daily Coach what you’re craving</small></button>
           <button data-nr="coach-move" role="menuitem">Workouts <small>Guided, with demos and auto-progression</small></button>
           <button data-nr="coach-groceries" role="menuitem">Kitchen stock <small>What you have, what to buy</small></button>
@@ -425,7 +513,7 @@ textarea.nr-input, .nr-box { border-radius:20px; resize:vertical; min-height:90p
         </div>
       </div>
     </nav>
-    <button class="nr-settings" id="nr-settings-btn"><svg class="i" viewBox="0 0 24 24" id="ic-gear"></svg><span>Settings</span></button>
+    <button class="nr-settings" id="nr-settings-btn" data-nr="settings"><svg class="i" viewBox="0 0 24 24" id="ic-gear"></svg><span>Settings</span></button>
   </header>
 
   <main class="nr-main" id="nr-main">
@@ -460,18 +548,28 @@ textarea.nr-input, .nr-box { border-radius:20px; resize:vertical; min-height:90p
           <button class="nr-btn light nr-circle" data-act="week-prev" aria-label="Previous week"><svg class="i" data-ic="left" viewBox="0 0 24 24"></svg></button>
           <button class="nr-btn light" data-act="week-now">This week</button>
           <button class="nr-btn light nr-circle" data-act="week-next" aria-label="Next week"><svg class="i" data-ic="right" viewBox="0 0 24 24"></svg></button>
+          <button class="nr-btn" data-act="lib-toggle"><svg class="i" data-ic="fork" viewBox="0 0 24 24"></svg>Meal library</button>
         </div>
       </div>
-      <div class="nr-weekwrap" id="nr-week"></div>
+      <div class="nr-weekgrid" id="nr-week"></div>
+      <aside class="nr-lib" id="nr-lib" hidden aria-label="Meal library">
+        <div class="nr-libhead"><b>Meal library</b><button class="nr-dots" data-act="lib-toggle" aria-label="Close library"><svg class="i" data-ic="x" viewBox="0 0 24 24"></svg></button></div>
+        <label class="nr-liblabel" for="nr-lib-day">Add to</label>
+        <div class="nr-libday"><select class="nr-input" id="nr-lib-day"></select><select class="nr-input" id="nr-lib-type"><option value="auto">Auto type</option><option value="">No type</option><option>Breakfast</option><option>Lunch</option><option>Snack</option><option>Dinner</option><option>Smoothie</option><option>Other</option></select></div>
+        <div class="nr-field" style="flex:none"><svg class="i" data-ic="search" viewBox="0 0 24 24"></svg><input class="nr-input" id="nr-lib-q" placeholder="Search meals..." autocomplete="off"></div>
+        <p class="nr-libtip">Tap + to add, or drag a meal onto a day.</p>
+        <div class="nr-liblist" id="nr-lib-list"></div>
+      </aside>
     </section>
 
     <section class="nr-page" data-page="grocery" hidden>
       <div class="nr-eyebrow"><svg class="i" data-ic="cart" viewBox="0 0 24 24"></svg><span>Grocery</span></div>
       <h1 class="nr-h1">Grocery List</h1>
-      <p class="nr-sub" id="nr-g-sub">Built from your plan. Tap a meal count for sizes and calories.</p>
+      <p class="nr-sub" id="nr-g-sub">Add ingredients from meals with “Add to Grocery”, or type items in.</p>
       <div class="nr-tools">
         <div class="nr-field"><svg class="i" data-ic="search" viewBox="0 0 24 24"></svg><input class="nr-input" id="nr-g-q" placeholder="Search ingredients..." autocomplete="off"></div>
         <form class="addwrap" id="nr-g-form"><input class="nr-input" id="nr-g-add" placeholder="Add an item..." autocomplete="off"><button class="nr-btn nr-circle" type="submit" aria-label="Add"><svg class="i" data-ic="plus" viewBox="0 0 24 24"></svg></button></form>
+        <button class="nr-btn light" data-act="g-from-plan"><svg class="i" data-ic="calendar" viewBox="0 0 24 24"></svg>Add from this week’s plan</button>
         <button class="nr-btn light" data-act="combine"><svg class="i" data-ic="merge" viewBox="0 0 24 24"></svg>Combine duplicates</button>
       </div>
       <div class="nr-ggrid" id="nr-g-grid"></div>
@@ -484,6 +582,14 @@ textarea.nr-input, .nr-box { border-radius:20px; resize:vertical; min-height:90p
       <div class="nr-chat" id="nr-chat" style="margin-top:26px"></div>
       <form class="nr-chatform" id="nr-chat-form"><input class="nr-input" id="nr-chat-in" placeholder="Ask me to plan your week..." autocomplete="off"><button class="nr-btn nr-circle" type="submit" aria-label="Send"><svg class="i" data-ic="send" viewBox="0 0 24 24"></svg></button></form>
     </section>
+
+    <section class="nr-page nr-narrow" data-page="meal-details" hidden id="nr-p-meal-details"></section>
+    <section class="nr-page nr-narrow" data-page="add-meal" hidden id="nr-p-add-meal"></section>
+    <section class="nr-page nr-narrow" data-page="settings" hidden id="nr-p-settings"></section>
+    <section class="nr-page nr-narrow" data-page="nutrition-summary" hidden id="nr-p-nutrition-summary"></section>
+    <section class="nr-page nr-narrow" data-page="recipe-ingredients" hidden id="nr-p-recipe-ingredients"></section>
+    <section class="nr-page nr-narrow" data-page="meal-categories" hidden id="nr-p-meal-categories"></section>
+    <section class="nr-page nr-narrow" data-page="pantry-inventory" hidden id="nr-p-pantry-inventory"></section>
   </main>
 
   <div class="nr-modal" id="nr-modal" hidden></div>
@@ -853,7 +959,7 @@ function settings(offset) {
   return {
     likes: list(v("likes")), dislikes: list(v("dislikes")), eatenFoods: today ? list(v("eaten")) : [],
     budget: +v("budget") || 999, time: +v("time") || 999, goal, want, targets, day,
-    yesterday: history()[dayKey(addDays(offset - 1))] || [],
+    yesterday: pickHistory()[dayKey(addDays(offset - 1))] || [],
     remCal, remPro, limit, eatCal, missPenalty: strict() ? 60 : 2,
     mood: moodOn ? parseMood(state.mood.text) : null,
     choice: today && state.choice && state.choice.day === dayKey() ? state.choice : {},
@@ -972,7 +1078,7 @@ function render() {
   renderStock();
 
   // remember what we served so tomorrow can vary
-  const h = history(); h[st.day] = items.filter(i => i.pick).map(i => i.pick.meal.name); saveHistory(h);
+  const h = pickHistory(); h[st.day] = items.filter(i => i.pick).map(i => i.pick.meal.name); saveHistory(h);
 }
 
 function renderGroceries(buy) {
@@ -1055,7 +1161,7 @@ function load() {
   } catch {}
   return found;
 }
-function history() { try { return JSON.parse(localStorage.getItem(HKEY) || "{}"); } catch { return {}; } }
+function pickHistory() { try { return JSON.parse(localStorage.getItem(HKEY) || "{}"); } catch { return {}; } }
 function saveHistory(h) {
   try {
     const keep = Object.keys(h).sort().slice(-14);
@@ -1690,8 +1796,10 @@ showTab("today");   // defaults already give a full plan; Setup is one tap away
 </script>
 <script>
 // ===========================================================================
-// Nourish shell: Home, Meals, Plan, Grocery, Help Me Healthy, Settings.
-// Reuses the Daily Coach data (MEALS, ING, emoji, parseMood, moodScore) from the script above.
+// Nourish: Home, Meals, Plan, Grocery, Help Me Healthy + Meal Details, Add/Edit Meal,
+// Settings, Weekly Nutrition Summary, Recipe Ingredients, Categories, Pantry.
+// Reuses the Daily Coach data (MEALS, ING, emoji, parseMood, moodScore, ingInfo, fmtOz, fmtN).
+// Everything runs on the device; nothing needs a connection.
 // ===========================================================================
 (() => {
 "use strict";
@@ -1701,12 +1809,11 @@ const uid = () => Math.random().toString(36).slice(2, 9);
 const iso = d => d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
 const parseISO = s => { const [y, m, d] = s.split("-").map(Number); return new Date(y, m - 1, d); };
 const addD = (d, n) => { const x = new Date(d); x.setDate(x.getDate() + n); return x; };
-const mondayOf = d => { const x = new Date(d); x.setHours(0, 0, 0, 0); x.setDate(x.getDate() - ((x.getDay() + 6) % 7)); return x; };
+const today0 = () => { const d = new Date(); d.setHours(0, 0, 0, 0); return d; };
 const DAYS = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+const MONTHS_LONG = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 const cap = s => s ? s[0].toUpperCase() + s.slice(1) : s;
-const stem = s => s.toLowerCase().trim().replace(/ies$/, "y").replace(/(es|s)$/, "");
-const same = (a, b) => { a = stem(a); b = stem(b); return a === b || (a.length > 3 && b.length > 3 && (a.includes(b) || b.includes(a))); };
 
 // ---------- icons ----------
 const IC = {
@@ -1717,23 +1824,84 @@ const IC = {
   gear: '<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/>',
   search: '<circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/>', plus: '<path d="M12 5v14M5 12h14"/>',
   dots: '<circle cx="5" cy="12" r="1.2"/><circle cx="12" cy="12" r="1.2"/><circle cx="19" cy="12" r="1.2"/>',
-  left: '<path d="m15 18-6-6 6-6"/>', right: '<path d="m9 18 6-6-6-6"/>', down: '<path d="m6 9 6 6 6-6"/>',
+  left: '<path d="m15 18-6-6 6-6"/>', right: '<path d="m9 18 6-6-6-6"/>', down: '<path d="m6 9 6 6 6-6"/>', up: '<path d="m18 15-6-6-6 6"/>',
   send: '<path d="m22 2-11 11"/><path d="M22 2 15 22l-4-9-9-4z"/>', x: '<path d="M18 6 6 18M6 6l12 12"/>', check: '<path d="m5 12 5 5L20 7"/>',
   merge: '<rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><path d="M14 17.5h7M17.5 14v7"/>',
+  edit: '<path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 1 1 3 3L7 19l-4 1 1-4z"/>', trash: '<path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6"/>',
 };
 const ic = (n, cls = "") => `<svg class="i ${cls}" viewBox="0 0 24 24">${IC[n]}</svg>`;
-document.querySelectorAll("#nr svg[data-ic]").forEach(s => { s.innerHTML = IC[s.dataset.ic] || ""; });
-$("ic-gear").innerHTML = IC.gear;
+const paintIcons = root => root.querySelectorAll("svg[data-ic]").forEach(s => { s.innerHTML = IC[s.dataset.ic] || ""; });
+paintIcons(document.getElementById("nr")); $("ic-gear").innerHTML = IC.gear;
+
+// ---------- ingredients: parse "2 cups rice", normalize "Diced tomatoes" -> "tomato" ----------
+const UNITS = "cups cup c tbsp tbsps tablespoons tablespoon tsp tsps teaspoons teaspoon oz ounces ounce lb lbs pounds pound g gram grams kg ml l liter liters litre cans can cloves clove slices slice pieces piece scoops scoop handfuls handful bunches bunch pinch pinches dash packs pack packages package bags bag jars jar bottles bottle heads head fillets fillet sticks stick quarts quart pints pint dozen".split(" ");
+const FRAC = { "½":.5, "¼":.25, "¾":.75, "⅓":1 / 3, "⅔":2 / 3 };
+function toNum(q) {
+  if (q == null || String(q).trim() === "") return null; let n = 0;
+  for (const p of String(q).trim().split(/\s+/)) {
+    if (FRAC[p] != null) n += FRAC[p];
+    else if (/^\d+\/\d+$/.test(p)) { const [a, b] = p.split("/"); n += a / b; }
+    else if (/^\d*\.?\d+$/.test(p)) n += +p;
+    else { const m = p.match(/^(\d+)([½¼¾⅓⅔])$/); if (m) n += +m[1] + FRAC[m[2]]; else return null; }
+  }
+  return n;
+}
+const fmtQty = n => String(Math.round(n * 100) / 100);
+const DESC = new Set("chopped diced sliced minced fresh large small medium ripe cooked raw boneless skinless shredded grated crushed organic frozen extra virgin finely roughly thinly whole halved peeled cubed optional lean plain unsweetened".split(" "));
+const singular = w => /(ss|us|is)$/.test(w) || w.length < 4 ? w : /ies$/.test(w) ? w.slice(0, -3) + "y" : /oes$/.test(w) ? w.slice(0, -2) : /(ches|shes|xes)$/.test(w) ? w.slice(0, -2) : /s$/.test(w) ? w.slice(0, -1) : w;
+const words = s => String(s).toLowerCase().replace(/\(.*?\)/g, " ").replace(/yoghurt/g, "yogurt").replace(/[^a-z0-9 ]/g, " ").split(/\s+/).filter(Boolean);
+function normName(s) {
+  let w = words(s).filter(x => !DESC.has(x) && x !== "of" && x !== "to" && x !== "taste");
+  if (!w.length) w = words(s); if (!w.length) return "";
+  w[w.length - 1] = singular(w[w.length - 1]); return w.join(" ");
+}
+function displayName(s) { const w = String(s).replace(/\(.*?\)/g, " ").replace(/yoghurt/gi, "yogurt").trim().split(/\s+/).filter(x => !DESC.has(x.toLowerCase())); return cap((w.length ? w : [String(s).trim()]).join(" ")); }
+const GKW = [
+  ["Beverages", ["water", "sparkling water", "juice", "coffee", "tea", "soda", "kombucha", "coconut water", "lemonade", "electrolyte", "sports drink"]],
+  ["Frozen", ["frozen", "ice cream", "popsicle", "frozen fruit", "frozen vegetable"]],
+  ["Bakery", ["bread", "tortilla", "pita", "flatbread", "bagel", "bun", "roll", "croissant", "muffin", "naan", "english muffin"]],
+  ["Meat & Seafood", ["chicken", "turkey", "beef", "steak", "salmon", "tuna", "shrimp", "pork", "bacon", "fish", "sausage", "ham", "cod", "tilapia", "lamb", "ground beef", "ground turkey"]],
+  ["Dairy", ["milk", "yogurt", "cheese", "butter", "egg", "cream", "cottage cheese", "feta", "mozzarella", "parmesan", "sour cream"]],
+  ["Produce", ["spinach", "banana", "berry", "apple", "grape", "mango", "pineapple", "lettuce", "tomato", "cucumber", "carrot", "zucchini", "pepper", "bell pepper", "asparagus", "broccoli", "onion", "garlic", "potato", "sweet potato", "avocado", "lemon", "lime", "pea", "celery", "kale", "orange", "strawberry", "blueberry", "raspberry", "peach", "pear", "cilantro", "parsley", "basil", "mushroom", "cabbage", "corn", "ginger", "fruit", "eggplant", "salad", "greens"]],
+  ["Pantry", ["rice", "pasta", "oat", "granola", "sauce", "tomato sauce", "tomato soup", "oil", "olive oil", "honey", "peanut butter", "peanut", "bean", "black bean", "kidney bean", "lentil", "chickpea", "broth", "salt", "spice", "powder", "protein powder", "chili powder", "curry powder", "ramen", "popcorn", "almond", "raisin", "flour", "sugar", "vinegar", "mayo", "salsa", "hummus", "cereal", "nut", "seed", "syrup", "noodle", "soup", "quinoa", "cracker", "chip", "soy sauce", "spaghetti"]],
+];
+function catOf(name) {
+  const n = " " + words(name).map(singular).join(" ") + " "; let best = "Other", len = 0;   // keeps words like "frozen"
+  for (const [c, ks] of GKW) for (const k of ks) if (n.includes(" " + k) && k.length > len) { best = c; len = k.length; }
+  return best;
+}
+const GCATS = ["Produce", "Dairy", "Meat & Seafood", "Pantry", "Frozen", "Bakery", "Beverages", "Other"];
+function parseIng(str) {
+  const s = String(str).trim().replace(/^[-•*]\s*/, ""); let qty = "", unit = "", rest = s;
+  const m = s.match(/^((?:\d+\s+)?\d+\/\d+|\d+(?:\.\d+)?\s*[½¼¾⅓⅔]?|[½¼¾⅓⅔])\s*(.*)$/);
+  if (m) {
+    qty = m[1].trim(); rest = m[2]; const w = rest.split(/\s+/), u = (w[0] || "").toLowerCase().replace(/\.$/, "");
+    if (UNITS.includes(u) && w.length > 1) { unit = w[0]; rest = w.slice(1).join(" "); }
+    rest = rest.replace(/^of\s+/i, "");
+  }
+  if (!rest.trim()) { rest = s; qty = ""; unit = ""; }
+  const name = rest.trim(), norm = normName(name);
+  return { id:uid(), name, qty, unit, cat:catOf(name), norm };
+}
+// a sample ingredient: name from the ING table, amount from its serving label ("2 large eggs", "1 cup florets")
+function seedIng(name, label) {
+  const p = parseIng(label || ""); let unit = p.unit;
+  if (!unit) { const first = (p.name.split(" ")[0] || "").toLowerCase(); if (UNITS.includes(first)) unit = p.name.split(" ")[0]; }
+  return { id:uid(), name, qty:p.qty, unit, cat:catOf(name), norm:normName(name) };
+}
+const ingText = i => [i.qty, i.unit, i.name].filter(Boolean).join(" ");
 
 // ---------- data ----------
 const KEY = "nourish-v1";
 const TAGS = ["Hydration", "30g Protein", "15g protein", "Breakfast", "Lunch", "Dinner", "Smoothies", "Snacks", "Meal Prep", "High Protein"];
-const SLOT_TAGS = { Breakfast:"Breakfast", Lunch:"Lunch", Dinner:"Dinner", Snack:"Snacks" };
-const SLOTS_N = ["Breakfast", "Lunch", "Dinner", "Snack"];
+const SLOT_TAGS = { Breakfast:"Breakfast", Lunch:"Lunch", Dinner:"Dinner", Snack:"Snacks", Smoothie:"Smoothies" };
+const SLOTS_N = ["Breakfast", "Lunch", "Dinner", "Snack"];                       // used by the auto-planner
+const TYPES = ["Breakfast", "Lunch", "Snack", "Dinner", "Smoothie", "Other"];   // optional meal types on the plan
 const PRO = { egg:12, chicken:26, "greek yogurt":15, "cottage cheese":19, tuna:26, salmon:25, shrimp:20, turkey:18, "ground beef":22, "ground turkey":21, steak:36, "protein powder":25, cheese:7, milk:8,
-  "peanut butter":7, beans:7, lentil:12, chickpea:7, oats:5, bread:8, rice:3, pasta:7, almond:6, hummus:4, tortilla:5, broccoli:3, spinach:1, banana:1, berr:1 };
-const proOf = name => { const k = Object.keys(PRO).find(k => name.toLowerCase().includes(k)); return k ? PRO[k] : 0; };
-const kcalOf = name => { const f = ingInfo(name.toLowerCase()); return f ? f.kcal : 0; };
+  "peanut butter":7, bean:7, lentil:12, chickpea:7, oat:5, bread:8, rice:3, pasta:7, almond:6, hummus:4, tortilla:5, broccoli:3, spinach:1, banana:1, berr:1 };
+const proOf = name => { const n = normName(name); const k = Object.keys(PRO).find(k => n.includes(k)); return k ? PRO[k] : 0; };
+const kcalOf = name => { const f = ingInfo(normName(name)) || ingInfo(String(name).toLowerCase()); return f ? f.kcal : 0; };
+const estimateCal = ing => ing.reduce((a, i) => a + kcalOf(i.name), 0);
 
 function seed() {
   const meals = MEALS.map(m => {
@@ -1742,28 +1910,79 @@ function seed() {
     if (m.pro >= 30) tags.add("30g Protein"); else if (m.pro >= 15) tags.add("15g protein");
     if (m.pro >= 25) tags.add("High Protein");
     if (/soup|chili|curry|bowl|pasta|rice|lentil|stir-fry|burrito/i.test(m.name) || (m.slots.includes("dinner") && m.time >= 20)) tags.add("Meal Prep");
-    const ing = m.ing.map(n => ({ name:n, qty:(ING[n] || [""])[0] }));
+    const ing = m.ing.map(n => seedIng(n, (ING[n] || [""])[0]));
     const desc = m.ing.map(n => { const f = ingInfo(n); return f ? `* ${f.serving} ${n} → ~${f.kcal} cal` : `* ${n}`; }).join(" ");
-    return { id:uid(), name:m.name, tags:[...tags], cal:m.cal, pro:m.pro, time:m.time, ing, desc, photo:null };
+    return { id:uid(), name:m.name, tags:[...tags], cal:m.cal, calEst:false, pro:m.pro, time:m.time, ing, desc, photo:null };
   });
   meals.unshift(
-    { id:uid(), name:"5 Water Bottles", tags:["Hydration"], cal:0, pro:0, time:0, ing:[], desc:"You need 4-5 Water Bottles a day.", photo:null, emoji:"💧" },
-    { id:uid(), name:"Sparkling Water & Lemon", tags:["Hydration"], cal:5, pro:0, time:1, ing:[{ name:"sparkling water", qty:"1 can" }], desc:"A fizzy, zero-sugar way to keep drinking.", photo:null, emoji:"🍋" });
-  return { meals, plan:{}, checked:{}, manual:[], chat:[], settings:{ cal:+(document.getElementById("calLimit") || {}).value || 900, pro:67 } };
+    { id:uid(), name:"5 Water Bottles", tags:["Hydration"], cal:0, calEst:false, pro:0, time:0, ing:[], desc:"You need 4-5 Water Bottles a day.", photo:null, emoji:"💧" },
+    { id:uid(), name:"Sparkling Water & Lemon", tags:["Hydration"], cal:5, calEst:false, pro:0, time:1, ing:[seedIng("sparkling water", "1 can")], desc:"A fizzy, zero-sugar way to keep drinking.", photo:null, emoji:"🍋" });
+  return { v:2, meals, plan:{}, grocery:[], pantry:[], cats:[...TAGS], chat:[],
+    settings:{ cal:+(document.getElementById("calLimit") || {}).value || 900, pro:67, weekStart:3 } };
 }
 function load() { try { const s = JSON.parse(localStorage.getItem(KEY) || "null"); if (s && s.meals) return s; } catch {} return seed(); }
 let S = load();
-const save = () => { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch {} };
-const ui = { q:"", tag:"All", week:mondayOf(new Date()), gq:"", open:new Set(), page:"home" };
+const save = () => { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch { toast("Couldn’t save. Storage may be full (large photos use the most)."); } };
 const meal = id => S.meals.find(m => m.id === id);
 
-// ---------- meal helpers ----------
-const slotOf = m => { for (const s of SLOTS_N) if (m.tags.includes(SLOT_TAGS[s])) return s; return m.tags.includes("Smoothies") ? "Breakfast" : "Snack"; };
+// ---------- grocery list (stored items, each linked to the meals that need it) ----------
+function addGrocery(name, { qty = "", unit = "", mealId = null } = {}) {
+  const norm = normName(name); if (!norm) return null;
+  let it = S.grocery.find(g => g.norm === norm), isNew = false;
+  if (!it) { it = { id:uid(), norm, name:displayName(name), qty:"", unit:"", cat:catOf(name), purchased:false, sources:[], manual:false }; S.grocery.push(it); isNew = true; }
+  if (mealId) { if (it.sources.includes(mealId)) return { it, isNew:false, dup:true }; it.sources.push(mealId); }
+  else it.manual = true;
+  const n = toNum(qty), cur = toNum(it.qty);
+  if (isNew) { it.qty = qty ? String(qty) : ""; it.unit = unit || ""; }
+  else if (n != null && cur != null && (it.unit || "").toLowerCase() === (unit || "").toLowerCase()) it.qty = fmtQty(cur + n);
+  else if (n != null || cur != null) { it.qty = ""; it.unit = ""; }        // different units: the meal list says how much
+  return { it, isNew, dup:false };
+}
+function addMealToGrocery(m) {
+  let added = 0, merged = 0;
+  for (const i of m.ing) { const r = addGrocery(i.name, { qty:i.qty, unit:i.unit, mealId:m.id }); if (!r) continue; if (r.isNew) added++; else if (!r.dup) merged++; }
+  return { added, merged };
+}
+function combineDuplicates() {
+  const out = []; let n = 0;
+  for (const g of S.grocery) {
+    g.norm = normName(g.name); const f = out.find(x => x.norm === g.norm);
+    if (!f) { out.push(g); continue; }
+    n++; g.sources.forEach(s => { if (!f.sources.includes(s)) f.sources.push(s); });
+    f.manual = f.manual || g.manual; f.purchased = f.purchased && g.purchased;
+    const a = toNum(f.qty), b = toNum(g.qty);
+    if (a != null && b != null && (f.unit || "").toLowerCase() === (g.unit || "").toLowerCase()) f.qty = fmtQty(a + b); else { f.qty = ""; f.unit = ""; }
+  }
+  S.grocery = out; return n;
+}
+const inPantry = norm => S.pantry.some(p => p.norm === norm);
+
+// ---------- one-time upgrade of data saved by the earlier version ----------
+if (S.v !== 2) {
+  const old = S;
+  old.meals.forEach(m => {
+    m.ing = (m.ing || []).map(i => i.norm ? i : seedIng(i.name, i.qty)); if (m.calEst == null) m.calEst = false;
+  });
+  old.cats = [...new Set([...TAGS, ...old.meals.flatMap(m => m.tags || [])])];
+  old.grocery = []; old.pantry = old.pantry || []; S = old;
+  const t = today0();
+  for (const k of Object.keys(S.plan || {})) if (parseISO(k) >= t) for (const p of S.plan[k]) { const m = meal(p.mealId); if (m) addMealToGrocery(m); }
+  for (const x of S.manual || []) addGrocery(x.name, { qty:x.qty > 1 ? String(x.qty) : "" });
+  for (const g of S.grocery) g.purchased = Object.keys(S.checked || {}).some(k => S.checked[k] && normName(k) === g.norm);
+  delete S.manual; delete S.checked; S.settings = S.settings || {}; if (S.settings.weekStart == null) S.settings.weekStart = 3;
+  S.v = 2; save();
+}
+
+// ---------- meal + plan helpers ----------
+const weekStartOf = d => { const x = new Date(d); x.setHours(0, 0, 0, 0); x.setDate(x.getDate() - ((x.getDay() - (S.settings.weekStart ?? 3) + 7) % 7)); return x; };
+const recall = k => { try { return sessionStorage.getItem(k) || null; } catch { return null; } };
+const ui = { q:"", tag:"All", week:weekStartOf(new Date()), gq:"", open:new Set(), page:"home", detailId:recall("nr-detail"), editId:recall("nr-edit"), back:"meals", lib:false, recipeId:null, prep:new Set(), form:null };
+const slotOf = m => { if (m.tags.includes("Smoothies") && !m.tags.includes("Breakfast")) return "Smoothie"; for (const s of SLOTS_N) if (m.tags.includes(SLOT_TAGS[s])) return s; return m.tags.includes("Smoothies") ? "Breakfast" : ""; };
 const mealEmoji = m => m.emoji || (m.ing[0] ? emoji(m.ing[0].name.toLowerCase()) : "🍽️");
 const GRAD = { Smoothies:["#ffd6e0", "#ffb59e"], Breakfast:["#ffeaa6", "#ffc27d"], Lunch:["#d3edc5", "#a3d9a5"], Dinner:["#f8ceaa", "#e69a6a"], Snacks:["#e7d7ff", "#c5b3f2"], Hydration:["#d3ebff", "#a0cef8"] };
 function photoHTML(m, big = true) {
-  if (m.photo) return `<img src="${m.photo}" alt="">`;
-  const key = m.tags.includes("Smoothies") ? "Smoothies" : m.tags.includes("Hydration") ? "Hydration" : (slotOf(m) === "Snack" ? "Snacks" : slotOf(m));
+  if (m.photo) return `<img src="${e(m.photo)}" alt="" loading="lazy" onerror="this.style.display='none'">`;
+  const s = slotOf(m), key = m.tags.includes("Smoothies") ? "Smoothies" : m.tags.includes("Hydration") ? "Hydration" : s === "Snack" ? "Snacks" : (s || m.tags[0]);
   const [a, b] = GRAD[key] || ["#e9ebef", "#cfd3da"];
   const ems = [...new Set([mealEmoji(m), ...m.ing.map(i => emoji(i.name.toLowerCase()))])].filter(x => x !== "🍽️").slice(0, 4);
   if (!ems.length) ems.push("🍽️");
@@ -1772,47 +1991,40 @@ function photoHTML(m, big = true) {
   return `<div style="position:absolute;inset:0;background:linear-gradient(135deg,${a},${b})"></div>` +
     ems.map((x, i) => `<span class="em" style="left:${pos[i][0]};top:${pos[i][1]};font-size:${pos[i][2]};transform:translate(-50%,-50%) rotate(${pos[i][3]}deg)">${x}</span>`).join("");
 }
+const calText = m => m.cal == null || m.cal === "" ? "— cal" : m.calEst ? `~${m.cal} cal · est.` : `${m.cal} cal`;
 const dayPlan = d => S.plan[iso(d)] || (S.plan[iso(d)] = []);
 const planned = d => (S.plan[iso(d)] || []).map(p => ({ p, m:meal(p.mealId) })).filter(x => x.m);
-const sumCal = list => list.reduce((a, x) => a + (x.m.cal || 0), 0);
-const sumPro = list => list.reduce((a, x) => a + (x.m.pro || 0), 0);
-function addToPlan(mealId, date, slot) {
+const sumCal = list => list.reduce((a, x) => a + (+x.m.cal || 0), 0);
+const sumPro = list => list.reduce((a, x) => a + (+x.m.pro || 0), 0);
+function addToPlan(mealId, date, slot, index) {
   const m = meal(mealId); if (!m) return;
-  dayPlan(date).push({ id:uid(), mealId, slot:slot || slotOf(m), done:false });
+  const arr = dayPlan(date), item = { id:uid(), mealId, slot:slot == null ? slotOf(m) : slot, done:false };
+  if (index == null || index > arr.length) arr.push(item); else arr.splice(index, 0, item);
   save();
 }
-const toast = (msg) => { const t = $("nr-toast"); t.textContent = msg; t.hidden = false; clearTimeout(toast.t); toast.t = setTimeout(() => t.hidden = true, 2400); };
+function toast(msg) { const t = $("nr-toast"); t.textContent = msg; t.hidden = false; clearTimeout(toast.t); toast.t = setTimeout(() => t.hidden = true, 2600); }
 const dayLabel = d => { const t = iso(new Date()), i = iso(d); return i === t ? "Today" : i === iso(addD(new Date(), 1)) ? "Tomorrow" : `${DAYS[d.getDay()]}, ${MONTHS[d.getMonth()]} ${d.getDate()}`; };
-
-// ---------- grocery (derived from the plan + manual items) ----------
-const CATS = [["Produce", ["spinach", "banana", "berr", "apple", "grape", "mango", "pineapple", "lettuce", "tomato", "cucumber", "carrot", "zucchini", "pepper", "asparagus", "broccoli", "onion", "garlic", "potato", "avocado", "lemon", "peas", "celery", "kale"]],
-  ["Dairy", ["milk", "yogurt", "cheese", "butter", "egg", "cottage", "cream"]],
-  ["Protein", ["chicken", "turkey", "beef", "steak", "salmon", "tuna", "shrimp", "protein powder", "tofu", "fish"]],
-  ["Pantry", []]];
-const catOf = n => { const l = n.toLowerCase(); for (const [c, ks] of CATS) if (ks.some(k => l.includes(k))) return c; return "Pantry"; };
-function groceryItems() {
-  const items = [], upcoming = [];
-  const today = new Date(); today.setHours(0, 0, 0, 0);
-  for (const k of Object.keys(S.plan)) { const d = parseISO(k); if (d >= today) for (const p of S.plan[k]) { const m = meal(p.mealId); if (m) upcoming.push(m); } }
-  for (const m of upcoming) for (const ing of m.ing) {
-    const name = ing.name.toLowerCase(); let it = items.find(x => same(x.name, name));
-    if (!it) { it = { name, qty:0, meals:[], manual:false }; items.push(it); }
-    it.qty++; if (!it.meals.includes(m.name)) it.meals.push(m.name);
-  }
-  for (const x of S.manual) { let it = items.find(y => same(y.name, x.name)); if (it) { it.qty += x.qty || 1; it.manualToo = true; } else items.push({ name:x.name.toLowerCase(), qty:x.qty || 1, meals:[], manual:true, mid:x.id }); }
-  items.forEach(it => { it.key = stem(it.name); it.checked = !!S.checked[it.key]; it.cat = catOf(it.name); });
-  return items;
+const weekDays = start => Array.from({ length:7 }, (_, i) => addD(start, i));
+const planMealsIn = start => { const ids = []; for (const d of weekDays(start)) for (const x of planned(d)) if (!ids.includes(x.m.id)) ids.push(x.m.id); return ids.map(meal); };
+function addPlanToGrocery(start) {
+  const ms = planMealsIn(start); let added = 0, merged = 0;
+  ms.forEach(m => { const r = addMealToGrocery(m); added += r.added; merged += r.merged; }); save();
+  return { meals:ms.length, added, merged };
 }
 
 // ---------- rendering ----------
+const PAGES = ["home", "meals", "plan", "grocery", "assistant", "meal-details", "add-meal", "settings", "nutrition-summary", "recipe-ingredients", "meal-categories", "pantry-inventory"];
+const MORE_PAGES = ["nutrition-summary", "recipe-ingredients", "meal-categories", "pantry-inventory", "add-meal"];
 function render() {
-  const p = ui.page;
-  if (p === "home") renderHome(); else if (p === "meals") renderMeals(); else if (p === "plan") renderPlan(); else if (p === "grocery") renderGrocery(); else if (p === "assistant") renderChat();
+  ({ home:renderHome, meals:renderMeals, plan:renderPlan, grocery:renderGrocery, assistant:renderChat, "meal-details":renderDetails, "add-meal":renderForm, settings:renderSettings,
+    "nutrition-summary":renderSummary, "recipe-ingredients":renderRecipe, "meal-categories":renderCats, "pantry-inventory":renderPantry }[ui.page] || renderHome)();
 }
+const viewBtn = (m, inner) => `<button class="nr-link" data-act="view-meal" data-id="${m.id}">${inner}</button>`;
+const head = (icon, eyebrow, title, sub, right = "") => `<div class="nr-head"><div><div class="nr-eyebrow">${ic(icon)}<span>${e(eyebrow)}</span></div><h1 class="nr-h1">${e(title)}</h1>${sub ? `<p class="nr-sub">${sub}</p>` : ""}</div>${right}</div>`;
 
 function renderHome() {
   const now = new Date();
-  $("nr-home-title").textContent = `${DAYS[now.getDay()]}, ${MONTHS[now.getMonth()] === "Oct" ? "October" : new Date().toLocaleString(undefined, { month:"long" })} ${now.getDate()}`;
+  $("nr-home-title").textContent = `${DAYS[now.getDay()]}, ${MONTHS_LONG[now.getMonth()]} ${now.getDate()}`;
   const list = planned(now);
   if (!list.length) {
     $("nr-home-body").innerHTML = `<div class="nr-empty">Nothing planned for today yet.<br><button class="nr-btn" data-act="pick-meal" data-date="${iso(now)}">${ic("plus")}Add a meal to today</button></div>
@@ -1820,12 +2032,12 @@ function renderHome() {
     return;
   }
   let html = `<div class="nr-today">`;
-  for (const s of SLOTS_N) {
-    const rows = list.filter(x => x.p.slot === s); if (!rows.length) continue;
-    html += `<div class="nr-slot">${s}</div>` + rows.map(x => `<div class="nr-row ${x.p.done ? "done" : ""}">
+  for (const s of [...TYPES, ""]) {
+    const rows = list.filter(x => (x.p.slot || "") === s); if (!rows.length) continue;
+    html += `<div class="nr-slot">${s || "Meals"}</div>` + rows.map(x => `<div class="nr-row ${x.p.done ? "done" : ""}">
       <button class="nr-check ${x.p.done ? "on" : ""}" data-act="toggle-done" data-date="${iso(now)}" data-pid="${x.p.id}" aria-label="Mark eaten">${ic("check")}</button>
-      <div class="nr-thumb">${photoHTML(x.m, false)}</div>
-      <div class="nm"><b>${e(x.m.name)}</b><span>${x.m.cal} cal · ${x.m.pro} g protein</span></div>
+      ${viewBtn(x.m, `<div class="nr-thumb">${photoHTML(x.m, false)}</div>`)}
+      <button class="nr-link nm" data-act="view-meal" data-id="${x.m.id}"><b>${e(x.m.name)}</b><span>${calText(x.m)} · ${+x.m.pro || 0} g protein</span></button>
       <button class="nr-dots" data-act="plan-menu" data-date="${iso(now)}" data-pid="${x.p.id}" aria-label="More">${ic("dots")}</button></div>`).join("");
   }
   const eaten = list.filter(x => x.p.done), cal = sumCal(list), ecal = sumCal(eaten), goal = S.settings.cal, pgoal = S.settings.pro;
@@ -1833,97 +2045,239 @@ function renderHome() {
     <div class="nr-totals">
       <div class="nr-stat"><b>${ecal}</b> <span>/ ${cal} cal planned</span><div class="nr-bar"><i style="width:${Math.min(100, goal ? ecal / goal * 100 : 0)}%"></i></div><span style="font-size:.9rem">Daily goal ${goal} cal</span></div>
       <div class="nr-stat"><b>${sumPro(eaten)}</b> <span>g protein so far · ${sumPro(list)} g planned</span><div class="nr-bar"><i style="width:${Math.min(100, pgoal ? sumPro(eaten) / pgoal * 100 : 0)}%"></i></div><span style="font-size:.9rem">Goal ${pgoal} g</span></div>
-      <div class="nr-stat"><b class="${cal > goal ? "" : ""}">${Math.max(0, goal - cal)}</b> <span>cal left in your plan</span><div class="nr-bar"><i class="${cal > goal ? "over" : ""}" style="width:${Math.min(100, goal ? cal / goal * 100 : 0)}%"></i></div>${cal > goal ? `<span style="color:var(--n-red);font-size:.9rem">Over your goal by ${cal - goal}</span>` : `<span style="font-size:.9rem">Within your goal</span>`}</div>
+      <div class="nr-stat"><b>${Math.max(0, goal - cal)}</b> <span>cal left in your plan</span><div class="nr-bar"><i class="${cal > goal ? "over" : ""}" style="width:${Math.min(100, goal ? cal / goal * 100 : 0)}%"></i></div>${cal > goal ? `<span style="color:var(--n-red);font-size:.9rem">Over your goal by ${cal - goal}</span>` : `<span style="font-size:.9rem">Within your goal</span>`}</div>
     </div>`;
   $("nr-home-body").innerHTML = html;
 }
 
 function renderMeals() {
-  $("nr-chips").innerHTML = ["All", ...TAGS].map(t => `<button class="nr-chip ${ui.tag === t ? "on" : ""}" data-act="tag" data-tag="${e(t)}">${e(t)}</button>`).join("");
+  $("nr-chips").innerHTML = ["All", ...S.cats].map(t => `<button class="nr-chip ${ui.tag === t ? "on" : ""}" data-act="tag" data-tag="${e(t)}">${e(t)}</button>`).join("");
   const q = ui.q.trim().toLowerCase();
   const list = S.meals.filter(m => (ui.tag === "All" || m.tags.includes(ui.tag)) && (!q || m.name.toLowerCase().includes(q) || m.ing.some(i => i.name.toLowerCase().includes(q)) || m.tags.some(t => t.toLowerCase().includes(q))));
   $("nr-grid").innerHTML = list.length ? list.map(m => `<article class="nr-card">
-      <div class="nr-photo">${photoHTML(m)}<button class="nr-btn nr-circle nr-add" data-act="add-meal" data-id="${m.id}" aria-label="Add to plan">${ic("plus")}</button><span class="nr-tag">${e(m.tags[0] || "Meal")}</span></div>
-      <div class="nr-cbody"><h3 class="nr-ctitle">${e(m.name)}</h3>
-        <div class="nr-crow"><span class="nr-pill">${m.cal ? m.cal + " cal" : "— cal"}</span><button class="nr-dots" data-act="meal-menu" data-id="${m.id}" aria-label="More">${ic("dots")}</button></div>
-        <p class="nr-desc">${e(m.desc || m.ing.map(i => i.qty ? i.qty + " " + i.name : i.name).join(", "))}</p></div></article>`).join("")
+      <div class="nr-photo">${viewBtn(m, photoHTML(m))}<button class="nr-btn nr-circle nr-add" data-act="add-meal" data-id="${m.id}" aria-label="Add to plan">${ic("plus")}</button>${m.tags[0] ? `<span class="nr-tag">${e(m.tags[0])}</span>` : ""}</div>
+      <div class="nr-cbody"><h3 class="nr-ctitle">${viewBtn(m, e(m.name))}</h3>
+        <div class="nr-crow"><span class="nr-pill">${calText(m)}</span><button class="nr-dots" data-act="meal-menu" data-id="${m.id}" aria-label="More">${ic("dots")}</button></div>
+        <p class="nr-desc">${e(m.desc && !m.desc.startsWith("*") ? m.desc : m.ing.map(ingText).join(", ") || m.desc || "")}</p></div></article>`).join("")
     : `<div class="nr-empty" style="grid-column:1/-1">No meals match.<br><button class="nr-btn" data-act="new-meal">${ic("plus")}New Meal</button></div>`;
 }
 
 function renderPlan() {
-  const start = ui.week, end = addD(start, 6);
+  const start = ui.week, end = addD(start, 6), todayISO = iso(new Date());
   $("nr-week-title").textContent = `${DAYS[start.getDay()].slice(0, 3)}, ${MONTHS[start.getMonth()]} ${start.getDate()} – ${DAYS[end.getDay()].slice(0, 3)}, ${MONTHS[end.getMonth()]} ${end.getDate()}`;
-  const todayISO = iso(new Date());
-  $("nr-week").innerHTML = Array.from({ length:7 }, (_, i) => {
-    const d = addD(start, i), list = planned(d), k = iso(d);
-    return `<div class="nr-daycol"><div class="nr-day ${k === todayISO ? "today" : ""}" data-drop="${k}">
+  $("nr-week").innerHTML = weekDays(start).map(d => {
+    const list = planned(d), k = iso(d);
+    return `<div class="nr-daycol" data-drop="${k}"><div class="nr-day ${k === todayISO ? "today" : ""}" data-day="${k}">
       <div class="nr-dayhead"><div><b>${DAYS[d.getDay()]}</b><span>${list.length} meal${list.length === 1 ? "" : "s"}${list.length ? " · " + sumCal(list) + " cal" : ""}</span></div><em>${d.getDate()}</em></div>
       <div class="nr-daybody">${list.length ? list.map(x => `<div class="nr-pm ${x.p.done ? "done" : ""}" draggable="true" data-drag="${x.p.id}" data-from="${k}">
-        <div class="nr-thumb" style="position:relative">${photoHTML(x.m, false)}</div>
-        <div class="nm"><b>${e(x.m.name)}</b><span>${x.p.slot} · ${x.m.cal} cal</span></div>
+        <span class="nr-link" role="button" tabindex="0" data-act="view-meal" data-id="${x.m.id}"><span class="nr-thumb" style="position:relative">${photoHTML(x.m, false)}</span></span>
+        <span class="nr-link nm" role="button" tabindex="0" data-act="view-meal" data-id="${x.m.id}"><b>${e(x.m.name)}</b><span>${x.p.slot ? e(x.p.slot) + " · " : ""}${calText(x.m)}</span></span>
         <button class="nr-dots" data-act="plan-menu" data-date="${k}" data-pid="${x.p.id}" aria-label="More">${ic("dots")}</button></div>`).join("") : `<div class="nr-none">No meals</div>`}</div></div>
       <button class="nr-dayadd" data-act="pick-meal" data-date="${k}">+ Add meal</button></div>`;
   }).join("");
+  $("nr-lib").hidden = !ui.lib; document.querySelector('[data-page="plan"]').classList.toggle("with-lib", ui.lib);
+  if (ui.lib) fillLib();
+}
+function fillLib() {
+  const sel = $("nr-lib-day"), days = weekDays(ui.week), keep = sel.value;
+  sel.innerHTML = days.map(d => `<option value="${iso(d)}">${e(dayLabel(d))}</option>`).join("");
+  sel.value = days.some(d => iso(d) === keep) ? keep : (days.some(d => iso(d) === iso(new Date())) ? iso(new Date()) : iso(days[0]));
+  const q = $("nr-lib-q").value.trim().toLowerCase();
+  $("nr-lib-list").innerHTML = S.meals.filter(m => !q || m.name.toLowerCase().includes(q) || m.tags.some(t => t.toLowerCase().includes(q))).map(m =>
+    `<div class="nr-libi" draggable="true" data-libdrag="${m.id}"><span class="nr-thumb">${photoHTML(m, false)}</span><span class="nm"><b>${e(m.name)}</b><span>${calText(m)}</span></span>
+     <button class="nr-btn nr-circle sm" data-act="lib-add" data-id="${m.id}" aria-label="Add ${e(m.name)}">${ic("plus")}</button></div>`).join("") || `<div class="nr-none">No meals match.</div>`;
 }
 
 function renderGrocery() {
-  const items = groceryItems(), q = ui.gq.trim().toLowerCase();
-  const shown = items.filter(it => !q || it.name.includes(q));
-  $("nr-g-sub").textContent = items.length ? `${items.filter(i => !i.checked).length} to buy · built from your plan. Tap a meal count for sizes and calories.` : "Plan some meals and your list builds itself.";
-  if (!shown.length) { $("nr-g-grid").innerHTML = `<div class="nr-empty" style="grid-column:1/-1">${items.length ? "Nothing matches." : "Your list is empty."}<br><button class="nr-btn" data-nr="plan">Plan meals</button></div>`; return; }
-  $("nr-g-grid").innerHTML = CATS.map(([c]) => {
-    const rows = shown.filter(it => it.cat === c).sort((a, b) => a.checked - b.checked || a.name.localeCompare(b.name)); if (!rows.length) return "";
+  const q = ui.gq.trim().toLowerCase(), all = S.grocery, shown = all.filter(it => !q || it.name.toLowerCase().includes(q) || it.norm.includes(q));
+  const left = all.filter(i => !i.purchased).length;
+  $("nr-g-sub").textContent = all.length ? `${left} to buy · ${all.length - left} purchased. Tap “Needed for…” to see which meals use an item.` : "Add ingredients from meals with “Add to Grocery”, or type items in.";
+  if (!shown.length) { $("nr-g-grid").innerHTML = `<div class="nr-empty" style="grid-column:1/-1">${all.length ? "Nothing matches." : "Your list is empty."}<br><button class="nr-btn" data-act="g-from-plan">${ic("calendar")}Add from this week’s plan</button></div>`; return; }
+  $("nr-g-grid").innerHTML = GCATS.map(c => {
+    const rows = shown.filter(it => (GCATS.includes(it.cat) ? it.cat : "Other") === c).sort((a, b) => a.purchased - b.purchased || a.name.localeCompare(b.name)); if (!rows.length) return "";
     return `<div class="nr-gcard"><h3>${c}</h3>${rows.map(it => {
-      const f = ingInfo(it.name), open = ui.open.has(it.key);
-      const label = it.meals.length ? `${it.meals.length} meal${it.meals.length > 1 ? "s" : ""}` : "added by you";
-      return `<div class="nr-gi"><div class="nr-gtop ${it.checked ? "checked" : ""}">
-        <button class="nr-check ${it.checked ? "on" : ""}" data-act="g-check" data-key="${e(it.key)}" aria-label="Got it">${ic("check")}</button>
-        <span class="nm">${e(it.name)}</span>${it.qty > 1 ? `<span class="qty">×${it.qty}</span>` : ""}
-        <button class="nr-mealchip" data-act="g-open" data-key="${e(it.key)}">${label}${ic("down")}</button>
-        ${it.mid || it.manualToo ? `<button class="nr-gx" data-act="g-del" data-key="${e(it.key)}" aria-label="Remove">${ic("x")}</button>` : ""}</div>
-        ${open ? `<div class="nr-ginfo">${it.meals.length ? `<div><b>Used in:</b> ${it.meals.map(e).join(", ")}</div>` : ""}${f ? `<div>1 serving = <b>${e(f.serving)}</b> (${fmtOz(f.oz)}) · <b>${f.kcal} kcal</b></div>
-          <div>Need ${it.qty} serving${it.qty > 1 ? "s" : ""} = <b>${fmtOz(it.qty * f.oz)}</b> · <b>${fmtN(it.qty * f.kcal)} kcal</b> total</div>
-          <div>Buy: <b>${Math.ceil(it.qty / f.per)} × ${e(f.pack)}</b>${f.per > 1 ? ` (${f.per} servings each)` : ""}</div>` : `<div>No size info for this one.</div>`}</div>` : ""}</div>`;
+      const n = it.sources.filter(meal).length, open = ui.open.has(it.id), f = ingInfo(it.norm), serv = Math.max(1, n);
+      const label = n ? `Needed for ${n} meal${n > 1 ? "s" : ""}` : "Added by you";
+      return `<div class="nr-gi"><div class="nr-gtop ${it.purchased ? "checked" : ""}">
+        <button class="nr-check ${it.purchased ? "on" : ""}" data-act="g-check" data-id="${it.id}" aria-label="${it.purchased ? "Mark not purchased" : "Mark purchased"}">${ic("check")}</button>
+        <span class="nm">${e(it.name)}</span>${it.qty ? `<span class="qty">${e(it.qty)}${it.unit ? " " + e(it.unit) : ""}</span>` : ""}${inPantry(it.norm) ? `<span class="nr-badge">In pantry</span>` : ""}
+        <button class="nr-mealchip" data-act="g-open" data-id="${it.id}" aria-expanded="${open}">${label}${ic(open ? "up" : "down")}</button>
+        <button class="nr-gx" data-act="g-del" data-id="${it.id}" aria-label="Remove">${ic("x")}</button></div>
+        ${open ? `<div class="nr-ginfo">${n ? `<div><b>Used for:</b></div>${it.sources.map(meal).filter(Boolean).map(m => `<button class="nr-link" style="color:var(--n-ink);text-decoration:underline" data-act="view-meal" data-id="${m.id}">${e(m.name)}</button>`).join("")}` : `<div>Added by you.</div>`}
+          ${it.manual && n ? `<div>Also added by you.</div>` : ""}
+          ${f ? `<div style="margin-top:6px">1 serving = <b>${e(f.serving)}</b> (${fmtOz(f.oz)}) · <b>${f.kcal} kcal</b></div>
+          <div>For ${n > 1 ? `these ${n} meals` : "this"}: about <b>${fmtOz(serv * f.oz)}</b> · <b>${fmtN(serv * f.kcal)} kcal</b> · buy <b>${Math.ceil(serv / f.per)} × ${e(f.pack)}</b></div>` : ""}</div>` : ""}</div>`;
     }).join("")}</div>`;
   }).join("");
 }
 
-// ---------- assistant ----------
-const SUGGEST = ["Create a meal called Chicken Rice Bowl with chicken, rice, broccoli and olive oil.", "Put the strawberry smoothie on Wednesday for breakfast.",
-  "Add everything I need for my planned meals to my grocery list.", "Add greek yogurt, strawberries and granola to my grocery list.",
-  "Plan my week with cheesy, quick, healthy meals under 900 calories."];
+// ----- Meal Details -----
+function renderDetails() {
+  const box = $("nr-p-meal-details"), m = meal(ui.detailId);
+  if (!m) { box.innerHTML = head("fork", "Meal Details", "Pick a meal", "") + `<div class="nr-plist">${S.meals.map(x => `<button data-act="view-meal" data-id="${x.id}"><span class="nr-thumb sm">${photoHTML(x, false)}</span><span style="flex:1"><b>${e(x.name)}</b><br><span class="nr-muted">${calText(x)}</span></span></button>`).join("")}</div>`; return; }
+  const upcoming = Object.keys(S.plan).filter(k => parseISO(k) >= today0() && S.plan[k].some(p => p.mealId === m.id)).sort().map(k => dayLabel(parseISO(k)));
+  box.innerHTML = `<button class="nr-back" data-act="back">${ic("left")}Back</button>
+    <div class="nr-detail">
+      <div class="nr-detail-photo">${photoHTML(m)}</div>
+      <div>
+        <div class="nr-eyebrow">${ic("fork")}<span>Meal Details</span></div>
+        <h1 class="nr-h1">${e(m.name)}</h1>
+        <div class="nr-detail-meta"><span class="nr-pill">${calText(m)}</span>${m.pro ? `<span class="nr-pill">${m.pro} g protein</span>` : ""}${m.tags.map(t => `<span class="nr-pill light">${e(t)}</span>`).join("")}</div>
+        ${m.calEst ? `<p class="nr-muted">Calories are estimated from the ingredients. Edit the meal to enter your own number.</p>` : ""}
+        <div class="nr-detail-actions">
+          <button class="nr-btn" data-act="add-meal" data-id="${m.id}">${ic("calendar")}Add to Plan</button>
+          <button class="nr-btn light" data-act="m-grocery" data-id="${m.id}">${ic("cart")}Add to Grocery</button>
+          <button class="nr-btn light" data-act="edit-meal" data-id="${m.id}">${ic("edit")}Edit</button>
+          <button class="nr-btn light danger" data-act="del-meal" data-id="${m.id}">${ic("trash")}Delete</button>
+        </div>
+        ${upcoming.length ? `<p class="nr-muted">On your plan: ${e(upcoming.join(", "))}</p>` : ""}
+      </div>
+    </div>
+    <div class="nr-gcard" style="margin-top:28px"><h3>Ingredients</h3>${m.ing.length ? `<ul class="nr-ilist">${m.ing.map(i => `<li><span>${e(ingText(i))}</span><span class="nr-muted">${e(i.cat)}</span></li>`).join("")}</ul>` : `<p class="nr-muted">No ingredients yet. <button class="nr-link" style="text-decoration:underline" data-act="edit-meal" data-id="${m.id}">Add some</button></p>`}
+    ${m.desc && !m.desc.startsWith("*") ? `<p class="nr-muted" style="margin-top:14px">${e(m.desc)}</p>` : ""}</div>`;
+}
+
+// ----- Add / Edit Meal -----
+function renderForm() {
+  const box = $("nr-p-add-meal"), m = ui.editId ? meal(ui.editId) : null;
+  ui.form = { tags:m ? [...m.tags] : (ui.tag !== "All" ? [ui.tag] : []), photo:m ? m.photo : null };
+  box.innerHTML = `<button class="nr-back" data-act="back">${ic("left")}Back</button>` + head("fork", "Meal Book", m ? "Edit Meal" : "Add New Meal", "Only the name is required.") + `
+    <form class="nr-form" id="nr-mform" autocomplete="off">
+      <label for="nr-m-name">Name</label><input class="nr-input sq" id="nr-m-name" required value="${e(m ? m.name : "")}" placeholder="e.g. Chicken Rice Bowl">
+      <div class="row2">
+        <div><label for="nr-m-cal">Calories</label><input class="nr-input sq" id="nr-m-cal" type="number" min="0" inputmode="numeric" value="${m && !m.calEst && m.cal != null ? m.cal : ""}" placeholder="${m && m.calEst ? `~${m.cal} (estimated)` : "Leave empty to estimate"}"></div>
+        <div><label for="nr-m-pro">Protein (g)</label><input class="nr-input sq" id="nr-m-pro" type="number" min="0" inputmode="numeric" value="${m && m.pro ? m.pro : ""}" placeholder="Optional"></div>
+      </div>
+      <label>Category</label>
+      <div class="nr-tagpick" id="nr-m-tags"></div>
+      <div class="nr-newcat"><input class="nr-input sq" id="nr-m-newcat" placeholder="New category"><button type="button" class="nr-btn light sm" data-act="m-newcat">${ic("plus")}Add</button></div>
+      <label for="nr-m-ing">Ingredients <small>one per line, like “2 eggs”, “1 cup rice” or “tomatoes”</small></label>
+      <textarea class="nr-input nr-box" id="nr-m-ing" rows="6" placeholder="2 eggs&#10;1 cup rice&#10;1 teaspoon olive oil&#10;tomatoes">${e(m ? m.ing.map(ingText).join("\n") : "")}</textarea>
+      <label>Photo <small>optional</small></label>
+      <div class="nr-photorow"><div class="nr-photoprev" id="nr-m-prev"></div>
+        <div class="nr-photoctl"><label class="nr-btn light sm nr-file">${ic("plus")}Upload photo<input type="file" id="nr-m-photo" accept="image/*"></label>
+          <input class="nr-input sq" id="nr-m-url" placeholder="…or paste an image URL" value="${e(m && m.photo && !m.photo.startsWith("data:") ? m.photo : "")}">
+          <button type="button" class="nr-btn light sm" data-act="m-nophoto">Remove photo</button></div></div>
+      <label for="nr-m-desc">Notes <small>optional</small></label><textarea class="nr-input nr-box" id="nr-m-desc" rows="2" style="min-height:60px">${e(m && m.desc && !m.desc.startsWith("*") ? m.desc : "")}</textarea>
+      <div class="actions"><button type="button" class="nr-btn light" data-act="back">Cancel</button><button type="submit" class="nr-btn">${m ? "Save changes" : "Add meal"}</button></div>
+    </form>`;
+  paintTags(); paintPrev();
+}
+function paintTags() { $("nr-m-tags").innerHTML = S.cats.map(t => `<button type="button" data-act="m-tag" data-tag="${e(t)}" class="${ui.form.tags.includes(t) ? "on" : ""}">${e(t)}</button>`).join(""); }
+function paintPrev() { const p = ui.form.photo; $("nr-m-prev").innerHTML = p ? `<img src="${e(p)}" alt="" onerror="this.replaceWith(document.createTextNode('Can’t load that image'))">` : `<span class="nr-muted">No photo</span>`; }
+function saveMealForm() {
+  const name = $("nr-m-name").value.trim(); if (!name) { $("nr-m-name").focus(); return; }
+  const raw = $("nr-m-ing").value.trim(), lines = raw.includes("\n") ? raw.split("\n") : raw.split(",");
+  const ing = lines.map(x => x.trim()).filter(Boolean).map(parseIng);
+  const calIn = $("nr-m-cal").value, proIn = $("nr-m-pro").value, est = estimateCal(ing);
+  const notes = $("nr-m-desc").value.trim(), url = $("nr-m-url").value.trim();
+  const photo = url || ui.form.photo;
+  const data = { name, tags:ui.form.tags, ing, desc:notes, photo:photo || null,
+    cal:calIn !== "" ? +calIn : (est > 0 ? est : null), calEst:calIn === "" && est > 0,
+    pro:proIn !== "" ? +proIn : ing.reduce((a, i) => a + proOf(i.name), 0) };
+  let id = ui.editId;
+  if (id && meal(id)) Object.assign(meal(id), data); else { id = uid(); S.meals.unshift({ id, time:15, ...data }); }
+  save(); toast(ui.editId ? "Meal saved" : "Meal added"); ui.editId = null; remember("nr-edit", ""); ui.back = "meals"; view(id);
+}
+
+// ----- Settings -----
+function renderSettings() {
+  $("nr-p-settings").innerHTML = head("gear", "Settings", "App Settings", "Saved on this device.") + `
+    <div class="nr-form">
+      <label for="nr-s-week">Planning week starts on</label>
+      <select class="nr-input sq" id="nr-s-week">${DAYS.map((d, i) => `<option value="${i}" ${i === (S.settings.weekStart ?? 3) ? "selected" : ""}>${d}</option>`).join("")}</select>
+      <div class="row2">
+        <div><label for="nr-s-cal">Daily calories (max)</label><input class="nr-input sq" id="nr-s-cal" type="number" min="0" step="50" value="${S.settings.cal}"></div>
+        <div><label for="nr-s-pro">Daily protein goal (g)</label><input class="nr-input sq" id="nr-s-pro" type="number" min="0" value="${S.settings.pro}"></div>
+      </div>
+      <p class="nr-muted">The calorie max is shared with Daily Coach, which never plans a day over it.</p>
+      <div class="actions" style="justify-content:space-between"><div style="display:flex;gap:10px;flex-wrap:wrap"><button type="button" class="nr-btn light sm" data-act="reset-sample">Reset to sample meals</button><button type="button" class="nr-btn light sm" data-act="clear-plan">Clear plan</button></div>
+        <button type="button" class="nr-btn" data-act="s-save">Save</button></div>
+    </div>`;
+}
+
+// ----- Weekly Nutrition Summary -----
+function renderSummary() {
+  const start = ui.week, days = weekDays(start), goal = S.settings.cal;
+  const tot = days.map(d => { const l = planned(d); return { d, n:l.length, cal:sumCal(l), est:l.some(x => x.m.calEst) }; });
+  const week = tot.reduce((a, x) => a + x.cal, 0), withMeals = tot.filter(x => x.n).length, max = Math.max(goal || 0, ...tot.map(x => x.cal), 1);
+  $("nr-p-nutrition-summary").innerHTML = head("calendar", "Weekly Nutrition Summary", `${MONTHS[start.getMonth()]} ${start.getDate()} – ${MONTHS[addD(start, 6).getMonth()]} ${addD(start, 6).getDate()}`, "Total calories for each day, from the meals on your plan.",
+    `<div style="display:flex;gap:10px"><button class="nr-btn light nr-circle" data-act="week-prev" aria-label="Previous week">${ic("left")}</button><button class="nr-btn light" data-act="week-now">This week</button><button class="nr-btn light nr-circle" data-act="week-next" aria-label="Next week">${ic("right")}</button></div>`) + `
+    <div class="nr-gcard">${tot.map(x => `<div class="nr-sumrow"><div><b>${DAYS[x.d.getDay()]}</b><span class="nr-muted"> ${MONTHS[x.d.getMonth()]} ${x.d.getDate()}</span><br><span class="nr-muted">${x.n} meal${x.n === 1 ? "" : "s"}</span></div>
+      <div class="nr-bar big"><i class="${goal && x.cal > goal ? "over" : ""}" style="width:${x.cal / max * 100}%"></i>${goal ? `<em style="left:${goal / max * 100}%"></em>` : ""}</div>
+      <div class="nr-sumcal">${x.est ? "~" : ""}${x.cal} cal</div></div>`).join("")}
+      <div class="nr-sumtotal"><span>Week total <b>${week} cal</b></span><span>Average on planned days <b>${withMeals ? Math.round(week / withMeals) : 0} cal</b></span><span>Daily max <b>${goal || "none"}</b></span></div>
+    </div>${tot.some(x => x.est) ? `<p class="nr-muted">~ means a meal on that day has estimated calories.</p>` : ""}`;
+}
+
+// ----- Recipe Ingredients -----
+function renderRecipe() {
+  if (!meal(ui.recipeId)) { const t = planned(new Date())[0]; ui.recipeId = t ? t.m.id : (S.meals[0] || {}).id; }
+  const m = meal(ui.recipeId);
+  $("nr-p-recipe-ingredients").innerHTML = head("fork", "Recipe Ingredients", "Prep list", "Pick a meal to see what goes in it. Tick things off as you prep.") + `
+    <select class="nr-input sq" id="nr-r-meal" style="max-width:520px">${S.meals.map(x => `<option value="${x.id}" ${m && x.id === m.id ? "selected" : ""}>${e(x.name)}</option>`).join("")}</select>
+    ${m ? `<div class="nr-gcard" style="margin-top:22px"><h3>${e(m.name)} <span class="nr-muted" style="font-size:1rem;font-weight:400">${calText(m)}</span></h3>
+      ${m.ing.length ? m.ing.map(i => `<div class="nr-gi"><div class="nr-gtop ${ui.prep.has(m.id + i.id) ? "checked" : ""}"><button class="nr-check ${ui.prep.has(m.id + i.id) ? "on" : ""}" data-act="prep" data-k="${m.id + i.id}" aria-label="Done">${ic("check")}</button><span class="nm">${e(ingText(i))}</span></div></div>`).join("") : `<p class="nr-muted">This meal has no ingredients yet.</p>`}
+      <div class="actions" style="justify-content:flex-start;margin-top:16px"><button class="nr-btn light sm" data-act="m-grocery" data-id="${m.id}">${ic("cart")}Add to Grocery</button><button class="nr-btn light sm" data-act="view-meal" data-id="${m.id}">Meal details</button><button class="nr-btn light sm" data-act="edit-meal" data-id="${m.id}">${ic("edit")}Edit ingredients</button></div></div>` : ""}`;
+}
+
+// ----- Categories -----
+function renderCats() {
+  $("nr-p-meal-categories").innerHTML = head("fork", "Category Manager", "Categories", "Rename a category by editing its name. Deleting one doesn’t delete any meals.") + `
+    <form class="nr-newcat" id="nr-c-form" style="max-width:520px"><input class="nr-input sq" id="nr-c-new" placeholder="New category, e.g. Pre-workout"><button class="nr-btn sm" type="submit">${ic("plus")}Add</button></form>
+    <div class="nr-gcard" style="margin-top:22px;max-width:760px">${S.cats.map((c, i) => `<div class="nr-catrow"><input class="nr-input sq" data-cat="${i}" value="${e(c)}" aria-label="Category name"><span class="nr-muted">${S.meals.filter(m => m.tags.includes(c)).length} meals</span>
+      <button class="nr-gx" data-act="cat-del" data-i="${i}" aria-label="Delete ${e(c)}">${ic("trash")}</button></div>`).join("")}</div>`;
+}
+
+// ----- Pantry -----
+function renderPantry() {
+  const list = [...S.pantry].sort((a, b) => a.name.localeCompare(b.name));
+  $("nr-p-pantry-inventory").innerHTML = head("cart", "Grocery Inventory", "Pantry Inventory", "Staples you already have at home. Matching grocery items are marked “In pantry” so you don’t buy them twice.") + `
+    <form class="nr-newcat" id="nr-pan-form" style="max-width:620px"><input class="nr-input sq" id="nr-pan-new" placeholder="Add staples, e.g. olive oil, rice, salt"><button class="nr-btn sm" type="submit">${ic("plus")}Add</button></form>
+    <div class="nr-gcard" style="margin-top:22px;max-width:760px">${list.length ? list.map(p => { const g = S.grocery.find(x => x.norm === p.norm && !x.purchased);
+      return `<div class="nr-catrow"><span class="nm" style="flex:1;font-size:1.15rem">${e(p.name)}</span>${g ? `<span class="nr-badge warn">On your grocery list</span>` : ""}<button class="nr-gx" data-act="pan-del" data-id="${p.id}" aria-label="Remove ${e(p.name)}">${ic("x")}</button></div>`; }).join("") : `<p class="nr-muted">Nothing here yet.</p>`}</div>`;
+}
+
+// ---------- Help Me Healthy ----------
+const SUGGEST = ["Create a meal called Chicken Rice Bowl. Ingredients are chicken, rice, broccoli and olive oil.", "Put the smoothie on Wednesday for breakfast.",
+  "Add these meals to my Meals: chicken tacos, turkey burger, shrimp pasta and strawberry smoothie.",
+  "Add everything I need for the meals I'm planning to my grocery list.", "Add Greek yogurt, strawberries, bananas and granola to my grocery list."];
 function renderChat() {
   const box = $("nr-chat");
   if (!S.chat.length) { box.innerHTML = `<div class="nr-try">Try one of these:</div>` + SUGGEST.map(t => `<button class="nr-sug" data-act="sug">${e(t)}</button>`).join(""); return; }
-  box.innerHTML = S.chat.map(m => `<div class="nr-msg ${m.role}">${e(m.text)}${m.acts && m.acts.length ? `<div class="acts">${m.acts.map(a => `<button data-act="chat-act" data-do="${e(a.do)}" data-arg="${e(a.arg || "")}">${e(a.label)}</button>`).join("")}</div>` : ""}</div>`).join("");
+  box.innerHTML = S.chat.map(m => `<div class="nr-msg ${m.role}">${e(m.text)}${m.acts && m.acts.length ? `<div class="acts">${m.acts.map(a => `<button data-act="chat-act" data-do="${e(a.do)}" data-arg="${e(a.arg || "")}">${e(a.label)}</button>`).join("")}</div>` : ""}</div>`).join("") +
+    `<button class="nr-link nr-muted" style="align-self:center;font-size:.9rem;margin-top:6px" data-act="chat-clear">Clear conversation</button>`;
   box.scrollTop = box.scrollHeight;
 }
 const say = (text, acts) => { S.chat.push({ role:"bot", text, acts }); S.chat = S.chat.slice(-60); save(); renderChat(); };
 function findMeal(phrase) {
-  const p = phrase.toLowerCase().replace(/\b(the|a|an|my|some)\b/g, " ").replace(/[^a-z0-9& ]/g, " ").trim(); if (!p) return null;
-  const words = p.split(/\s+/).filter(w => w.length > 2); let best = null, bs = 0;
+  const p = phrase.toLowerCase().replace(/\b(the|a|an|my|some|meal|recipe)\b/g, " ").replace(/[^a-z0-9& ]/g, " ").replace(/\s+/g, " ").trim(); if (!p) return null;
+  const ws = p.split(/\s+/).filter(w => w.length > 2); let best = null, bs = 0;
   for (const m of S.meals) {
     const n = m.name.toLowerCase(); let sc = n === p ? 100 : n.includes(p) ? 60 : 0;
-    sc += words.filter(w => n.includes(w.replace(/s$/, ""))).length * 10; if (words.length && words.every(w => n.includes(w.replace(/s$/, "")))) sc += 25;
+    sc += ws.filter(w => n.includes(singular(w))).length * 10; if (ws.length && ws.every(w => n.includes(singular(w)))) sc += 25;
+    sc -= n.split(/\s+/).length * 0.5;                                          // prefer the simpler name on ties
     if (sc > bs) { bs = sc; best = m; }
   }
   return bs >= 20 ? best : null;
 }
+const DAYW = "today|tomorrow|sunday|monday|tuesday|wednesday|thursday|friday|saturday";
 function dateFromWord(w) {
-  w = w.toLowerCase(); const t = new Date(); t.setHours(0, 0, 0, 0);
+  w = String(w || "").toLowerCase(); const t = today0();
   if (w === "today") return t; if (w === "tomorrow") return addD(t, 1);
   const i = DAYS.findIndex(d => d.toLowerCase() === w); if (i < 0) return null;
   return addD(t, (i - t.getDay() + 7) % 7);
 }
-function suggest(slot, moodText, n, excludeIds = [], cap = 0) {
+const typeWord = l => { const m = l.match(/\b(breakfast|lunch|dinner|snack|smoothie)\b/); return m ? cap(m[1]) : null; };
+function suggest(slot, moodText, n, excludeIds = [], calCap = 0) {
   const mood = moodText && moodText.trim() ? parseMood(moodText) : null, tag = SLOT_TAGS[slot];
   const out = [];
   for (const m of S.meals) {
     if (!m.tags.includes(tag) || m.tags.includes("Hydration") || excludeIds.includes(m.id)) continue;
-    const c = { name:m.name, ing:m.ing.map(i => i.name.toLowerCase()), time:m.time || 15, cal:m.cal, pro:m.pro, cost:3 };
+    const c = { name:m.name, ing:m.ing.map(i => i.name.toLowerCase()), time:m.time || 15, cal:+m.cal || 0, pro:+m.pro || 0, cost:3 };
     let s = Math.random() * 6;
     if (mood) { const ms = moodScore(c, mood); if (!ms) continue; s += ms.score; }
-    if (cap) s -= Math.max(0, m.cal - cap) * 0.5;
+    if (calCap) s -= Math.max(0, c.cal - calCap) * 0.5;
     out.push({ m, s });
   }
   return out.sort((a, b) => b.s - a.s).slice(0, n).map(x => x.m);
@@ -1933,75 +2287,136 @@ function autoplan(text) {
   const mins = { Breakfast:150, Lunch:200, Dinner:250, Snack:70 };
   let filled = 0; const used = {};
   for (let i = 0; i < 7; i++) {
-    const d = addD(new Date(new Date().setHours(0, 0, 0, 0)), i); if (planned(d).length) continue;
-    let budget = dayCap; const today = [];                      // never the same meal twice in one day
+    const d = addD(today0(), i); if (planned(d).length) continue;
+    let budget = dayCap; const todayIds = [];
     SLOTS_N.forEach((slot, si) => {
       const later = SLOTS_N.slice(si + 1).reduce((a, s) => a + mins[s], 0), room = budget - later;
-      const skip = [...Object.keys(used).filter(k => used[k] >= 2), ...today];
-      const pool = suggest(slot, text, 8, skip, 0).filter(m => m.cal <= room);
-      const pick = pool[0] || suggest(slot, "", 30, today).sort((a, b) => a.cal - b.cal)[0];
-      if (pick) { addToPlan(pick.id, d, slot); today.push(pick.id); used[pick.id] = (used[pick.id] || 0) + 1; budget -= pick.cal; }
+      const skip = [...Object.keys(used).filter(k => used[k] >= 2), ...todayIds];
+      const pool = suggest(slot, text, 8, skip, 0).filter(m => (+m.cal || 0) <= room);
+      const pick = pool[0] || suggest(slot, "", 30, todayIds).sort((a, b) => a.cal - b.cal)[0];
+      if (pick) { addToPlan(pick.id, d, slot); todayIds.push(pick.id); used[pick.id] = (used[pick.id] || 0) + 1; budget -= +pick.cal || 0; }
     });
     filled++;
   }
   return { filled, dayCap };
 }
-function parseIngredients(str) { return str.replace(/\.$/, "").split(/,|\band\b/i).map(x => x.trim().replace(/^(some|a|an)\s+/i, "")).filter(Boolean); }
+const splitList = str => str.replace(/\.$/, "").split(/,|;|\band\b|\n/i).map(x => x.trim().replace(/^(some|a|an|the)\s+/i, "")).filter(Boolean);
+const titleCase = s => s.replace(/\b\w/g, c => c.toUpperCase());
+function guessTags(name, ing) {
+  const tags = []; for (const [re, tg] of [[/breakfast|oat|egg|toast|pancake|waffle/i, "Breakfast"], [/lunch|sandwich|wrap|salad|burger/i, "Lunch"], [/dinner|bowl|stir|pasta|curry|chicken|steak|salmon|taco|shrimp/i, "Dinner"], [/smoothie|shake/i, "Smoothies"], [/snack/i, "Snacks"]]) if (re.test(name) && !tags.includes(tg)) tags.push(tg);
+  const pro = ing.reduce((a, i) => a + proOf(i.name), 0); if (pro >= 25) tags.push("High Protein");
+  return tags;
+}
+function createMeal(name, ingStrs, calGiven) {
+  const ing = ingStrs.map(parseIng), est = estimateCal(ing), nm = titleCase(name.trim());
+  const m = { id:uid(), name:nm, tags:guessTags(nm, ing), ing, desc:"", photo:null, time:15,
+    cal:calGiven != null ? calGiven : (est > 0 ? est : null), calEst:calGiven == null && est > 0, pro:ing.reduce((a, i) => a + proOf(i.name), 0) };
+  S.meals.unshift(m); return m;
+}
+function findPlanned(m, fromWord) {
+  const keys = Object.keys(S.plan).filter(k => S.plan[k].some(p => p.mealId === m.id)).sort();
+  if (fromWord) { const d = dateFromWord(fromWord), k = d && iso(d); const back = d && iso(addD(d, -7)); for (const kk of [k, back]) if (kk && keys.includes(kk)) return { k:kk, p:S.plan[kk].find(p => p.mealId === m.id) }; }
+  const up = keys.filter(k => parseISO(k) >= today0()); const k = up[0] || keys[keys.length - 1];
+  return k ? { k, p:S.plan[k].find(p => p.mealId === m.id) } : null;
+}
 function handle(text) {
-  const t = text.trim(), l = t.toLowerCase(); let m;
-  // create a meal
-  if ((m = t.match(/(?:create|make|add|save|new)\s+(?:a\s+|an\s+)?(?:new\s+)?meal\s+(?:called|named)\s+["“]?(.+?)["”]?\s+(?:with|using|from)\s+(.+?)\.?$/i))) {
-    const name = m[1].replace(/\b\w/g, c => c.toUpperCase()), ing = parseIngredients(m[2]).map(n => ({ name:n.toLowerCase(), qty:(ING[n.toLowerCase()] || [""])[0] }));
-    const tags = []; for (const [re, tg] of [[/breakfast|oat|egg|toast/i, "Breakfast"], [/lunch|sandwich|wrap|salad/i, "Lunch"], [/dinner|bowl|stir|pasta|curry|chicken|steak|salmon/i, "Dinner"], [/smoothie|shake/i, "Smoothies"], [/snack/i, "Snacks"]]) if (re.test(name) && !tags.includes(tg)) tags.push(tg);
-    const pro = ing.reduce((a, i) => a + proOf(i.name), 0), cal = ing.reduce((a, i) => a + kcalOf(i.name), 0);
-    if (pro >= 30) tags.push("30g Protein"); else if (pro >= 15) tags.push("15g protein"); if (pro >= 25) tags.push("High Protein");
-    if (!tags.length) tags.push("Lunch");
-    const nm = { id:uid(), name, tags, cal, pro, time:20, ing, desc:ing.map(i => `* ${i.qty ? i.qty + " " : ""}${i.name}${kcalOf(i.name) ? " → ~" + kcalOf(i.name) + " cal" : ""}`).join(" "), photo:null };
-    S.meals.unshift(nm); save();
-    return say(`Added “${name}” to your Meals with ${ing.map(i => i.name).join(", ")}.\n~${cal} cal · ~${pro} g protein (estimated from the ingredients).`, [{ label:"Add to today", do:"add-today", arg:nm.id }, { label:"Open Meals", do:"go", arg:"meals" }]);
+  const t = text.trim().replace(/\s+/g, " "), l = t.toLowerCase(); let m;
+  // several meals at once
+  if ((m = t.match(/^(?:please\s+)?(?:add|create|make|save)\s+(?:these|the following|some|new)?\s*meals?\s*(?:to|in|into)?\s*(?:my\s+)?(?:meals|meal book|library)?\s*:\s*(.+)$/i))) {
+    const made = [], skipped = [];
+    for (const n of splitList(m[1])) { if (S.meals.some(x => x.name.toLowerCase() === n.toLowerCase())) skipped.push(n); else made.push(createMeal(n, []).name); }
+    save(); return say(`${made.length ? `Added ${made.length} meal${made.length > 1 ? "s" : ""} to your Meals: ${made.join(", ")}.` : ""}${skipped.length ? ` Already had: ${skipped.join(", ")}.` : ""}${made.length ? "\nThey have no ingredients or calories yet. Tell me the ingredients, like “Add chicken, tortillas and salsa to chicken tacos”." : ""}`, [{ label:"Open Meals", do:"go", arg:"meals" }]);
   }
-  // add to grocery list
-  if ((m = t.match(/^(?:please\s+)?(?:add|put)\s+(.+?)\s+(?:to|on)\s+(?:my\s+)?(?:grocery|shopping)(?:\s+list)?\.?$/i)) && !/everything|planned|all (?:the )?(?:ingredients|meals)/i.test(m[1])) {
-    const names = parseIngredients(m[1]); for (const n of names) { const ex = S.manual.find(x => same(x.name, n)); if (ex) ex.qty = (ex.qty || 1) + 1; else S.manual.push({ id:uid(), name:n.toLowerCase(), qty:1 }); }
-    save(); return say(`Added ${names.join(", ")} to your grocery list.`, [{ label:"Open Grocery", do:"go", arg:"grocery" }]);
+  // one meal, optionally with ingredients and calories
+  if ((m = t.match(/(?:create|make|add|save|new)\s+(?:a\s+|an\s+)?(?:new\s+)?meal\s+(?:called|named)\s+["“]?(.+?)["”]?(?:\s*[.,;:]?\s*(?:with|using|from|containing|it has|it's made with|ingredients\s*(?:are|:|include))\s*:?\s*(.+?))?\.?$/i))) {
+    if (S.meals.some(x => x.name.toLowerCase() === m[1].trim().toLowerCase())) return say(`You already have a meal called “${m[1].trim()}”.`, [{ label:"Open it", do:"view", arg:S.meals.find(x => x.name.toLowerCase() === m[1].trim().toLowerCase()).id }]);
+    const calM = (m[2] || "").match(/(\d{2,4})\s*(?:cal|kcal|calories)/i);
+    const ingStr = (m[2] || "").replace(/,?\s*(?:and\s+)?(?:it's\s+|it is\s+)?\d{2,4}\s*(?:cal|kcal|calories)/i, "");
+    const nm = createMeal(m[1], ingStr ? splitList(ingStr) : [], calM ? +calM[1] : null); save();
+    return say(`Added “${nm.name}” to your Meals${nm.ing.length ? ` with ${nm.ing.map(i => i.name).join(", ")}` : ""}.\n${nm.cal != null ? `${nm.calEst ? "~" : ""}${nm.cal} cal${nm.calEst ? " (estimated from the ingredients)" : ""}.` : "No calories yet."}`, [{ label:"Add to today", do:"add-today", arg:nm.id }, { label:"Open meal", do:"view", arg:nm.id }]);
   }
-  if (/(grocery|shopping)/.test(l) && /(everything|planned|all|what i need|plan)/.test(l) && /(add|build|make|update|sync|put)/.test(l)) {
-    const items = groceryItems().filter(i => i.meals.length);
-    return say(items.length ? `Your grocery list is built from your plan: ${items.length} ingredients from ${new Set(items.flatMap(i => i.meals)).size} planned meals. It updates itself whenever you change your plan.` : "You don't have any upcoming planned meals yet, so there's nothing to add. Plan a few meals first, or ask me to plan your week.",
-      [{ label:"Open Grocery", do:"go", arg:"grocery" }, ...(items.length ? [] : [{ label:"Plan my week", do:"autoplan", arg:"" }])]);
-  }
-  // remove from grocery
-  if ((m = t.match(/(?:remove|delete|take off|clear)\s+(.+?)\s+from\s+(?:my\s+)?(?:grocery|shopping)/i))) {
-    const names = parseIngredients(m[1]); let n = 0; for (const nm of names) { const b = S.manual.length; S.manual = S.manual.filter(x => !same(x.name, nm)); n += b - S.manual.length; }
-    save(); return say(n ? `Removed ${names.join(", ")} from your list. (Items that come from planned meals stay until you change the plan.)` : "I couldn't find that among the items you added yourself. Items from planned meals go away when you remove the meal from your plan.");
+  // groceries
+  if (/(grocery|groceries|shopping)/.test(l)) {
+    if (/(combine|merge|dedupe|duplicate)/.test(l)) { const n = combineDuplicates(); save(); return say(n ? `Combined ${n} duplicate item${n > 1 ? "s" : ""}.` : "No duplicates. Each ingredient is already on your list once.", [{ label:"Open Grocery", do:"go", arg:"grocery" }]); }
+    if ((m = t.match(/(?:add|put)\s+(?:all\s+)?(?:the\s+)?ingredients\s+(?:for|from|of|in)\s+(?:the\s+|my\s+)?(.+?)\s+(?:to|on|in|into)\s+(?:my\s+|the\s+)?(?:grocery|groceries|shopping)/i))) {
+      const names = [m[1], ...splitList(m[1])], done = [], missing = [];
+      const ms = []; const whole = findMeal(m[1]); if (whole && splitList(m[1]).length === 1) ms.push(whole); else for (const n of splitList(m[1])) { const f = findMeal(n); if (f) ms.push(f); else missing.push(n); }
+      let add = 0, mer = 0; for (const x of ms) { const r = addMealToGrocery(x); add += r.added; mer += r.merged; done.push(x.name); } save();
+      return say(ms.length ? `Added the ingredients for ${done.join(", ")}: ${add} new item${add === 1 ? "" : "s"}${mer ? `, ${mer} combined with items already on the list` : ""}.${missing.length ? ` I couldn't find: ${missing.join(", ")}.` : ""}` : `I couldn't find “${m[1]}” in your Meals.`, [{ label:"Open Grocery", do:"go", arg:"grocery" }]);
+    }
+    if (/(everything|all|what i need|planned|planning|my plan|this week)/.test(l) && /(add|build|make|update|put|get)/.test(l) && !/^(?:please\s+)?(?:add|put)\s+(?!everything|all|what)(.+?)\s+to\s+my/.test(l)) {
+      const r = addPlanToGrocery(weekStartOf(new Date()));
+      return say(r.meals ? `Read your plan for this week (${r.meals} meal${r.meals > 1 ? "s" : ""}). Added ${r.added} new item${r.added === 1 ? "" : "s"}${r.merged ? ` and combined ${r.merged} with items already on your list` : ""}. Shared ingredients appear once, with the meals that need them.` : "There are no meals on this week’s plan yet, so there’s nothing to add.", [{ label:"Open Grocery", do:"go", arg:"grocery" }]);
+    }
+    if ((m = t.match(/(?:remove|delete|take off|take)\s+(.+?)\s+(?:from|off)\s+(?:my\s+|the\s+)?(?:grocery|groceries|shopping)/i))) {
+      const names = splitList(m[1]); let n = 0; for (const nm of names) { const k = normName(nm), b = S.grocery.length; S.grocery = S.grocery.filter(g => g.norm !== k); n += b - S.grocery.length; }
+      save(); return say(n ? `Removed ${names.join(", ")} from your grocery list.` : `${names.join(", ")} wasn't on your grocery list.`);
+    }
+    if ((m = t.match(/(?:add|put|get)\s+(.+?)\s+(?:to|on|in|into)\s+(?:my\s+|the\s+)?(?:grocery|groceries|shopping)/i))) {
+      const names = splitList(m[1]); let nw = 0; for (const n of names) { const p = parseIng(n), r = addGrocery(p.name, { qty:p.qty, unit:p.unit }); if (r && r.isNew) nw++; }
+      save(); return say(`Added ${names.join(", ")} to your grocery list${nw < names.length ? ` (${names.length - nw} ${names.length - nw > 1 ? "were" : "was"} already on it, so I didn't duplicate ${names.length - nw > 1 ? "them" : "it"})` : ""}.`, [{ label:"Open Grocery", do:"go", arg:"grocery" }]);
+    }
   }
   // plan my week
   if (/plan (my|the|this|next)? ?(week|days)|fill (in )?my (week|plan)|plan .*meals for (the )?week/.test(l)) {
     const r = autoplan(t);
-    return say(r.filled ? `Done. I filled ${r.filled} empty day${r.filled > 1 ? "s" : ""} with breakfast, lunch, dinner and a snack, keeping each day under ${r.dayCap} cal${parseMood(t).chips.length ? ` and leaning ${parseMood(t).chips.slice(0, 4).join(", ")}` : ""}.` : "Your next 7 days already have meals, so I left them alone. Clear a day first if you want me to redo it.", [{ label:"Open Plan", do:"go", arg:"plan" }, { label:"Open Grocery", do:"go", arg:"grocery" }]);
+    return say(r.filled ? `Done. I filled ${r.filled} empty day${r.filled > 1 ? "s" : ""} with breakfast, lunch, dinner and a snack, keeping each day under ${r.dayCap} cal${parseMood(t).chips.length ? ` and leaning ${parseMood(t).chips.slice(0, 4).join(", ")}` : ""}.` : "Your next 7 days already have meals, so I left them alone. Clear a day first if you want me to redo it.", [{ label:"Open Plan", do:"go", arg:"plan" }]);
   }
-  // put a meal on a day
-  const dayW = (l.match(/\b(today|tomorrow|sunday|monday|tuesday|wednesday|thursday|friday|saturday)\b/) || [])[1], slotW = (l.match(/\b(breakfast|lunch|dinner|snack)\b/) || [])[1];
-  if (/^(put|add|schedule|plan|move|set|have)\b/.test(l) && (dayW || slotW) && !/grocery|shopping/.test(l)) {
-    const phrase = t.replace(/^(put|add|schedule|plan|move|set|have)\s+/i, "").replace(/\s+(on|for|to|at|as|in)\s+(today|tomorrow|sunday|monday|tuesday|wednesday|thursday|friday|saturday|breakfast|lunch|dinner|snack|my plan).*$/i, "");
-    const found = findMeal(phrase);
-    if (!found) return say(`I couldn't find a meal like “${phrase}” in your Meals. Try the exact name, or ask me to create it first.`);
-    const date = dayW ? dateFromWord(dayW) : new Date(new Date().setHours(0, 0, 0, 0)), slot = slotW ? cap(slotW) : slotOf(found);
-    addToPlan(found.id, date, slot);
-    return say(`Put “${found.name}” on ${dayLabel(date)} for ${slot.toLowerCase()}.`, [{ label:"Open Plan", do:"go", arg:"plan" }]);
+  // move a planned meal
+  if ((m = t.match(new RegExp(`^(?:please\\s+)?move\\s+(?:the\\s+|my\\s+)?(.+?)\\s+(?:from\\s+(${DAYW})\\s+)?(?:to|over to)\\s+(${DAYW})(?:\\s+(?:for|as)\\s+(breakfast|lunch|dinner|snack|smoothie))?\\.?$`, "i")))) {
+    const f = findMeal(m[1]); if (!f) return say(`I couldn't find “${m[1]}” in your Meals.`);
+    const at = findPlanned(f, m[2]), to = dateFromWord(m[3]), slot = m[4] ? cap(m[4].toLowerCase()) : null;
+    if (!at) { addToPlan(f.id, to, slot); return say(`“${f.name}” wasn't on your plan, so I added it to ${dayLabel(to)}.`, [{ label:"Open Plan", do:"go", arg:"plan" }]); }
+    S.plan[at.k] = S.plan[at.k].filter(p => p !== at.p); if (slot) at.p.slot = slot; dayPlan(to).push(at.p); save();
+    return say(`Moved “${f.name}” from ${dayLabel(parseISO(at.k))} to ${dayLabel(to)}${slot ? ` for ${slot.toLowerCase()}` : ""}.`, [{ label:"Open Plan", do:"go", arg:"plan" }]);
   }
-  // remove a meal from the plan
-  if ((m = t.match(/(?:remove|delete|take off|clear)\s+(?:the\s+)?(.+?)\s+from\s+(?:my\s+)?(plan|today|tomorrow|sunday|monday|tuesday|wednesday|thursday|friday|saturday)/i))) {
-    const found = findMeal(m[1]); if (!found) return say(`I couldn't find “${m[1]}” in your Meals.`);
-    let n = 0; for (const k of Object.keys(S.plan)) { const b = S.plan[k].length; if (/^plan$/i.test(m[2]) || iso(dateFromWord(m[2]) || new Date(0)) === k) S.plan[k] = S.plan[k].filter(p => p.mealId !== found.id); n += b - S.plan[k].length; }
-    save(); return say(n ? `Removed “${found.name}” from your plan (${n}×).` : `“${found.name}” wasn't on your plan there.`);
+  // rename / calories / category
+  if ((m = t.match(/^(?:please\s+)?rename\s+(?:the\s+|my\s+)?(.+?)\s+(?:to|as)\s+["“]?(.+?)["”]?\.?$/i))) {
+    const f = findMeal(m[1]); if (!f) return say(`I couldn't find “${m[1]}”.`); const old = f.name; f.name = titleCase(m[2]); save(); return say(`Renamed “${old}” to “${f.name}”.`);
   }
-  if (/(clear|reset|empty) (my )?(plan|week)/.test(l)) { S.plan = {}; save(); return say("Cleared your plan."); }
+  if ((m = t.match(/(?:change|set|update|make)\s+(?:the\s+)?(?:calories|cals?)\s+(?:for|of|on|in)\s+(?:the\s+|my\s+)?(.+?)\s+to\s+(\d+)/i)) || (m = t.match(/(?:change|set|update|make)\s+(?:the\s+|my\s+)?(.+?)\s+(?:calories\s+)?to\s+(\d+)\s*(?:cal|kcal|calories)/i)) || (m = t.match(/^(?:the\s+|my\s+)?(.+?)\s+(?:is|has)\s+(\d+)\s*(?:cal|kcal|calories)\.?$/i))) {
+    const f = findMeal(m[1]); if (!f) return say(`I couldn't find “${m[1]}”.`); f.cal = +m[2]; f.calEst = false; save(); return say(`“${f.name}” is now ${f.cal} cal.`, [{ label:"Open meal", do:"view", arg:f.id }]);
+  }
+  if ((m = t.match(/(?:add|put|move)\s+(?:the\s+|my\s+)?(.+?)\s+(?:to|in|into|under)\s+(?:the\s+|my\s+)?(.+?)\s+category\.?$/i))) {
+    const f = findMeal(m[1]); if (!f) return say(`I couldn't find “${m[1]}”.`);
+    const c = S.cats.find(x => x.toLowerCase() === m[2].toLowerCase()) || titleCase(m[2]); if (!S.cats.includes(c)) S.cats.push(c); if (!f.tags.includes(c)) f.tags.push(c); save();
+    return say(`Added “${f.name}” to ${c}.`);
+  }
   // delete a meal
   if ((m = t.match(/(?:delete|remove)\s+(?:the\s+)?meal\s+(?:called\s+)?["“]?(.+?)["”]?\.?$/i))) {
-    const found = findMeal(m[1]); if (!found) return say(`I couldn't find “${m[1]}”.`);
-    S.meals = S.meals.filter(x => x.id !== found.id); for (const k of Object.keys(S.plan)) S.plan[k] = S.plan[k].filter(p => p.mealId !== found.id); save();
-    return say(`Deleted “${found.name}” and took it off your plan.`);
+    const f = findMeal(m[1]); if (!f) return say(`I couldn't find “${m[1]}”.`);
+    S.meals = S.meals.filter(x => x.id !== f.id); for (const k of Object.keys(S.plan)) S.plan[k] = S.plan[k].filter(p => p.mealId !== f.id); save();
+    return say(`Deleted “${f.name}” and took it off your plan.`);
+  }
+  // remove from plan
+  if ((m = t.match(new RegExp(`(?:remove|delete|take off|take|clear)\\s+(?:the\\s+|my\\s+)?(.+?)\\s+(?:from|off)\\s+(?:my\\s+|the\\s+)?(plan|week|${DAYW})`, "i")))) {
+    const f = findMeal(m[1]); if (!f) return say(`I couldn't find “${m[1]}” in your Meals.`);
+    const day = /^(plan|week)$/i.test(m[2]) ? null : iso(dateFromWord(m[2])); let n = 0;
+    for (const k of Object.keys(S.plan)) { if (day && k !== day) continue; const b = S.plan[k].length; S.plan[k] = S.plan[k].filter(p => p.mealId !== f.id); n += b - S.plan[k].length; }
+    save(); return say(n ? `Removed “${f.name}” from your plan${day ? ` on ${dayLabel(parseISO(day))}` : ""}${n > 1 ? ` (${n}×)` : ""}.` : `“${f.name}” wasn't on your plan${day ? " that day" : ""}.`, [{ label:"Open Plan", do:"go", arg:"plan" }]);
+  }
+  if (/(clear|reset|empty) (my |the )?(plan|week)/.test(l)) { S.plan = {}; save(); return say("Cleared your plan."); }
+  // remove an ingredient from a meal
+  if ((m = t.match(/(?:remove|take)\s+(?:the\s+)?(.+?)\s+(?:from|out of)\s+(?:the\s+|my\s+)?(.+?)\.?$/i))) {
+    const f = findMeal(m[2]);
+    if (f) { const ks = splitList(m[1]).map(normName), b = f.ing.length; f.ing = f.ing.filter(i => !ks.includes(i.norm)); if (f.calEst) { const est = estimateCal(f.ing); f.cal = est || null; } save();
+      return say(b > f.ing.length ? `Removed ${splitList(m[1]).join(", ")} from “${f.name}”.` : `“${f.name}” doesn't have ${m[1]}.`, [{ label:"Open meal", do:"view", arg:f.id }]); }
+  }
+  // put a meal on a day
+  const dayW = (l.match(new RegExp(`\\b(${DAYW})\\b`)) || [])[1], slotW = typeWord(l.replace(/^.*?\b(on|for|to|at|as)\b/, " "));
+  if (/^(please\s+)?(put|add|schedule|plan|set|have)\b/.test(l) && dayW) {
+    const phrase = t.replace(/^(please\s+)?(put|add|schedule|plan|set|have)\s+/i, "").replace(new RegExp(`\\s+(on|for|to|at|as|in)\\s+(${DAYW}|breakfast|lunch|dinner|snack|my plan).*$`, "i"), "");
+    const found = findMeal(phrase);
+    if (!found) return say(`I couldn't find a meal like “${phrase}” in your Meals. Try the exact name, or ask me to create it first.`);
+    const date = dateFromWord(dayW), slot = typeWord(l.slice(l.indexOf(phrase.toLowerCase()) + phrase.length)) || slotOf(found);
+    addToPlan(found.id, date, slot);
+    return say(`Put “${found.name}” on ${dayLabel(date)}${date && iso(date) === iso(new Date()) ? ` (${DAYS[date.getDay()]})` : ""}${slot ? ` for ${slot.toLowerCase()}` : ""}.`, [{ label:"Open Plan", do:"go", arg:"plan" }]);
+  }
+  // add ingredients to a meal
+  if ((m = t.match(/^(?:please\s+)?add\s+(?:the\s+)?(?:ingredients?\s+)?(.+?)\s+(?:to|into|in)\s+(?:the\s+|my\s+)?(.+?)(?:\s+(?:meal|recipe|ingredients))?\.?$/i))) {
+    const f = findMeal(m[2]);
+    if (f) { const add = splitList(m[1]).map(parseIng).filter(i => !f.ing.some(x => x.norm === i.norm)); f.ing.push(...add); if (f.calEst || f.cal == null) { const est = estimateCal(f.ing); if (est) { f.cal = est; f.calEst = true; } } save();
+      return say(add.length ? `Added ${add.map(i => i.name).join(", ")} to “${f.name}”.${f.calEst ? ` Estimated calories are now ~${f.cal}.` : ""}` : `“${f.name}” already has those.`, [{ label:"Open meal", do:"view", arg:f.id }]); }
   }
   // numbers for today
   if (/(calorie|protein|macros)/.test(l) && /(today|left|so far|how many|how much)/.test(l)) {
@@ -2010,13 +2425,13 @@ function handle(text) {
   }
   // ideas
   if (/(what should i eat|suggest|recommend|ideas?|i want|i['’]?m in the mood|im in the mood|craving|something|hungry|feel like|feeling like)/.test(l)) {
-    const slot = slotW ? cap(slotW) : null, slots = slot ? [slot] : ["Breakfast", "Lunch", "Dinner"];
+    const slot = typeWord(l), slots = slot && SLOT_TAGS[slot] ? [slot] : ["Breakfast", "Lunch", "Dinner"];
     const lines = [], acts = [];
-    for (const s of slots) { const picks = suggest(s, t, slot ? 4 : 2, [], S.settings.cal / 3); picks.forEach(p => { lines.push(`${s}: ${p.name} (${p.cal} cal, ${p.pro} g protein)`); acts.push({ label:`+ ${p.name}`, do:"add-today", arg:p.id }); }); }
+    for (const s of slots) { const picks = suggest(s, t, slot ? 4 : 2, [], S.settings.cal / 3); picks.forEach(p => { lines.push(`${s}: ${p.name} (${calText(p)}, ${+p.pro || 0} g protein)`); acts.push({ label:`+ ${p.name}`, do:"add-today", arg:p.id }); }); }
     const chips = parseMood(t).chips;
-    return say(`${chips.length ? `Going for ${chips.slice(0, 5).join(", ")}. ` : ""}Here's what fits from your Meals:\n${lines.join("\n")}`, acts.slice(0, 6));
+    return say(`${chips.length ? `Going for ${chips.slice(0, 5).join(", ")}. ` : ""}Here's what fits from your Meals:\n${lines.join("\n") || "Nothing matched. Try different words."}`, acts.slice(0, 6));
   }
-  return say("I can do things like:\n• Create a meal called … with …\n• Put the … on Wednesday for breakfast\n• Plan my week with cheesy, quick, healthy meals under 900 calories\n• Add … to my grocery list\n• Add everything I need for my planned meals\n• Remove … from my plan\n• How many calories do I have left today?\n• I want something cheesy and quick");
+  return say("I didn't catch that. I can:\n• Create a meal called … Ingredients are …\n• Add these meals to my Meals: …, …\n• Add spinach to the omelette / Remove onion from the omelette\n• Set the calories for … to 400 / Rename … to …\n• Put the … on Wednesday for breakfast\n• Move the … from Wednesday to Friday\n• Remove the … from my plan\n• Add everything I need for the meals I'm planning to my grocery list\n• Add the ingredients for … to my grocery list\n• Add … to my grocery list / Remove … from my grocery list\n• Combine duplicate groceries\n• Plan my week with cheesy, quick meals under 900 calories\n• How many calories do I have left today?");
 }
 
 // ---------- modals + menus ----------
@@ -2030,82 +2445,80 @@ function showPop(anchor, html) {
   pop.style.left = Math.max(8, Math.min(innerWidth - w - 8, r.right - w)) + "px";
   pop.style.top = Math.max(8, Math.min(innerHeight - h - 8, r.bottom + 6)) + "px";
 }
-function weekDays(n = 8) { return Array.from({ length:n }, (_, i) => addD(new Date(new Date().setHours(0, 0, 0, 0)), i)); }
+// days you can add to: the current planning week plus the next one, starting today
+const pickDays = () => { const s = weekStartOf(new Date()); return Array.from({ length:14 }, (_, i) => addD(s, i)).filter(d => d >= today0()); };
+const typeOptions = sel => `<option value="" ${!sel ? "selected" : ""}>No type</option>` + TYPES.map(t => `<option ${t === sel ? "selected" : ""}>${t}</option>`).join("");
 
 function pickMeal(dateISO) {
   const d = parseISO(dateISO);
-  openModal(`<h2>Add a meal</h2><p class="s">To ${e(dayLabel(d))}. Pick one from your Meal Book.</p>
-    <div class="row2"><div><label>Meal type</label><select class="nr-input" id="nr-pick-slot" style="border-radius:16px"><option value="">Auto</option>${SLOTS_N.map(s => `<option>${s}</option>`).join("")}</select></div>
-    <div><label>Search</label><input class="nr-input" id="nr-pick-q" placeholder="Search meals..." autocomplete="off" style="border-radius:16px"></div></div>
+  openModal(`<h2>Add a meal</h2><p class="s">To ${e(dayLabel(d))}. Pick one from your Meals.</p>
+    <div class="row2"><div><label>Meal type</label><select class="nr-input sq" id="nr-pick-slot"><option value="auto">Auto</option>${typeOptions("auto")}</select></div>
+    <div><label>Search</label><input class="nr-input sq" id="nr-pick-q" placeholder="Search meals..." autocomplete="off"></div></div>
     <div class="nr-plist" id="nr-pick-list"></div><div class="actions"><button class="nr-btn light" data-act="close-modal">Cancel</button></div>`);
   modal.dataset.date = dateISO; fillPick();
 }
 function fillPick() {
-  const q = ($("nr-pick-q") || {}).value || "", ql = q.trim().toLowerCase();
-  $("nr-pick-list").innerHTML = S.meals.filter(m => !ql || m.name.toLowerCase().includes(ql) || m.tags.some(t => t.toLowerCase().includes(ql))).slice(0, 60).map(m =>
-    `<button data-act="pick-do" data-id="${m.id}"><span class="nr-thumb" style="width:50px;height:50px;border-radius:14px;overflow:hidden;position:relative;display:flex;align-items:center;justify-content:center;font-size:1.6rem;flex:0 0 auto">${photoHTML(m, false)}</span>
-    <span style="flex:1"><b style="font-weight:600">${e(m.name)}</b><br><span style="color:var(--n-mute);font-size:.9rem">${m.cal} cal · ${e(m.tags.slice(0, 2).join(", "))}</span></span></button>`).join("") || `<div class="nr-none">No meals match.</div>`;
+  const ql = (($("nr-pick-q") || {}).value || "").trim().toLowerCase();
+  $("nr-pick-list").innerHTML = S.meals.filter(m => !ql || m.name.toLowerCase().includes(ql) || m.tags.some(t => t.toLowerCase().includes(ql))).slice(0, 80).map(m =>
+    `<button data-act="pick-do" data-id="${m.id}"><span class="nr-thumb sm">${photoHTML(m, false)}</span>
+    <span style="flex:1"><b style="font-weight:600">${e(m.name)}</b><br><span class="nr-muted">${calText(m)}${m.tags.length ? " · " + e(m.tags.slice(0, 2).join(", ")) : ""}</span></span></button>`).join("") || `<div class="nr-none">No meals match.</div>`;
 }
 function addToPlanModal(id) {
   const m = meal(id); if (!m) return;
-  openModal(`<h2>Add to plan</h2><p class="s">${e(m.name)} · ${m.cal} cal</p>
-    <label>Day</label><select class="nr-input" id="nr-ap-day" style="border-radius:16px">${weekDays().map(d => `<option value="${iso(d)}">${e(dayLabel(d))}</option>`).join("")}</select>
-    <label>Meal type</label><select class="nr-input" id="nr-ap-slot" style="border-radius:16px">${SLOTS_N.map(s => `<option ${s === slotOf(m) ? "selected" : ""}>${s}</option>`).join("")}</select>
+  openModal(`<h2>Add to plan</h2><p class="s">${e(m.name)} · ${calText(m)}</p>
+    <label>Day</label><select class="nr-input sq" id="nr-ap-day">${pickDays().map(d => `<option value="${iso(d)}">${e(dayLabel(d))}</option>`).join("")}</select>
+    <label>Meal type <small>optional</small></label><select class="nr-input sq" id="nr-ap-slot">${typeOptions(slotOf(m))}</select>
     <div class="actions"><button class="nr-btn light" data-act="close-modal">Cancel</button><button class="nr-btn" data-act="ap-do" data-id="${id}">Add to plan</button></div>`);
-}
-let editing = null, editTags = [], editPhoto = null;
-function mealForm(m) {
-  editing = m ? m.id : null; editTags = m ? [...m.tags] : []; editPhoto = m ? m.photo : null;
-  openModal(`<h2>${m ? "Edit meal" : "New meal"}</h2><p class="s">Ingredients go on your grocery list when you plan this meal.</p>
-    <label>Name</label><input class="nr-input" id="nr-m-name" value="${e(m ? m.name : "")}" placeholder="e.g. Chicken Rice Bowl" style="border-radius:16px">
-    <label>Categories</label><div class="nr-tagpick" id="nr-m-tags">${TAGS.map(t => `<button type="button" data-act="m-tag" data-tag="${e(t)}" class="${editTags.includes(t) ? "on" : ""}">${e(t)}</button>`).join("")}</div>
-    <div class="row2"><div><label>Calories</label><input class="nr-input" id="nr-m-cal" type="number" min="0" value="${m ? m.cal : ""}" style="border-radius:16px"></div><div><label>Protein (g)</label><input class="nr-input" id="nr-m-pro" type="number" min="0" value="${m ? m.pro : ""}" style="border-radius:16px"></div></div>
-    <label>Ingredients <small style="font-weight:400;color:var(--n-mute)">(one per line, or comma separated)</small></label><textarea class="nr-input nr-box" id="nr-m-ing" rows="4" placeholder="2 eggs&#10;spinach&#10;cheese">${e(m ? m.ing.map(i => i.name).join("\n") : "")}</textarea>
-    <label>Notes</label><textarea class="nr-input nr-box" id="nr-m-desc" rows="2" style="min-height:60px">${e(m && m.desc && !m.desc.startsWith("*") ? m.desc : "")}</textarea>
-    <label>Photo <small style="font-weight:400;color:var(--n-mute)">(optional)</small></label><input type="file" id="nr-m-photo" accept="image/*">
-    <div class="actions"><button class="nr-btn light" data-act="close-modal">Cancel</button><button class="nr-btn" data-act="m-save">Save meal</button></div>`);
-}
-function saveMeal() {
-  const name = $("nr-m-name").value.trim(); if (!name) { $("nr-m-name").focus(); return; }
-  const ing = $("nr-m-ing").value.split(/\n|,/).map(x => x.trim()).filter(Boolean).map(n => ({ name:n.toLowerCase(), qty:(ING[n.toLowerCase()] || [""])[0] }));
-  const calIn = $("nr-m-cal").value, proIn = $("nr-m-pro").value;
-  const cal = calIn !== "" ? +calIn : ing.reduce((a, i) => a + kcalOf(i.name), 0), pro = proIn !== "" ? +proIn : ing.reduce((a, i) => a + proOf(i.name), 0);
-  const notes = $("nr-m-desc").value.trim(), desc = notes || ing.map(i => `* ${i.qty ? i.qty + " " : ""}${i.name}${kcalOf(i.name) ? " → ~" + kcalOf(i.name) + " cal" : ""}`).join(" ");
-  const data = { name, tags:editTags.length ? editTags : ["Lunch"], cal, pro, ing, desc, photo:editPhoto, time:15 };
-  if (editing) Object.assign(meal(editing), data); else S.meals.unshift({ id:uid(), ...data });
-  save(); closeModal(); render(); toast(editing ? "Meal updated" : "Meal added");
 }
 function photoToData(file, cb) {
   const r = new FileReader();
   r.onload = () => { const img = new Image(); img.onload = () => { const k = Math.min(1, 720 / Math.max(img.width, img.height)), c = document.createElement("canvas"); c.width = img.width * k; c.height = img.height * k; c.getContext("2d").drawImage(img, 0, 0, c.width, c.height); cb(c.toDataURL("image/jpeg", .72)); }; img.src = r.result; };
   r.readAsDataURL(file);
 }
-function settingsModal() {
-  openModal(`<h2>Settings</h2><p class="s">Saved on this device.</p>
-    <div class="row2"><div><label>Daily calories (max)</label><input class="nr-input" id="nr-s-cal" type="number" min="0" step="50" value="${S.settings.cal}" style="border-radius:16px"></div>
-    <div><label>Daily protein goal (g)</label><input class="nr-input" id="nr-s-pro" type="number" min="0" value="${S.settings.pro}" style="border-radius:16px"></div></div>
-    <p class="s" style="margin-top:12px">The calorie max is shared with Daily Coach, which never plans a day over it.</p>
-    <div class="actions" style="justify-content:space-between"><div style="display:flex;gap:10px;flex-wrap:wrap"><button class="nr-btn light sm" data-act="reset-sample">Reset to sample meals</button><button class="nr-btn light sm" data-act="clear-plan">Clear plan</button></div>
-    <div style="display:flex;gap:10px"><button class="nr-btn light" data-act="close-modal">Cancel</button><button class="nr-btn" data-act="s-save">Save</button></div></div>`);
+function deleteMeal(id) {
+  const m = meal(id); if (!m) return;
+  S.meals = S.meals.filter(x => x.id !== id); for (const k of Object.keys(S.plan)) S.plan[k] = S.plan[k].filter(p => p.mealId !== id);
+  S.grocery.forEach(g => g.sources = g.sources.filter(s => s !== id)); S.grocery = S.grocery.filter(g => g.sources.length || g.manual);
+  save(); toast(`Deleted ${m.name}`);
+}
+function mealToGrocery(id) {
+  const m = meal(id); if (!m) return;
+  if (!m.ing.length) { toast(`${m.name} has no ingredients yet. Edit it to add some.`); return; }
+  const r = addMealToGrocery(m); save();
+  toast(r.added || r.merged ? `Added ${m.name}: ${r.added} new item${r.added === 1 ? "" : "s"}${r.merged ? `, ${r.merged} already on your list` : ""}` : `${m.name} is already on your grocery list`);
+}
+function moveWithin(k, pid, dir) { const a = S.plan[k] || [], i = a.findIndex(x => x.id === pid), j = i + dir; if (i < 0 || j < 0 || j >= a.length) return; [a[i], a[j]] = [a[j], a[i]]; save(); render(); }
+function movePlan(from, pid, to, index) {
+  const arr = S.plan[from] || [], i = arr.findIndex(x => x.id === pid); if (i < 0) return;
+  const [it] = arr.splice(i, 1), dest = S.plan[to] = S.plan[to] || [];
+  if (index == null || index > dest.length) dest.push(it); else dest.splice(index, 0, it);
+  save(); render();
 }
 
 // ---------- routing ----------
-const PAGES = ["home", "meals", "plan", "grocery", "assistant"];
 function go(name, push = true) {
   closePop(); $("nr-more-menu").hidden = true;
   if (name === "coach") name = "coach-today";
   const coach = name.startsWith("coach");
   if (!coach && !PAGES.includes(name)) name = "home";
+  if (!coach && ui.page !== name && !["meal-details", "add-meal"].includes(ui.page)) ui.back = ui.page;
   document.querySelectorAll(".nr-page").forEach(p => p.hidden = coach || p.dataset.page !== name);
   $("coach").hidden = !coach; $("nr-main").hidden = coach;
-  document.querySelectorAll("#nr-tabs > button").forEach(b => b.classList.toggle("on", b.dataset.nr === (coach ? "coach" : name)));
-  $("nr-more-btn").classList.remove("on");
+  const tab = coach ? "coach" : ["meal-details", "add-meal", "recipe-ingredients", "meal-categories"].includes(name) && !MORE_PAGES.includes(name) ? "meals" : name;
+  document.querySelectorAll("#nr-tabs > button").forEach(b => b.classList.toggle("on", b.dataset.nr === tab));
+  const editing = name === "add-meal" && ui.editId;
+  if (editing) document.querySelectorAll("#nr-tabs > button").forEach(b => b.classList.toggle("on", b.dataset.nr === "meals"));
+  $("nr-more-btn").classList.toggle("on", !coach && MORE_PAGES.includes(name) && !editing);
+  $("nr-settings-btn").classList.toggle("on", name === "settings");
   if (coach) { const t = name.split("-")[1] || "today"; showTab(t); }
   else { ui.page = name; render(); }
   if (push) { try { history.replaceState(null, "", "#" + name); } catch {} }
   window.scrollTo(0, 0);
 }
 window.__nrGo = go;
+const remember = (k, v) => { try { sessionStorage.setItem(k, v || ""); } catch {} };
+const view = id => { ui.detailId = id; remember("nr-detail", id); go("meal-details"); };
+const edit = id => { ui.editId = id; remember("nr-edit", id); go("add-meal"); };
 
 // ---------- events ----------
 document.addEventListener("click", ev => {
@@ -2113,86 +2526,138 @@ document.addEventListener("click", ev => {
   if (!t.closest(".nr-more")) $("nr-more-menu").hidden = true;
   if (!t.closest("#nr-pop") && !t.closest('[data-act$="-menu"]')) closePop();
   if (t === modal) return closeModal();
-  const nav = t.closest("[data-nr]"); if (nav) { go(nav.dataset.nr); return; }
+  const nav = t.closest("[data-nr]"); if (nav) { if (nav.dataset.nr === "add-meal") { ui.editId = null; remember("nr-edit", ""); } go(nav.dataset.nr); return; }
   if (t.closest("#nr-more-btn")) {
     const m = $("nr-more-menu"), btn = $("nr-more-btn"); m.hidden = !m.hidden; btn.setAttribute("aria-expanded", String(!m.hidden));
     if (!m.hidden) { const r = btn.getBoundingClientRect(); m.style.top = (r.bottom + 8) + "px"; m.style.left = Math.max(8, Math.min(innerWidth - m.offsetWidth - 8, r.left)) + "px"; }
-    return; }
-  if (t.closest("#nr-settings-btn")) return settingsModal();
+    return;
+  }
   const a = t.closest("[data-act]"); if (!a) return;
   const d = a.dataset, act = d.act;
   switch (act) {
     case "close-modal": closeModal(); break;
+    case "back": if (ui.page === "add-meal" && ui.editId && meal(ui.editId)) view(ui.editId); else go(ui.back && ui.back !== ui.page ? ui.back : "meals"); break;
+    case "view-meal": closeModal(); closePop(); view(d.id); break;
     case "tag": ui.tag = d.tag; renderMeals(); break;
-    case "new-meal": mealForm(null); break;
-    case "m-tag": { const i = editTags.indexOf(d.tag); if (i < 0) editTags.push(d.tag); else editTags.splice(i, 1); a.classList.toggle("on"); break; }
-    case "m-save": saveMeal(); break;
-    case "add-meal": addToPlanModal(d.id); break;
+    case "new-meal": ui.editId = null; remember("nr-edit", ""); go("add-meal"); break;
+    case "edit-meal": closePop(); edit(d.id); break;
+    case "m-tag": { const i = ui.form.tags.indexOf(d.tag); if (i < 0) ui.form.tags.push(d.tag); else ui.form.tags.splice(i, 1); a.classList.toggle("on"); break; }
+    case "m-newcat": { const v = $("nr-m-newcat").value.trim(); if (!v) break; const c = S.cats.find(x => x.toLowerCase() === v.toLowerCase()) || v; if (!S.cats.includes(c)) S.cats.push(c); if (!ui.form.tags.includes(c)) ui.form.tags.push(c); $("nr-m-newcat").value = ""; save(); paintTags(); break; }
+    case "m-nophoto": ui.form.photo = null; $("nr-m-url").value = ""; paintPrev(); break;
+    case "add-meal": closePop(); addToPlanModal(d.id); break;
     case "ap-do": { const day = $("nr-ap-day").value, slot = $("nr-ap-slot").value; addToPlan(d.id, parseISO(day), slot); closeModal(); toast(`Added to ${dayLabel(parseISO(day))}`); render(); break; }
-    case "meal-menu": showPop(a, `<button data-act="edit-meal" data-id="${d.id}">Edit</button><button data-act="add-meal" data-id="${d.id}">Add to plan…</button><button data-act="dup-meal" data-id="${d.id}">Duplicate</button><div class="sep"></div><button class="danger" data-act="del-meal" data-id="${d.id}">Delete</button>`); break;
-    case "edit-meal": closePop(); mealForm(meal(d.id)); break;
+    case "m-grocery": closePop(); mealToGrocery(d.id); render(); break;
+    case "meal-menu": showPop(a, `<button data-act="add-meal" data-id="${d.id}">Add to Plan</button><button data-act="m-grocery" data-id="${d.id}">Add to Grocery</button><button data-act="edit-meal" data-id="${d.id}">Edit</button><button data-act="dup-meal" data-id="${d.id}">Duplicate</button><div class="sep"></div><button class="danger" data-act="del-meal" data-id="${d.id}">Delete</button>`); break;
     case "dup-meal": { closePop(); const m = meal(d.id), c = JSON.parse(JSON.stringify(m)); c.id = uid(); c.name += " (copy)"; S.meals.splice(S.meals.indexOf(m) + 1, 0, c); save(); render(); toast("Duplicated"); break; }
-    case "del-meal": { closePop(); const m = meal(d.id); S.meals = S.meals.filter(x => x.id !== d.id); for (const k of Object.keys(S.plan)) S.plan[k] = S.plan[k].filter(p => p.mealId !== d.id); save(); render(); toast(`Deleted ${m ? m.name : "meal"}`); break; }
+    case "del-meal": closePop(); deleteMeal(d.id); if (ui.page === "meal-details") go("meals"); else render(); break;
     case "pick-meal": pickMeal(d.date); break;
-    case "pick-do": { const slot = ($("nr-pick-slot") || {}).value || null, date = parseISO(modal.dataset.date); addToPlan(d.id, date, slot); closeModal(); toast(`Added to ${dayLabel(date)}`); render(); break; }
-    case "toggle-done": { const p = (S.plan[d.date] || []).find(x => x.id === d.pid); if (p) { p.done = !p.done; save(); render(); } break; }
+    case "pick-do": { const v = ($("nr-pick-slot") || {}).value, date = parseISO(modal.dataset.date); addToPlan(d.id, date, v === "auto" ? null : v); closeModal(); toast(`Added to ${dayLabel(date)}`); render(); break; }
+    case "toggle-done": { const p = (S.plan[d.date] || []).find(x => x.id === d.pid); if (p) { p.done = !p.done; save(); closePop(); render(); } break; }
     case "plan-menu": {
-      const k = d.date, pid = d.pid, days = Array.from({ length:7 }, (_, i) => addD(ui.page === "plan" ? ui.week : mondayOf(new Date()), i));
-      showPop(a, `<div class="cap">Move to</div>${days.filter(x => iso(x) !== k).map(x => `<button data-act="plan-move" data-from="${k}" data-pid="${pid}" data-to="${iso(x)}">${e(dayLabel(x))}</button>`).join("")}<div class="sep"></div>
-        <button data-act="toggle-done" data-date="${k}" data-pid="${pid}">Mark eaten / not eaten</button><button class="danger" data-act="plan-del" data-date="${k}" data-pid="${pid}">Remove from plan</button>`); break; }
-    case "plan-move": movePlan(d.from, d.pid, d.to); closePop(); break;
+      const k = d.date, pid = d.pid, p = (S.plan[k] || []).find(x => x.id === pid); if (!p) break;
+      const base = ui.page === "plan" ? ui.week : weekStartOf(new Date()), days = weekDays(base);
+      showPop(a, `<div class="cap">Move to</div>${days.filter(x => iso(x) !== k).map(x => `<button data-act="plan-move" data-from="${k}" data-pid="${pid}" data-to="${iso(x)}">${e(dayLabel(x))}</button>`).join("")}
+        <div class="sep"></div><button data-act="plan-up" data-date="${k}" data-pid="${pid}">Move up</button><button data-act="plan-down" data-date="${k}" data-pid="${pid}">Move down</button>
+        <div class="cap">Meal type</div>${["", ...TYPES].map(tp => `<button data-act="plan-type" data-date="${k}" data-pid="${pid}" data-type="${tp}">${(p.slot || "") === tp ? "✓ " : ""}${tp || "No type"}</button>`).join("")}
+        <div class="sep"></div><button data-act="view-meal" data-id="${p.mealId}">View meal</button><button data-act="toggle-done" data-date="${k}" data-pid="${pid}">${p.done ? "Mark not eaten" : "Mark eaten"}</button><button class="danger" data-act="plan-del" data-date="${k}" data-pid="${pid}">Remove from plan</button>`); break; }
+    case "plan-move": closePop(); movePlan(d.from, d.pid, d.to); break;
+    case "plan-up": closePop(); moveWithin(d.date, d.pid, -1); break;
+    case "plan-down": closePop(); moveWithin(d.date, d.pid, 1); break;
+    case "plan-type": { const p = (S.plan[d.date] || []).find(x => x.id === d.pid); if (p) { p.slot = d.type; save(); } closePop(); render(); break; }
     case "plan-del": { S.plan[d.date] = (S.plan[d.date] || []).filter(x => x.id !== d.pid); save(); closePop(); render(); break; }
-    case "week-prev": ui.week = addD(ui.week, -7); renderPlan(); break;
-    case "week-next": ui.week = addD(ui.week, 7); renderPlan(); break;
-    case "week-now": ui.week = mondayOf(new Date()); renderPlan(); break;
-    case "g-check": S.checked[d.key] = !S.checked[d.key]; save(); renderGrocery(); break;
-    case "g-open": if (ui.open.has(d.key)) ui.open.delete(d.key); else ui.open.add(d.key); renderGrocery(); break;
-    case "g-del": { S.manual = S.manual.filter(x => stem(x.name) !== d.key); save(); renderGrocery(); break; }
-    case "combine": { const seen = []; let n = 0; S.manual = S.manual.filter(x => { const f = seen.find(y => same(y.name, x.name)); if (f) { f.qty = (f.qty || 1) + (x.qty || 1); n++; return false; } seen.push(x); return true; }); save(); renderGrocery(); toast(n ? `Combined ${n} duplicate${n > 1 ? "s" : ""}` : "No duplicates found"); break; }
+    case "week-prev": ui.week = addD(ui.week, -7); render(); break;
+    case "week-next": ui.week = addD(ui.week, 7); render(); break;
+    case "week-now": ui.week = weekStartOf(new Date()); render(); break;
+    case "lib-toggle": ui.lib = !ui.lib; renderPlan(); if (ui.lib) $("nr-lib-q").focus(); break;
+    case "lib-add": { const k = $("nr-lib-day").value, v = $("nr-lib-type").value; addToPlan(d.id, parseISO(k), v === "auto" ? null : v); toast(`Added ${meal(d.id).name} to ${dayLabel(parseISO(k))}`); renderPlan(); break; }
+    case "g-check": { const g = S.grocery.find(x => x.id === d.id); if (g) { g.purchased = !g.purchased; save(); renderGrocery(); } break; }
+    case "g-open": if (ui.open.has(d.id)) ui.open.delete(d.id); else ui.open.add(d.id); renderGrocery(); break;
+    case "g-del": S.grocery = S.grocery.filter(x => x.id !== d.id); save(); renderGrocery(); break;
+    case "g-from-plan": { const r = addPlanToGrocery(weekStartOf(new Date())); renderGrocery(); toast(r.meals ? `From ${r.meals} planned meal${r.meals > 1 ? "s" : ""}: ${r.added} new, ${r.merged} combined` : "No meals on this week’s plan yet"); break; }
+    case "combine": { const n = combineDuplicates(); save(); renderGrocery(); toast(n ? `Combined ${n} duplicate${n > 1 ? "s" : ""}` : "No duplicates found"); break; }
     case "sug": $("nr-chat-in").value = a.textContent; $("nr-chat-form").requestSubmit(); break;
     case "chat-act": chatAct(d.do, d.arg); break;
-    case "s-save": { S.settings.cal = +$("nr-s-cal").value || 0; S.settings.pro = +$("nr-s-pro").value || 0; save();
+    case "chat-clear": S.chat = []; save(); renderChat(); break;
+    case "prep": if (ui.prep.has(d.k)) ui.prep.delete(d.k); else ui.prep.add(d.k); renderRecipe(); break;
+    case "cat-del": { const c = S.cats[+d.i]; S.cats.splice(+d.i, 1); S.meals.forEach(m => m.tags = m.tags.filter(x => x !== c)); if (ui.tag === c) ui.tag = "All"; save(); renderCats(); toast(`Deleted category ${c}`); break; }
+    case "pan-del": S.pantry = S.pantry.filter(p => p.id !== d.id); save(); renderPantry(); break;
+    case "s-save": {
+      S.settings.weekStart = +$("nr-s-week").value; S.settings.cal = +$("nr-s-cal").value || 0; S.settings.pro = +$("nr-s-pro").value || 0; ui.week = weekStartOf(new Date()); save();
       try { const el = document.getElementById("calLimit"); if (el) { el.value = S.settings.cal || ""; update(); } } catch {}
-      closeModal(); render(); toast("Settings saved"); break; }
-    case "reset-sample": S = seed(); save(); closeModal(); render(); toast("Sample meals restored"); break;
-    case "clear-plan": S.plan = {}; save(); closeModal(); render(); toast("Plan cleared"); break;
+      toast("Settings saved"); break; }
+    case "reset-sample": S = seed(); save(); render(); toast("Sample meals restored"); break;
+    case "clear-plan": S.plan = {}; save(); render(); toast("Plan cleared"); break;
   }
 });
 function chatAct(what, arg) {
   if (what === "go") return go(arg);
-  if (what === "add-today") { const m = meal(arg); if (m) { addToPlan(arg, new Date(), slotOf(m)); toast(`Added ${m.name} to today`); } return; }
-  if (what === "autoplan") { handle("plan my week"); }
+  if (what === "view") return view(arg);
+  if (what === "add-today") { const m = meal(arg); if (m) { addToPlan(arg, new Date()); toast(`Added ${m.name} to today`); } return; }
 }
-function movePlan(from, pid, to) {
-  const arr = S.plan[from] || [], i = arr.findIndex(x => x.id === pid); if (i < 0) return;
-  const [it] = arr.splice(i, 1); (S.plan[to] = S.plan[to] || []).push(it); save(); render();
-}
-// drag and drop between days
-document.addEventListener("dragstart", ev => { const el = ev.target.closest && ev.target.closest("[data-drag]"); if (!el) return; ev.dataTransfer.setData("text/plain", el.dataset.drag + "|" + el.dataset.from); ev.dataTransfer.effectAllowed = "move"; el.classList.add("dragging"); });
-document.addEventListener("dragend", ev => { document.querySelectorAll(".dragging,.drop").forEach(x => x.classList.remove("dragging", "drop")); });
-document.addEventListener("dragover", ev => { const z = ev.target.closest && ev.target.closest("[data-drop]"); if (z) { ev.preventDefault(); document.querySelectorAll(".drop").forEach(x => x !== z && x.classList.remove("drop")); z.classList.add("drop"); } });
-document.addEventListener("drop", ev => { const z = ev.target.closest && ev.target.closest("[data-drop]"); if (!z) return; ev.preventDefault(); const [pid, from] = (ev.dataTransfer.getData("text/plain") || "").split("|"); if (pid && from && from !== z.dataset.drop) movePlan(from, pid, z.dataset.drop); });
+// drag and drop: planned meals between days (and within a day to reorder), library meals onto a day
+document.addEventListener("dragstart", ev => {
+  const el = ev.target.closest && ev.target.closest("[data-drag],[data-libdrag]"); if (!el) return;
+  ev.dataTransfer.setData("text/plain", el.dataset.libdrag ? "lib|" + el.dataset.libdrag : "pm|" + el.dataset.drag + "|" + el.dataset.from);
+  ev.dataTransfer.effectAllowed = "copyMove"; el.classList.add("dragging");
+});
+document.addEventListener("dragend", () => { document.querySelectorAll(".dragging,.drop,.drop-before").forEach(x => x.classList.remove("dragging", "drop", "drop-before")); });
+document.addEventListener("dragover", ev => {
+  const z = ev.target.closest && ev.target.closest("[data-drop]"); if (!z) return; ev.preventDefault();
+  document.querySelectorAll(".drop,.drop-before").forEach(x => x.classList.remove("drop", "drop-before")); z.classList.add("drop");
+  const pm = ev.target.closest(".nr-pm"); if (pm) pm.classList.add("drop-before");
+});
+document.addEventListener("drop", ev => {
+  const z = ev.target.closest && ev.target.closest("[data-drop]"); if (!z) return; ev.preventDefault();
+  const [kind, id, from] = (ev.dataTransfer.getData("text/plain") || "").split("|"), to = z.dataset.drop;
+  const pm = ev.target.closest(".nr-pm"); let index = pm ? (S.plan[to] || []).findIndex(x => x.id === pm.dataset.drag) : null; if (index < 0) index = null;
+  if (kind === "lib" && meal(id)) { const v = $("nr-lib-type").value; addToPlan(id, parseISO(to), v === "auto" ? null : v, index); toast(`Added ${meal(id).name} to ${dayLabel(parseISO(to))}`); render(); }
+  else if (kind === "pm" && id && from) {
+    if (from === to && index != null) { const arr = S.plan[from], i = arr.findIndex(x => x.id === id); if (i >= 0 && i < index) index--; }
+    if (!(from === to && index == null)) movePlan(from, id, to, index);
+  }
+});
 
 document.addEventListener("input", ev => {
-  if (ev.target.id === "nr-meal-q") { ui.q = ev.target.value; renderMeals(); }
-  else if (ev.target.id === "nr-g-q") { ui.gq = ev.target.value; renderGrocery(); }
-  else if (ev.target.id === "nr-pick-q") fillPick();
+  const id = ev.target.id;
+  if (id === "nr-meal-q") { ui.q = ev.target.value; renderMeals(); }
+  else if (id === "nr-g-q") { ui.gq = ev.target.value; renderGrocery(); }
+  else if (id === "nr-pick-q") fillPick();
+  else if (id === "nr-lib-q") fillLib();
+  else if (id === "nr-m-url") { ui.form.photo = ev.target.value.trim() || null; paintPrev(); }
 });
 document.addEventListener("change", ev => {
-  if (ev.target.id === "nr-m-photo" && ev.target.files[0]) photoToData(ev.target.files[0], d => { editPhoto = d; toast("Photo added"); });
+  const id = ev.target.id;
+  if (id === "nr-m-photo" && ev.target.files[0]) photoToData(ev.target.files[0], d => { ui.form.photo = d; $("nr-m-url").value = ""; paintPrev(); toast("Photo added"); });
+  else if (id === "nr-r-meal") { ui.recipeId = ev.target.value; renderRecipe(); }
+  else if (ev.target.dataset && ev.target.dataset.cat != null) {
+    const i = +ev.target.dataset.cat, old = S.cats[i], v = ev.target.value.trim();
+    if (!v || v === old) { ev.target.value = old; return; }
+    if (S.cats.some((c, j) => j !== i && c.toLowerCase() === v.toLowerCase())) { toast("That category already exists"); ev.target.value = old; return; }
+    S.cats[i] = v; S.meals.forEach(m => m.tags = m.tags.map(x => x === old ? v : x)); if (ui.tag === old) ui.tag = v; save(); renderCats(); toast(`Renamed to ${v}`);
+  }
 });
-$("nr-g-form").addEventListener("submit", ev => { ev.preventDefault(); const v = $("nr-g-add").value.trim(); if (!v) return; for (const n of parseIngredients(v)) S.manual.push({ id:uid(), name:n.toLowerCase(), qty:1 }); $("nr-g-add").value = ""; save(); renderGrocery(); });
+document.addEventListener("submit", ev => {
+  const id = ev.target.id;
+  if (id === "nr-mform") { ev.preventDefault(); saveMealForm(); }
+  else if (id === "nr-c-form") { ev.preventDefault(); const v = $("nr-c-new").value.trim(); if (v && !S.cats.some(c => c.toLowerCase() === v.toLowerCase())) { S.cats.push(v); save(); } renderCats(); }
+  else if (id === "nr-pan-form") { ev.preventDefault(); for (const n of splitList($("nr-pan-new").value)) { const k = normName(n); if (k && !S.pantry.some(p => p.norm === k)) S.pantry.push({ id:uid(), name:displayName(n), norm:k }); } save(); renderPantry(); }
+});
+$("nr-g-form").addEventListener("submit", ev => { ev.preventDefault(); const v = $("nr-g-add").value.trim(); if (!v) return; for (const n of splitList(v)) { const p = parseIng(n); addGrocery(p.name, { qty:p.qty, unit:p.unit }); } $("nr-g-add").value = ""; save(); renderGrocery(); });
 $("nr-chat-form").addEventListener("submit", ev => {
   ev.preventDefault(); const v = $("nr-chat-in").value.trim(); if (!v) return; $("nr-chat-in").value = "";
-  S.chat.push({ role:"user", text:v }); save(); renderChat(); setTimeout(() => handle(v), 250);
+  S.chat.push({ role:"user", text:v }); save(); renderChat(); setTimeout(() => handle(v), 200);
 });
-document.addEventListener("keydown", ev => { if (ev.key === "Escape") { closePop(); $("nr-more-menu").hidden = true; if (!modal.hidden) closeModal(); } });
+document.addEventListener("keydown", ev => { if ((ev.key === "Enter" || ev.key === " ") && ev.target.matches && ev.target.matches('span[role="button"][data-act]')) { ev.preventDefault(); ev.target.click(); return; } if (ev.key === "Escape") { closePop(); $("nr-more-menu").hidden = true; if (!modal.hidden) closeModal(); } });
 window.addEventListener("hashchange", () => go(location.hash.slice(1) || "home", false));
-window.__nr = { get S() { return S; }, handle, go, autoplan, groceryItems, planned, seed, reset() { S = seed(); save(); render(); } };
+window.__nr = { get S() { return S; }, handle, go, autoplan, planned, seed, normName, parseIng, catOf, reset() { S = seed(); save(); render(); } };
 
 go(location.hash.slice(1) || "home", false);
 })();
 
+</script>
+<script>
+// Offline: install the service worker when served from the web (not when opened as a file or inside a preview)
+if ("serviceWorker" in navigator && (location.protocol === "https:" || location.hostname === "localhost")) { try { navigator.serviceWorker.register("./sw.js").catch(() => {}); } catch (e) {} }
 </script>
 </body>
 </html>
