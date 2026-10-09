@@ -237,6 +237,27 @@ select.nr-input { appearance:none; -webkit-appearance:none; background:#fff url(
 .nr-toast { position:fixed; left:50%; bottom:24px; transform:translateX(-50%); background:var(--n-black); color:#fff; padding:10px 18px; border-radius:99px; z-index:80; font-size:14px; box-shadow:0 8px 24px rgba(0,0,0,.3); }
 .nr-toast[hidden] { display:none; }
 
+
+/* drawing annotations */
+#nr-ink { position:absolute; left:0; top:0; z-index:35; pointer-events:none; touch-action:auto; }
+#nr-ink.on { pointer-events:auto; touch-action:none; cursor:crosshair; }
+#nr-ink.on.erase { cursor:cell; }
+.nr-inkbtn { position:fixed; right:20px; bottom:20px; z-index:46; width:48px; height:48px; border-radius:50%; border:0; background:var(--n-black); color:#fff; display:flex; align-items:center; justify-content:center; cursor:pointer; box-shadow:0 6px 18px rgba(0,0,0,.28); padding:0; }
+.nr-inkbtn:hover { background:#262626; }
+.nr-inkbtn svg { width:20px !important; height:20px !important; }
+.nr-inkbtn[hidden], .nr-inkbar[hidden] { display:none; }
+.nr-inkbtn i { position:absolute; top:6px; right:6px; width:10px; height:10px; border-radius:50%; background:#ef4444; border:2px solid #fff; }
+.nr-inkbar { position:fixed; left:50%; bottom:16px; transform:translateX(-50%); z-index:62; max-width:calc(100vw - 16px); display:flex; align-items:center; gap:6px; background:#fff; border:1px solid var(--n-line); border-radius:999px; padding:6px 8px; box-shadow:0 10px 30px rgba(0,0,0,.2); overflow-x:auto; }
+.nr-inkbar button { flex:0 0 auto; height:36px; min-width:36px; border:0; background:none; border-radius:999px; display:flex; align-items:center; justify-content:center; gap:6px; padding:0 8px; font-size:13px; font-weight:500; color:#444; cursor:pointer; }
+.nr-inkbar button:hover { background:var(--n-soft); }
+.nr-inkbar button.on { background:var(--n-black); color:#fff; }
+.nr-inkbar button.done { background:var(--n-black); color:#fff; padding:0 14px; }
+.nr-inkbar button.sw { width:26px; min-width:26px; height:26px; padding:0; border:2px solid #fff; box-shadow:0 0 0 1px #d4d4d4; }
+.nr-inkbar button.sw.on { box-shadow:0 0 0 2px var(--n-black); }
+.nr-inkbar .sep { width:1px; height:22px; background:var(--n-line); flex:0 0 auto; margin:0 2px; }
+.nr-inkbar button.sz span { display:block; border-radius:50%; background:currentColor; }
+.nr-inkbar svg.i { width:18px; height:18px; }
+
 /* meal library panel on Plan */
 .nr-lib { position:fixed; top:0; right:0; bottom:0; width:min(360px, 92vw); z-index:45; background:#fff; border-left:1px solid var(--n-line); box-shadow:-20px 0 40px rgba(0,0,0,.08); display:flex; flex-direction:column; gap:10px; padding:16px 16px 0; }
 .nr-lib[hidden] { display:none; }
@@ -1867,6 +1888,10 @@ const IC = {
   merge: '<rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><path d="M14 17.5h7M17.5 14v7"/>',
   leaf: '<path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"/><path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"/>',
   calplus: '<rect x="3" y="4" width="18" height="18" rx="2.5"/><path d="M16 2v4M8 2v4M3 10h18M12 13.5v5M9.5 16h5"/>',
+  highlighter: '<path d="m9 11-6 6v3h9l3-3"/><path d="m22 12-4.6 4.6a2 2 0 0 1-2.8 0l-5.2-5.2a2 2 0 0 1 0-2.8L14 4"/>',
+  eraser: '<path d="m7 21-4.3-4.3a1 1 0 0 1 0-1.4l9.6-9.6a2 2 0 0 1 2.8 0l5.2 5.2a2 2 0 0 1 0 2.8L13 21"/><path d="M22 21H7"/><path d="m5 11 9 9"/>',
+  hand: '<path d="M18 11V6a2 2 0 0 0-4 0v5"/><path d="M14 10V4a2 2 0 0 0-4 0v6"/><path d="M10 10.5V6a2 2 0 0 0-4 0v8"/><path d="M18 8a2 2 0 1 1 4 0v6a8 8 0 0 1-8 8h-2c-2.8 0-4.5-.9-5.9-2.4L3.4 16a2 2 0 0 1 3.2-2.4L8 15"/>',
+  undo: '<path d="M3 7v6h6"/><path d="M21 17a9 9 0 0 0-9-9 9 9 0 0 0-6 2.3L3 13"/>',
   edit: '<path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 1 1 3 3L7 19l-4 1 1-4z"/>', trash: '<path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6"/>',
 };
 const ic = (n, cls = "") => `<svg class="i ${cls}" viewBox="0 0 24 24">${IC[n]}</svg>`;
@@ -2574,6 +2599,7 @@ function go(name, push = true) {
   else { ui.page = name; render(); }
   if (push) { try { history.replaceState(null, "", "#" + name); } catch {} }
   window.scrollTo(0, 0);
+  inkRefresh();
 }
 window.__nrGo = go;
 const remember = (k, v) => { try { sessionStorage.setItem(k, v || ""); } catch {} };
@@ -2711,9 +2737,122 @@ $("nr-chat-form").addEventListener("submit", ev => {
 });
 document.addEventListener("keydown", ev => { if ((ev.key === "Enter" || ev.key === " ") && ev.target.matches && ev.target.matches('span[role="button"][data-act]')) { ev.preventDefault(); ev.target.click(); return; } if (ev.key === "Escape") { closePop(); $("nr-more-menu").hidden = true; if (!modal.hidden) closeModal(); } });
 window.addEventListener("hashchange", () => go(location.hash.slice(1) || "home", false));
-window.__nr = { get S() { return S; }, handle, go, autoplan, planned, seed, normName, parseIng, catOf, reset() { S = seed(); save(); render(); } };
+window.__nr = { get ink() { return ink; }, get S() { return S; }, handle, go, autoplan, planned, seed, normName, parseIng, catOf, reset() { S = seed(); save(); render(); } };
+
+
+// ---------- drawing annotations: pen, highlighter, eraser on any page; saved per page on this device ----------
+const INK_KEY = "nourish-ink-v1";
+const ink = { on:false, tool:"pen", color:"#111111", size:3, key:"home", cur:null, data:(() => { try { return JSON.parse(localStorage.getItem(INK_KEY) || "{}") || {}; } catch { return {}; } })(), clearArm:0 };
+const inkCanvas = document.createElement("canvas"); inkCanvas.id = "nr-ink"; inkCanvas.setAttribute("aria-hidden", "true"); document.body.appendChild(inkCanvas);
+const ictx = inkCanvas.getContext("2d");
+const INK_COLORS = ["#111111", "#e11d48", "#2563eb", "#16a34a", "#f59e0b", "#9333ea"];
+const INK_SIZES = [2, 4, 8];
+const inkBtn = document.createElement("button"); inkBtn.className = "nr-inkbtn"; inkBtn.id = "nr-inkbtn"; inkBtn.setAttribute("aria-label", "Draw notes on this page"); inkBtn.title = "Draw on this page"; document.body.appendChild(inkBtn);
+const inkBar = document.createElement("div"); inkBar.className = "nr-inkbar"; inkBar.id = "nr-inkbar"; inkBar.hidden = true; inkBar.setAttribute("role", "toolbar"); inkBar.setAttribute("aria-label", "Drawing tools"); document.body.appendChild(inkBar);
+const strokes = () => ink.data[ink.key] || (ink.data[ink.key] = []);
+const inkSave = () => { try { for (const k of Object.keys(ink.data)) if (!ink.data[k].length) delete ink.data[k]; localStorage.setItem(INK_KEY, JSON.stringify(ink.data)); } catch { toast("Couldn’t save drawings. Storage may be full."); } };
+const inkPageKey = () => {
+  if (!$("coach").hidden) { const t = document.querySelector("#coach .tab:not([hidden])"); return "coach-" + (t ? t.dataset.tab : "today"); }
+  return ui.page === "meal-details" ? "meal-details-" + ui.detailId : ui.page;
+};
+function drawStroke(c, s) {
+  const p = s.pts; if (!p.length) return;
+  c.save(); c.lineCap = "round"; c.lineJoin = "round"; c.strokeStyle = s.color; c.fillStyle = s.color;
+  c.lineWidth = s.tool === "hl" ? s.w * 5 : s.w; c.globalAlpha = s.tool === "hl" ? .32 : 1;
+  if (s.tool === "hl") c.lineCap = "butt";
+  if (p.length === 1) { c.beginPath(); c.arc(p[0][0], p[0][1], c.lineWidth / 2, 0, Math.PI * 2); c.fill(); }
+  else { c.beginPath(); c.moveTo(p[0][0], p[0][1]); for (let i = 1; i < p.length - 1; i++) { const mx = (p[i][0] + p[i + 1][0]) / 2, my = (p[i][1] + p[i + 1][1]) / 2; c.quadraticCurveTo(p[i][0], p[i][1], mx, my); } c.lineTo(p[p.length - 1][0], p[p.length - 1][1]); c.stroke(); }
+  c.restore();
+}
+function inkRedraw() {
+  const dpr = Math.min(window.devicePixelRatio || 1, 2);
+  ictx.setTransform(1, 0, 0, 1, 0, 0); ictx.clearRect(0, 0, inkCanvas.width, inkCanvas.height); ictx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  for (const s of strokes()) drawStroke(ictx, s);
+  if (ink.cur) drawStroke(ictx, ink.cur);
+}
+function inkSize() {
+  const dpr = Math.min(window.devicePixelRatio || 1, 2), w = document.documentElement.clientWidth, h = Math.max(document.body.offsetHeight, innerHeight);
+  if (inkCanvas.width !== Math.round(w * dpr) || inkCanvas.height !== Math.round(h * dpr)) {
+    inkCanvas.width = Math.round(w * dpr); inkCanvas.height = Math.round(h * dpr); inkCanvas.style.width = w + "px"; inkCanvas.style.height = h + "px"; inkRedraw();
+  }
+}
+function inkBarHTML() {
+  const t = ink.tool;
+  return `<button data-ink="pen" class="${t === "pen" ? "on" : ""}" aria-label="Pen" title="Pen">${ic("edit")}</button>
+    <button data-ink="hl" class="${t === "hl" ? "on" : ""}" aria-label="Highlighter" title="Highlighter">${ic("highlighter")}</button>
+    <button data-ink="erase" class="${t === "erase" ? "on" : ""}" aria-label="Eraser" title="Eraser">${ic("eraser")}</button>
+    <button data-ink="hand" class="${t === "hand" ? "on" : ""}" aria-label="Scroll and tap (no drawing)" title="Scroll and tap">${ic("hand")}</button>
+    <span class="sep"></span>
+    ${INK_COLORS.map(c => `<button class="sw ${ink.color === c ? "on" : ""}" data-ink-color="${c}" style="background:${c}" aria-label="Color ${c}"></button>`).join("")}
+    <span class="sep"></span>
+    ${INK_SIZES.map(z => `<button class="sz ${ink.size === z ? "on" : ""}" data-ink-size="${z}" aria-label="Thickness ${z}"><span style="width:${z + 3}px;height:${z + 3}px"></span></button>`).join("")}
+    <span class="sep"></span>
+    <button data-ink="undo" aria-label="Undo" title="Undo">${ic("undo")}</button>
+    <button data-ink="clear" aria-label="Clear this page" title="Clear this page">${ic("trash")}${ink.clearArm ? "Tap again" : ""}</button>
+    <button data-ink="done" class="done">Done</button>`;
+}
+function inkUI() {
+  inkBtn.innerHTML = ic("edit") + (strokes().length ? "<i></i>" : "");
+  inkBtn.hidden = ink.on; inkBar.hidden = !ink.on;
+  inkCanvas.classList.toggle("on", ink.on && ink.tool !== "hand"); inkCanvas.classList.toggle("erase", ink.tool === "erase");
+  if (ink.on) inkBar.innerHTML = inkBarHTML();
+}
+function inkRefresh() {
+  const k = inkPageKey(); if (k !== ink.key) { ink.key = k; ink.cur = null; inkRedraw(); }
+  inkSize(); inkUI();
+}
+function inkPoint(e) { return [Math.round((e.pageX) * 10) / 10, Math.round((e.pageY) * 10) / 10]; }
+function inkErase(pt) {
+  const r = 14, before = strokes().length;
+  ink.data[ink.key] = strokes().filter(s => !s.pts.some(q => Math.abs(q[0] - pt[0]) < r + s.w && Math.abs(q[1] - pt[1]) < r + s.w && Math.hypot(q[0] - pt[0], q[1] - pt[1]) < r + s.w));
+  if (strokes().length !== before) inkRedraw();
+}
+let inkPointer = null, inkErased = false;
+inkCanvas.addEventListener("pointerdown", ev => {
+  if (!ink.on || ink.tool === "hand") return;
+  ev.preventDefault(); inkCanvas.setPointerCapture(ev.pointerId); inkPointer = ev.pointerId; ink.clearArm = 0;
+  const pt = inkPoint(ev);
+  if (ink.tool === "erase") { inkErased = false; const n = strokes().length; inkErase(pt); inkErased = strokes().length !== n; }
+  else { ink.cur = { tool:ink.tool, color:ink.color, w:ink.size, pts:[pt] }; inkRedraw(); }
+});
+inkCanvas.addEventListener("pointermove", ev => {
+  if (inkPointer !== ev.pointerId) return; ev.preventDefault();
+  const evs = ev.getCoalescedEvents ? ev.getCoalescedEvents() : [ev];
+  for (const e2 of (evs.length ? evs : [ev])) {
+    const pt = inkPoint(e2);
+    if (ink.tool === "erase") { const n = strokes().length; inkErase(pt); if (strokes().length !== n) inkErased = true; }
+    else if (ink.cur) { const l = ink.cur.pts[ink.cur.pts.length - 1]; if (Math.hypot(pt[0] - l[0], pt[1] - l[1]) >= 1.2) ink.cur.pts.push(pt); }
+  }
+  if (ink.cur) inkRedraw();
+});
+const inkEnd = ev => {
+  if (inkPointer !== ev.pointerId) return; inkPointer = null;
+  if (ink.cur) { strokes().push(ink.cur); ink.cur = null; inkRedraw(); inkSave(); inkUI(); }
+  else if (inkErased) { inkSave(); inkUI(); }
+};
+inkCanvas.addEventListener("pointerup", inkEnd); inkCanvas.addEventListener("pointercancel", inkEnd);
+inkBtn.addEventListener("click", () => { ink.on = true; if (ink.tool === "hand") ink.tool = "pen"; inkRefresh(); toast("Draw with your finger or Apple Pencil. Tap the hand to scroll."); });
+inkBar.addEventListener("click", ev => {
+  const b = ev.target.closest("button"); if (!b) return; const d = b.dataset;
+  if (d.inkColor) { ink.color = d.inkColor; if (ink.tool === "erase" || ink.tool === "hand") ink.tool = "pen"; }
+  else if (d.inkSize) ink.size = +d.inkSize;
+  else if (d.ink === "undo") { strokes().pop(); inkSave(); inkRedraw(); }
+  else if (d.ink === "clear") {
+    if (!strokes().length) return toast("Nothing to clear on this page");
+    if (!ink.clearArm) { ink.clearArm = 1; clearTimeout(inkBar._t); inkBar._t = setTimeout(() => { ink.clearArm = 0; inkUI(); }, 3000); }
+    else { ink.data[ink.key] = []; ink.clearArm = 0; inkSave(); inkRedraw(); toast("Cleared drawings on this page"); }
+  }
+  else if (d.ink === "done") { ink.on = false; ink.cur = null; ink.clearArm = 0; }
+  else if (d.ink) { ink.tool = d.ink; }
+  inkUI();
+});
+document.addEventListener("keydown", ev => { if (ev.key === "Escape" && ink.on && modal.hidden) { ink.on = false; inkUI(); } });
+document.addEventListener("click", () => setTimeout(inkRefresh, 60));
+window.addEventListener("resize", inkRefresh);
+if (window.ResizeObserver) new ResizeObserver(() => inkSize()).observe(document.body);
 
 go(location.hash.slice(1) || "home", false);
+inkRefresh();
 })();
 
 </script>
