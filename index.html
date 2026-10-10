@@ -396,6 +396,13 @@ select.nr-input { appearance:none; -webkit-appearance:none; background:#fff url(
 .nr-collhead h2 { margin:0; font-size:21px; font-weight:700; letter-spacing:-.02em; }
 .nr-rail { display:flex; gap:16px; overflow-x:auto; padding:2px 2px 14px; scroll-snap-type:x proximity; scrollbar-width:thin; }
 .nr-rail .nr-card { flex:0 0 250px; scroll-snap-align:start; }
+#coach .howto{background:rgba(5,12,60,.55); border:1px solid var(--line); border-radius:18px; padding:8px 26px; max-width:860px;}
+#coach .howto-step{display:grid; grid-template-columns:36px 1fr; gap:18px; padding:24px 0; border-top:1px solid var(--line);}
+#coach .howto-step:first-child{border-top:0;}
+#coach .howto-ic{color:#4ade80; padding-top:2px;}
+#coach .howto-step h3{margin:0 0 8px; font-size:1.35rem; font-weight:600; line-height:1.25;}
+#coach .howto-step p{margin:0; font-size:1.08rem; line-height:1.55; color:var(--soft); max-width:none;}
+@media (max-width:560px){#coach .howto{padding:4px 18px;} #coach .howto-step{gap:12px; padding:18px 0;} #coach .howto-step h3{font-size:1.15rem;} #coach .howto-step p{font-size:1rem;}}
 /* Plan: photo tiles with stickers, no cards */
 .nr-daybody { gap:10px; }
 .nr-pm { display:block; position:relative; padding:0; border:0; background:none; border-radius:14px; aspect-ratio:4 / 3; overflow:hidden; cursor:grab; box-shadow:0 1px 3px rgba(0,0,0,.12); }
@@ -850,6 +857,7 @@ select.nr-input { appearance:none; -webkit-appearance:none; background:#fff url(
     <button data-go="today">Today</button>
     <button data-go="move">Move</button>
     <button data-go="nutrients">Nutrients</button>
+    <button data-go="start">How to Start</button>
   </nav>
   <div class="topright"><span id="today"></span><button class="btn-outline" data-go="setup">Setup</button></div>
 </header>
@@ -896,6 +904,17 @@ select.nr-input { appearance:none; -webkit-appearance:none; background:#fff url(
       <div class="nutg-row"><b>Folate</b><span>Spinach, broccoli, beans</span></div>
       <div class="nutg-row"><b>Healthy fats</b><span>Chia seeds, olive oil, nuts, avocado</span></div>
       <div class="nutg-row"><b>Complex carbohydrates</b><span>Sweet potatoes, beans, oats, whole grains</span></div>
+    </section>
+  </div>
+
+  <div class="tab" data-tab="start" hidden>
+    <div class="pagehead"><h2>How to <b>Start</b></h2><p>Small steps, in this order.</p></div>
+    <section class="howto">
+      <div class="howto-step"><span class="howto-ic"><svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 3v7a2.5 2.5 0 0 0 2.5 2.5V21M9.5 3v7.5"/><path d="M19 3v18M19 3c-1.8 1.4-2.5 4-2.5 7H19"/></svg></span><div><h3>1. Establish your meal routine first</h3><p>Start with meals you already enjoy: cheesy chicken pita sandwiches, smoothies, chicken tacos, shrimp, and seasoned vegetables. You don't need to eat stereotypical breakfast foods or force yourself to like meals you dislike.</p></div></div>
+      <div class="howto-step"><span class="howto-ic"><svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 4c2 0 3 2 3 4.5S9.7 12 8 12 5 10.5 5 8s1-4 3-4z"/><path d="M7 15h3v2.5a1.5 1.5 0 0 1-3 0z"/><path d="M16 8c2 0 3 2 3 4.5S17.7 16 16 16s-3-1.5-3-4 1-4 3-4z"/><path d="M15 19h3v1a1.5 1.5 0 0 1-3 0z"/></svg></span><div><h3>2. Start exercising in small increments</h3><p>Begin with 10–15 minutes of comfortable movement when you're ready. Walking, beginner workouts, and gentle strength exercises are all options. You don't have to wait until your diet is perfect to start moving.</p></div></div>
+      <div class="howto-step"><span class="howto-ic"><svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="3"/><path d="M16 2v4M8 2v4M3 10h18"/><path d="m9 16 2 2 4-4"/></svg></span><div><h3>3. Increase gradually</h3><p>Build consistency before increasing duration. Eventually, you may enjoy morning and evening sessions, but an hour twice a day isn't a requirement for successful weight loss.</p></div></div>
+      <div class="howto-step"><span class="howto-ic"><svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20s-8-4.6-8-10.2A4.5 4.5 0 0 1 12 7a4.5 4.5 0 0 1 8 2.8C20 15.4 12 20 12 20z"/><path d="M5 12h3l2-3 3 6 2-3h4"/></svg></span><div><h3>4. Fuel your activity</h3><p>Eat enough to support your energy, recovery, and nutritional needs. We shouldn't make exercise a way to compensate for eating or use a very low calorie limit as the foundation of your plan.</p></div></div>
+      <div class="howto-step"><span class="howto-ic"><svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="9.5" width="17" height="6" rx="3" transform="rotate(-35 12 12.5)"/><path d="m9.5 8.7 5.9 6.6" transform="rotate(0)"/></svg></span><div><h3>5. Keep taking your medications</h3><p>Make sure you are also taking your ADHD medications, depression medications, and anxiety medications as prescribed. This plan works alongside them, not instead of them. Talk to your prescriber or doctor before changing anything.</p></div></div>
     </section>
   </div>
 
@@ -948,6 +967,7 @@ select.nr-input { appearance:none; -webkit-appearance:none; background:#fff url(
   <button data-go="today"><span>🏠</span>Today</button>
   <button data-go="move"><span>🏋🏽‍♀️</span>Move</button>
   <button data-go="nutrients"><span>🥗</span>Nutrients</button>
+  <button data-go="start"><span>🚀</span>Start</button>
   <button data-go="setup"><span>⚙️</span>Setup</button>
 </nav>
 
@@ -1904,7 +1924,7 @@ $("run").addEventListener("click", e => {
 
 
 // ---- Tabs + Today overview -----------------------------------------------
-const TABS = ["today", "move", "nutrients", "setup"];
+const TABS = ["today", "move", "nutrients", "start", "setup"];
 function showTab(name) {
   if (name === "groceries") { if (window.__nrGo) window.__nrGo("grocery"); return; }   // blended into the Nourish Grocery page
   const toPlan = name === "eat"; if (toPlan) name = "today";
