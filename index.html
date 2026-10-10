@@ -2365,13 +2365,29 @@ const CHEAT = [
   { name:"Thick milkshake", emoji:"🥤", cal:620, pro:12, desc:"Vanilla or chocolate.", ing:[["ice cream","2 scoops"], ["milk","1 cup"]] },
   { name:"Fudge brownie", emoji:"🍫", cal:420, pro:5, desc:"With a scoop of vanilla.", ing:[["brownie","1"], ["ice cream","1 scoop"]] }
 ];
+function addCheatMeal(name, ingStrs, cal) {
+  let m = S.meals.find(x => x.name.toLowerCase() === name.trim().toLowerCase());
+  if (!m) m = createMeal(name, ingStrs || [], cal != null ? cal : null);
+  else if (cal != null && !m.cal) { m.cal = cal; m.calEst = false; }
+  if (!m.tags.includes("Cheat Day")) m.tags = ["Cheat Day"];
+  if (!S.cats.includes("Cheat Day")) S.cats.push("Cheat Day");
+  save(); return m;
+}
+function addCheatModal() {
+  openModal(`<div class="nr-mhead"><h2>Add cheat meal</h2><button class="nr-mx" data-act="close-modal" aria-label="Close">${ic("x")}</button></div>
+    <p class="s" style="margin-top:-8px">Save a favorite so it’s ready on your cheat day.</p>
+    <label for="nr-ch-name">Name</label><input class="nr-input sq" id="nr-ch-name" placeholder="e.g. Pepperoni pizza" autocomplete="off" style="margin-bottom:14px">
+    <label for="nr-ch-cal">Calories (optional)</label><input class="nr-input sq" id="nr-ch-cal" type="number" min="0" placeholder="e.g. 800" style="margin-bottom:14px">
+    <label for="nr-ch-ing">What’s in it (optional, comma separated)</label><input class="nr-input sq" id="nr-ch-ing" placeholder="pizza dough, cheese, pepperoni" autocomplete="off">
+    <div class="actions"><button class="nr-btn light" data-act="close-modal">Cancel</button><button class="nr-btn" data-act="cheat-save">Add cheat meal</button></div>`);
+}
 function cheatDate() {
   const want = S.settings.cheatDay ?? 6, t = today0(); return addD(t, (want - t.getDay() + 7) % 7);
 }
 function renderCheat() {
   const want = S.settings.cheatDay ?? 6, d = cheatDate(), isToday = iso(d) === iso(today0()), away = Math.round((d - today0()) / 86400000);
-  const list = planned(d), cal = sumCal(list);
-  $("nr-p-cheat").innerHTML = head("fork", "Cheat Day", "Cheat Day", "One planned day with no calorie cap, so the rest of the week stays easy.") + `
+  const list = planned(d), cal = sumCal(list), favs = S.meals.filter(m => m.tags.includes("Cheat Day") && !CHEAT.some(c => c.name === m.name));
+  $("nr-p-cheat").innerHTML = head("fork", "Cheat Day", "Cheat Day", "One planned day with no calorie cap, so the rest of the week stays easy.", `<button class="nr-btn" data-act="cheat-new">${ic("plus")}Add cheat meal</button>`) + `
     <div class="nr-gcard" style="margin-top:8px"><h3>Your cheat day</h3>
       <div class="nr-chips" style="margin:6px 0 14px">${DAYS.map((n, i) => `<button class="nr-chip ${i === want ? "on" : ""}" data-act="cheat-day" data-d="${i}">${n.slice(0, 3)}</button>`).join("")}</div>
       <p style="margin:0"><b>${isToday ? "Today is your cheat day." : `${DAYS[d.getDay()]} is your cheat day`}</b> ${isToday ? "The 900 calorie limit is paused. Enjoy it." : `· ${away} day${away === 1 ? "" : "s"} away. Other days stay at 900 calories or less.`}</p>
@@ -2379,6 +2395,11 @@ function renderCheat() {
     <div class="nr-gcard" style="margin-top:18px"><h3>${DAYS[d.getDay()]}’s plan${list.length ? ` · ${cal} cal` : ""}</h3>
       ${list.length ? `<ul class="nr-ilist">${list.map(x => `<li><span>${e(x.m.name)}</span><span class="nr-muted">${calText(x.m)}</span></li>`).join("")}</ul>
         <button class="nr-btn light sm" style="margin-top:12px" data-act="cheat-clear">Clear cheat meals</button>` : `<p class="nr-muted" style="margin:0">Nothing picked yet. Choose from the ideas below.</p>`}</div>
+    ${favs.length ? `<h3 style="margin:26px 0 12px;font-size:18px">My favorite cheat meals</h3>
+    <div class="nr-grid" style="grid-template-columns:repeat(auto-fill,minmax(250px,1fr))">${favs.map(m => `<article class="nr-card"><div class="nr-cbody">
+      <div style="font-size:34px;line-height:1">${mealEmoji(m)}</div><h3 class="nr-ctitle" style="margin-top:8px">${e(m.name)}</h3>
+      <div class="nr-crow"><span class="nr-pill">${calText(m)}</span></div>${m.ing.length ? `<p class="nr-desc">${e(m.ing.map(i => i.name).join(", "))}</p>` : ""}
+      <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap"><button class="nr-btn light sm" data-act="cheat-fav-add" data-id="${m.id}">${ic("plus")}Add to ${DAYS[d.getDay()]}</button><button class="nr-btn light sm danger" data-act="cheat-fav-del" data-id="${m.id}">Remove</button></div></div></article>`).join("")}</div>` : ""}
     <h3 style="margin:26px 0 12px;font-size:18px">Cheat meal ideas</h3>
     <div class="nr-grid" style="grid-template-columns:repeat(auto-fill,minmax(250px,1fr))">${CHEAT.map((c, i) => `<article class="nr-card"><div class="nr-cbody">
       <div style="font-size:34px;line-height:1">${c.emoji}</div><h3 class="nr-ctitle" style="margin-top:8px">${e(c.name)}</h3>
@@ -2593,6 +2614,19 @@ function findPlanned(m, fromWord) {
 }
 function handle(text) {
   const t = text.trim().replace(/\s+/g, " "), l = t.toLowerCase(); let m;
+  // favorite cheat meals
+  if (/cheat/.test(l) && /(add|save|create|put|favou?rite|new)/.test(l) && !/(plan|week|grocery|groceries)/.test(l)) {
+    let nm = null;
+    if ((m = t.match(/(?:add|save|create|put)\s+(?:a\s+|an\s+)?(?:new\s+)?(?:favou?rite\s+)?cheat\s*(?:day\s*)?(?:meals?|foods?|treats?)\s*(?:called|named|:|-)?\s*(.+)$/i))) nm = m[1];
+    else if ((m = t.match(/(?:add|save|put)\s+(.+?)\s+(?:to|as|in|into|on)\s+(?:my\s+)?(?:favou?rite\s+)?cheat\s*(?:day\s*)?(?:meals?|foods?|treats?|list|page)?\s*$/i))) nm = m[1];
+    else if ((m = t.match(/my\s+favou?rite\s+cheat\s*(?:day\s*)?(?:meals?|foods?|treats?)\s+(?:is|are|:)\s*(.+)$/i))) nm = m[1];
+    if (nm) {
+      const calM = nm.match(/(\d{2,4})\s*(?:calories|kcal|cal)\b/i), cal = calM ? +calM[1] : null; nm = nm.replace(/[,(]?\s*(?:at\s+|about\s+|around\s+)?\d{2,4}\s*(?:calories|kcal|cal)\b\)?/i, "").replace(/["“”]/g, "").trim();
+      const names = splitList(nm).filter(Boolean), made = [];
+      for (const n of names) made.push(addCheatMeal(n, [], names.length === 1 ? cal : null).name);
+      if (made.length) return say(`Added ${made.join(", ")} to your cheat meals.${cal && names.length === 1 ? ` (${cal} cal)` : ""} You can add ${made.length > 1 ? "them" : "it"} to your cheat day from the Cheat Day page.`, [{ label:"Open Cheat Day", do:"go", arg:"cheat" }]);
+    }
+  }
   // several meals at once
   if ((m = t.match(/^(?:please\s+)?(?:add|create|make|save)\s+(?:these|the following|some|new)?\s*meals?\s*(?:to|in|into)?\s*(?:my\s+)?(?:meals|meal book|library)?\s*:\s*(.+)$/i))) {
     const made = [], skipped = [];
@@ -2864,6 +2898,11 @@ document.addEventListener("click", ev => {
       let m = S.meals.find(x => x.name === c.name);
       if (!m) { m = { id:uid(), name:c.name, tags:["Cheat Day"], cal:c.cal, calEst:false, pro:c.pro, time:0, ing:c.ing.map(x => seedIng(x[0], x[1])), desc:c.desc, photo:null, emoji:c.emoji }; S.meals.push(m); if (!S.cats.includes("Cheat Day")) S.cats.push("Cheat Day"); }
       addToPlan(m.id, cheatDate(), "Other"); toast(`Added to ${DAYS[cheatDate().getDay()]}`); renderCheat(); break; }
+    case "cheat-new": addCheatModal(); break;
+    case "cheat-save": { const nm = $("nr-ch-name").value.trim(); if (!nm) { toast("Give it a name"); break; } const c = $("nr-ch-cal").value;
+      const m = addCheatMeal(nm, $("nr-ch-ing").value.trim() ? splitList($("nr-ch-ing").value) : [], c !== "" ? +c : null); closeModal(); toast(`Added “${m.name}” to your cheat meals`); renderCheat(); break; }
+    case "cheat-fav-add": { addToPlan(d.id, cheatDate(), "Other"); toast(`Added to ${DAYS[cheatDate().getDay()]}`); renderCheat(); break; }
+    case "cheat-fav-del": { const m = meal(d.id); if (!m) break; S.meals = S.meals.filter(x => x.id !== d.id); for (const k of Object.keys(S.plan)) S.plan[k] = S.plan[k].filter(x => x.mealId !== d.id); save(); renderCheat(); toast(`Removed “${m.name}”`); break; }
     case "cheat-clear": { const k = iso(cheatDate()); S.plan[k] = (S.plan[k] || []).filter(x => !(meal(x.mealId) || { tags:[] }).tags.includes("Cheat Day")); save(); renderCheat(); break; }
     case "g-from-plan": { const r = addPlanToGrocery(weekStartOf(new Date())); renderGrocery(); toast(r.meals ? `From ${r.meals} planned meal${r.meals > 1 ? "s" : ""}: ${r.added} new, ${r.merged} combined` : "No meals on this week’s plan yet"); break; }
     case "combine": { const n = combineDuplicates(); save(); renderGrocery(); toast(n ? `Combined ${n} duplicate${n > 1 ? "s" : ""}` : "No duplicates found"); break; }
