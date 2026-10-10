@@ -2288,9 +2288,9 @@ function recipeMeal2(r) {
   const presets = r.presets.map(p => { const ing = p.ing.map(recipeIng), n = calcNutr({ servings:p.servings }, ing, () => false);
     return { key:p.key, label:p.label, portion:p.portion, meal:p.meal, limit:p.limit, servings:p.servings, ing, highlights:p.highlights, sum:{ cal:Math.round(n.v[0]), pro:Math.round(n.v[1]) } }; });
   const p0 = presets[0], n = calcNutr({ servings:p0.servings }, p0.ing, () => false);
-  return { id:uid(), name:r.name, tags:[...new Set([...r.meals, ...r.tags])], cal:Math.round(n.v[0]), calEst:true, pro:Math.round(n.v[1]), time:r.prep + r.cook, ing:p0.ing, desc:r.desc, photo:"images/recipes/" + r.key + ".jpg",
+  return { id:uid(), name:r.name, tags:[...new Set([...r.meals, ...r.tags])], cal:Math.round(n.v[0]), calEst:true, pro:Math.round(n.v[1]), time:r.prep + r.cook, ing:p0.ing, desc:r.desc, photo:null,
     r:{ key:r.key, v2:true, calc:true, rev:REV, presets, preset:p0.key, servings:p0.servings, unit:"serving", unitPl:"servings", step:1, prep:r.prep, cook:String(r.cook), difficulty:r.difficulty, equipment:r.equipment,
-        cal:n.cal, pro:n.pro, carbs:n.carbs, fat:n.fat, fiber:n.fiber, steps:r.steps, highlights:p0.highlights, cost:"", storage:r.storage, reheat:r.reheat, safety:r.safety, notes:r.notes || [], credit:RECIPE_CREDITS[r.key] || null } };
+        cal:n.cal, pro:n.pro, carbs:n.carbs, fat:n.fat, fiber:n.fiber, steps:r.steps, highlights:p0.highlights, cost:"", storage:r.storage, reheat:r.reheat, safety:r.safety, notes:r.notes || [], credit:null } };
 }
 const presetOf = m => m.r && m.r.presets ? (m.r.presets.find(q => q.key === m.r.preset) || m.r.presets[0]) : null;
 const presetFor = (m, slot) => m.r && m.r.presets ? (m.r.presets.find(q => q.meal === slot) || presetOf(m)).key : null;
@@ -2745,7 +2745,7 @@ function renderDetails() {
         <div class="nr-detail-actions">
           <button class="nr-btn" data-act="add-meal" data-id="${m.id}">${ic("calendar")}Add to Plan</button>
           <button class="nr-btn light" data-act="m-grocery" data-id="${m.id}">${ic("cart")}Add to Grocery</button>
-          <button class="nr-btn light" data-act="edit-meal" data-id="${m.id}">${ic("edit")}Edit</button>
+          ${m.r ? `<button class="nr-btn light" data-act="m-photo" data-id="${m.id}">${ic("edit")}${m.photo ? "Change photo" : "Add your photo"}</button>${m.photo && m.photo.startsWith("data:") && m.r.v2 ? `<button class="nr-btn light" data-act="m-photo-del" data-id="${m.id}">Remove photo</button>` : ""}<input type="file" accept="image/*" id="nr-m-photo2" hidden>` : `<button class="nr-btn light" data-act="edit-meal" data-id="${m.id}">${ic("edit")}Edit</button>`}
           <button class="nr-btn light danger" data-act="del-meal" data-id="${m.id}">${ic("trash")}Delete</button>
         </div>
         ${upcoming.length ? `<p class="nr-muted">On your plan: ${e(upcoming.join(", "))}</p>` : ""}
@@ -3248,6 +3248,8 @@ document.addEventListener("click", ev => {
       save(); closeModal(); toast(`Grocery list updated from ${n} meal${n === 1 ? "" : "s"}: ${added} new, ${merged} combined`); go("grocery"); break; }
     case "sel-plan": selPlanModal(); break;
     case "sel-plan-do": { const day = parseISO($("nr-sp-day").value), slot = $("nr-sp-slot").value; S.sel.forEach(id => addToPlan(id, day, slot)); closeModal(); toast(`Added ${S.sel.length} to ${dayLabel(day)}`); render(); break; }
+    case "m-photo": { const inp = $("nr-m-photo2"); if (inp) { inp.dataset.id = d.id; inp.click(); } break; }
+    case "m-photo-del": { const m = meal(d.id); if (m) { m.photo = null; save(); renderDetails(); toast("Photo removed"); } break; }
     case "r-preset": { const m = meal(d.id); if (m && m.r && m.r.presets) { setPreset(m, d.k); renderDetails(); } break; }
     case "g-copy": { const txt = groceryText(); if (navigator.share) { navigator.share({ title:"Grocery list", text:txt }).catch(() => {}); break; }
       const done = () => toast("Grocery list copied"); if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(txt).then(done, () => { fallbackCopy(txt); done(); }); else { fallbackCopy(txt); done(); } break; }
@@ -3257,7 +3259,7 @@ document.addEventListener("click", ev => {
     case "r-serv": { const m = meal(d.id); if (!m || !m.r) break; const st = m.r.step || 1, n = Math.max(m.r.v2 ? 1 : m.r.servings, Math.min(Math.max(12, m.r.servings * 6), servOf(m) + +d.d * st)); ui.scale[m.id] = n; renderDetails(); break; }
     case "r-opt": { const m = meal(d.id); if (!m) break; const set = ui.opt[m.id] = ui.opt[m.id] || new Set(); const i = +d.i; if (set.has(i)) set.delete(i); else set.add(i); renderDetails(); break; }
     case "m-grocery": closePop(); mealToGrocery(d.id); if (!modal.hidden && modal.querySelector(".nr-dbox")) closeModal(); render(); break;
-    case "meal-menu": showPop(a, `<button data-act="add-meal" data-id="${d.id}">${ic("calplus")}Add to Plan</button><button data-act="m-grocery" data-id="${d.id}">${ic("cart")}Add to Grocery</button><button data-act="edit-meal" data-id="${d.id}">${ic("edit")}Edit</button><button class="danger" data-act="del-meal" data-id="${d.id}">${ic("trash")}Delete</button>`); break;
+    case "meal-menu": showPop(a, `<button data-act="add-meal" data-id="${d.id}">${ic("calplus")}Add to Plan</button><button data-act="m-grocery" data-id="${d.id}">${ic("cart")}Add to Grocery</button>${meal(d.id) && meal(d.id).r ? `<button data-act="open-full" data-id="${d.id}">${ic("edit")}Add your photo</button>` : `<button data-act="edit-meal" data-id="${d.id}">${ic("edit")}Edit</button>`}<button class="danger" data-act="del-meal" data-id="${d.id}">${ic("trash")}Delete</button>`); break;
     case "dup-meal": { closePop(); const m = meal(d.id), c = JSON.parse(JSON.stringify(m)); c.id = uid(); c.name += " (copy)"; S.meals.splice(S.meals.indexOf(m) + 1, 0, c); save(); render(); toast("Duplicated"); break; }
     case "del-meal": closePop(); deleteMeal(d.id); if (ui.page === "meal-details") go("meals"); else render(); break;
     case "pick-meal": pickMeal(d.date); break;
@@ -3348,6 +3350,7 @@ document.addEventListener("input", ev => {
 });
 document.addEventListener("change", ev => {
   const id = ev.target.id;
+  if (id === "nr-m-photo2" && ev.target.files[0]) { const mm = meal(ev.target.dataset.id); photoToData(ev.target.files[0], dd => { if (mm) { mm.photo = dd; save(); renderDetails(); toast("Photo added"); } }); }
   if (id === "nr-m-photo" && ev.target.files[0]) photoToData(ev.target.files[0], d => { ui.form.photo = d; $("nr-m-url").value = ""; paintPrev(); toast("Photo added"); });
   else if (ev.target.dataset && ev.target.dataset.cat != null) {
     const i = +ev.target.dataset.cat, old = S.cats[i], v = ev.target.value.trim();
