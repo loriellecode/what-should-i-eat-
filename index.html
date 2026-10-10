@@ -391,6 +391,11 @@ select.nr-input { appearance:none; -webkit-appearance:none; background:#fff url(
 #coach .nutg-row b{font-size:1.05rem; font-weight:500;}
 #coach .nutg-row span{color:var(--soft);}
 @media (max-width:560px){#coach .nutg-head{display:none;} #coach .nutg-row{grid-template-columns:1fr; gap:3px;}}
+.nr-coll { margin-top:30px; }
+.nr-collhead { display:flex; align-items:baseline; gap:12px; flex-wrap:wrap; margin-bottom:12px; }
+.nr-collhead h2 { margin:0; font-size:21px; font-weight:700; letter-spacing:-.02em; }
+.nr-rail { display:flex; gap:16px; overflow-x:auto; padding:2px 2px 14px; scroll-snap-type:x proximity; scrollbar-width:thin; }
+.nr-rail .nr-card { flex:0 0 250px; scroll-snap-align:start; }
 /* Plan: photo tiles with stickers, no cards */
 .nr-daybody { gap:10px; }
 .nr-pm { display:block; position:relative; padding:0; border:0; background:none; border-radius:14px; aspect-ratio:4 / 3; overflow:hidden; cursor:grab; box-shadow:0 1px 3px rgba(0,0,0,.12); }
@@ -744,7 +749,7 @@ select.nr-input { appearance:none; -webkit-appearance:none; background:#fff url(
           <h1 class="nr-h1">Meals</h1>
           <p class="nr-sub">Your saved meals and recipes.</p>
         </div>
-        <button class="nr-btn" data-act="new-meal"><svg class="i" data-ic="plus" viewBox="0 0 24 24"></svg>New Meal</button>
+        <div style="display:flex;gap:10px;flex-wrap:wrap"><button class="nr-btn light" data-nr="discover"><svg class="i" data-ic="compass" viewBox="0 0 24 24"></svg>Discover</button><button class="nr-btn" data-act="new-meal"><svg class="i" data-ic="plus" viewBox="0 0 24 24"></svg>New Meal</button></div>
       </div>
       <div class="nr-field" style="max-width:447px;flex:none"><svg class="i" data-ic="search" viewBox="0 0 24 24"></svg><input class="nr-input" id="nr-meal-q" placeholder="Search meals..." autocomplete="off"></div>
       <div class="nr-chips" id="nr-chips"></div>
@@ -824,6 +829,7 @@ select.nr-input { appearance:none; -webkit-appearance:none; background:#fff url(
 
     <section class="nr-page nr-narrow" data-page="meal-details" hidden id="nr-p-meal-details"></section>
     <section class="nr-page nr-narrow" data-page="add-meal" hidden id="nr-p-add-meal"></section>
+    <section class="nr-page" data-page="discover" hidden id="nr-p-discover"></section>
     <section class="nr-page nr-narrow" data-page="settings" hidden id="nr-p-settings"></section>
     <section class="nr-page nr-narrow" data-page="customize" hidden id="nr-p-customize"></section>
     <section class="nr-page nr-narrow" data-page="nutrition-summary" hidden id="nr-p-nutrition-summary"></section>
@@ -2048,6 +2054,7 @@ const cap = s => s ? s[0].toUpperCase() + s.slice(1) : s;
 
 // ---------- icons ----------
 const IC = {
+  compass: '<circle cx="12" cy="12" r="9"/><path d="m15.5 8.5-2 5-5 2 2-5z"/>',
   calendar: '<rect x="3" y="4" width="18" height="18" rx="3"/><path d="M16 2v4M8 2v4M3 10h18"/><path d="M8 14h.01M12 14h.01M16 14h.01M8 18h.01M12 18h.01"/>',
   fork: '<path d="M5 3v7a2.5 2.5 0 0 0 2.5 2.5V21M9.5 3v7.5M5 3v0M13 3c-2.2 1.6-3 4.4-3 7.5h3V21"/><path d="M19 3v18M19 3c-1.8 1.4-2.5 4-2.5 7H19"/>',
   cart: '<circle cx="9" cy="20" r="1.5"/><circle cx="18" cy="20" r="1.5"/><path d="M2 3h3l2.6 12.2a1 1 0 0 0 1 .8H18a1 1 0 0 0 1-.8L21 7H6"/>',
@@ -2250,10 +2257,10 @@ function addPlanToGrocery(start) {
 }
 
 // ---------- rendering ----------
-const PAGES = ["home", "meals", "plan", "grocery", "assistant", "meal-details", "add-meal", "settings", "nutrition-summary", "meal-categories", "pantry-inventory", "cheat", "customize"];
+const PAGES = ["home", "meals", "plan", "grocery", "assistant", "meal-details", "add-meal", "settings", "nutrition-summary", "meal-categories", "pantry-inventory", "cheat", "customize", "discover"];
 const MORE_PAGES = ["nutrition-summary", "meal-categories", "pantry-inventory", "cheat"];
 function render() {
-  ({ home:renderHome, meals:renderMeals, plan:renderPlan, grocery:renderGrocery, assistant:renderChat, "meal-details":renderDetails, "add-meal":renderForm, settings:renderSettings, customize:renderCustomize,
+  ({ home:renderHome, meals:renderMeals, plan:renderPlan, grocery:renderGrocery, assistant:renderChat, "meal-details":renderDetails, "add-meal":renderForm, settings:renderSettings, customize:renderCustomize, discover:renderDiscover,
     "nutrition-summary":renderSummary, "meal-categories":renderCats, "pantry-inventory":renderPantry, cheat:renderCheat }[ui.page] || renderHome)();
 }
 const viewBtn = (m, inner) => `<button class="nr-link" data-act="view-meal" data-id="${m.id}">${inner}</button>`;
@@ -2310,16 +2317,38 @@ const FILTERS = {
   "Dinner": m => m.tags.includes("Dinner"),
   "Smoothies & Snacks": m => m.tags.includes("Smoothies") || m.tags.includes("Snacks")
 };
+const mealCard = m => `<article class="nr-card">
+      <div class="nr-photo">${viewBtn(m, photoHTML(m))}<button class="nr-btn nr-circle nr-add" data-act="add-meal" data-id="${m.id}" aria-label="Add to plan">${ic("plus")}</button>${m.tags[0] ? `<span class="nr-tag">${e(m.tags[0])}</span>` : ""}</div>
+      <div class="nr-cbody"><h3 class="nr-ctitle">${viewBtn(m, e(m.name))}</h3>
+        <div class="nr-crow"><span class="nr-pill">${calText(m)}</span><button class="nr-dots" data-act="meal-menu" data-id="${m.id}" aria-label="More">${ic("dots")}</button></div>
+        <p class="nr-desc">${e(m.desc && !m.desc.startsWith("*") ? m.desc : m.ing.map(ingText).join(", ") || m.desc || "")}</p>${nutHTML(m)}</div></article>`;
+// ----- Discover: collections of meals -----
+const SUGARY = /honey|banana|mango|pineapple|juice|sugar|syrup|maple|dates?\b|agave|ice cream|chocolate|granola|raisin|jam|jelly|peanut butter banana/;
+const lowSugar = m => !SUGARY.test(m.ing.map(i => i.name.toLowerCase()).join(" | ") + " " + m.name.toLowerCase());
+const isSmoothie = m => m.tags.includes("Smoothies");
+const COLLECTIONS = [
+  { t:"Five-minute meals", sub:"Ready in 5 minutes or less.", f:m => +m.time > 0 && +m.time <= 5 && !isSmoothie(m), sort:(a, b) => a.time - b.time },
+  { t:"15–25 minute meals", sub:"A little more effort, still weeknight-friendly.", f:m => +m.time >= 15 && +m.time <= 25 && !isSmoothie(m), sort:(a, b) => a.time - b.time },
+  { t:"Healthiest meals", sub:"Ranked by how many of your key nutrients they cover.", f:m => nutrientsOf(m).length >= 4 && !m.tags.includes("Cheat Day"), sort:(a, b) => nutrientsOf(b).length - nutrientsOf(a).length || (+b.pro || 0) - (+a.pro || 0) },
+  { t:"Protein smoothies", sub:"15 g protein or more per smoothie.", f:m => isSmoothie(m) && (+m.pro >= 15 || /protein/i.test(m.name)), sort:(a, b) => (+b.pro || 0) - (+a.pro || 0) },
+  { t:"Low-sugar smoothies", sub:"No honey, banana, mango, juice or other sugary add-ins.", f:m => isSmoothie(m) && lowSugar(m), sort:(a, b) => (+a.cal || 0) - (+b.cal || 0) },
+  { t:"High-protein meals", sub:"30 g protein or more.", f:m => +m.pro >= 30 && !isSmoothie(m), sort:(a, b) => (+b.pro || 0) - (+a.pro || 0) },
+  { t:"Under 300 calories", sub:"Light meals and snacks.", f:m => +m.cal > 0 && +m.cal < 300 && !m.tags.includes("Hydration"), sort:(a, b) => (+a.cal || 0) - (+b.cal || 0) },
+  { t:"Meal-prep favorites", sub:"Cook once, eat all week.", f:m => m.tags.some(t => /meal prep/i.test(t)), sort:(a, b) => (+b.pro || 0) - (+a.pro || 0) }
+];
+function renderDiscover() {
+  const sets = COLLECTIONS.map(c => ({ c, list:S.meals.filter(m => !m.tags.includes("Hydration") && c.f(m)).sort(c.sort).slice(0, 12) })).filter(x => x.list.length);
+  $("nr-p-discover").innerHTML = `<button class="nr-back" data-nr="meals">${ic("left")}Meals</button>` + head("compass", "Discover", "Discover meals", "Collections to browse. Tap a meal to open it, or + to add it to your plan.") +
+    (sets.length ? sets.map(({ c, list }) => `<section class="nr-coll"><div class="nr-collhead"><h2>${e(c.t)}</h2><span class="nr-muted">${list.length} meal${list.length === 1 ? "" : "s"} · ${e(c.sub)}</span></div>
+      <div class="nr-rail">${list.map(mealCard).join("")}</div></section>`).join("") : `<div class="nr-empty">Add some meals and collections will show up here.</div>`);
+}
+
 function renderMeals() {
   if (!FILTERS[ui.tag]) ui.tag = "All";
   $("nr-chips").innerHTML = Object.keys(FILTERS).map(t => `<button class="nr-chip ${ui.tag === t ? "on" : ""}" data-act="tag" data-tag="${e(t)}">${e(t)}</button>`).join("");
   const q = ui.q.trim().toLowerCase();
   const list = S.meals.filter(m => FILTERS[ui.tag](m) && (!q || m.name.toLowerCase().includes(q) || m.ing.some(i => i.name.toLowerCase().includes(q)) || m.tags.some(t => t.toLowerCase().includes(q))));
-  $("nr-grid").innerHTML = list.length ? list.map(m => `<article class="nr-card">
-      <div class="nr-photo">${viewBtn(m, photoHTML(m))}<button class="nr-btn nr-circle nr-add" data-act="add-meal" data-id="${m.id}" aria-label="Add to plan">${ic("plus")}</button>${m.tags[0] ? `<span class="nr-tag">${e(m.tags[0])}</span>` : ""}</div>
-      <div class="nr-cbody"><h3 class="nr-ctitle">${viewBtn(m, e(m.name))}</h3>
-        <div class="nr-crow"><span class="nr-pill">${calText(m)}</span><button class="nr-dots" data-act="meal-menu" data-id="${m.id}" aria-label="More">${ic("dots")}</button></div>
-        <p class="nr-desc">${e(m.desc && !m.desc.startsWith("*") ? m.desc : m.ing.map(ingText).join(", ") || m.desc || "")}</p>${nutHTML(m)}</div></article>`).join("")
+  $("nr-grid").innerHTML = list.length ? list.map(mealCard).join("")
     : `<div class="nr-empty" style="grid-column:1/-1">No meals match.<br><button class="nr-btn" data-act="new-meal">${ic("plus")}New Meal</button></div>`;
 }
 
@@ -2853,7 +2882,7 @@ function go(name, push = true) {
   if (!coach && ui.page !== name && !["meal-details", "add-meal"].includes(ui.page)) ui.back = ui.page;
   document.querySelectorAll(".nr-page").forEach(p => p.hidden = coach || p.dataset.page !== name);
   $("coach").hidden = !coach; $("nr-main").hidden = coach;
-  const tab = coach ? "coach" : name === "nutrition-summary" ? "plan" : name === "pantry-inventory" ? "grocery" : ["meal-details", "add-meal"].includes(name) ? "meals" : name;
+  const tab = coach ? "coach" : name === "nutrition-summary" ? "plan" : name === "pantry-inventory" ? "grocery" : ["meal-details", "add-meal", "discover"].includes(name) ? "meals" : name;
   document.querySelectorAll("#nr-tabs > button").forEach(b => b.classList.toggle("on", b.dataset.nr === tab));
   const editing = name === "add-meal" && ui.editId;
   if (editing) document.querySelectorAll("#nr-tabs > button").forEach(b => b.classList.toggle("on", b.dataset.nr === "meals"));
