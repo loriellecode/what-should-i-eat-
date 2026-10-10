@@ -642,7 +642,6 @@ select.nr-input { appearance:none; -webkit-appearance:none; background:#fff url(
       <button data-nr="coach">Daily Coach</button>
       <button data-nr="nutrition-summary">Nutrition</button>
       <button data-nr="recipe-ingredients">Recipes</button>
-      <button data-nr="meal-categories">Categories</button>
       <button data-nr="cheat">Cheat Day</button>
       <button data-nr="pantry-inventory">Pantry</button>
       <button data-nr="add-meal">Add Meal</button>
@@ -740,6 +739,7 @@ select.nr-input { appearance:none; -webkit-appearance:none; background:#fff url(
     <section class="nr-page nr-narrow" data-page="meal-details" hidden id="nr-p-meal-details"></section>
     <section class="nr-page nr-narrow" data-page="add-meal" hidden id="nr-p-add-meal"></section>
     <section class="nr-page nr-narrow" data-page="settings" hidden id="nr-p-settings"></section>
+    <section class="nr-page nr-narrow" data-page="customize" hidden id="nr-p-customize"></section>
     <section class="nr-page nr-narrow" data-page="nutrition-summary" hidden id="nr-p-nutrition-summary"></section>
     <section class="nr-page nr-narrow" data-page="recipe-ingredients" hidden id="nr-p-recipe-ingredients"></section>
     <section class="nr-page nr-narrow" data-page="meal-categories" hidden id="nr-p-meal-categories"></section>
@@ -2155,10 +2155,10 @@ function addPlanToGrocery(start) {
 }
 
 // ---------- rendering ----------
-const PAGES = ["home", "meals", "plan", "grocery", "assistant", "meal-details", "add-meal", "settings", "nutrition-summary", "recipe-ingredients", "meal-categories", "pantry-inventory", "cheat"];
+const PAGES = ["home", "meals", "plan", "grocery", "assistant", "meal-details", "add-meal", "settings", "nutrition-summary", "recipe-ingredients", "meal-categories", "pantry-inventory", "cheat", "customize"];
 const MORE_PAGES = ["nutrition-summary", "recipe-ingredients", "meal-categories", "pantry-inventory", "cheat", "add-meal"];
 function render() {
-  ({ home:renderHome, meals:renderMeals, plan:renderPlan, grocery:renderGrocery, assistant:renderChat, "meal-details":renderDetails, "add-meal":renderForm, settings:renderSettings,
+  ({ home:renderHome, meals:renderMeals, plan:renderPlan, grocery:renderGrocery, assistant:renderChat, "meal-details":renderDetails, "add-meal":renderForm, settings:renderSettings, customize:renderCustomize,
     "nutrition-summary":renderSummary, "recipe-ingredients":renderRecipe, "meal-categories":renderCats, "pantry-inventory":renderPantry, cheat:renderCheat }[ui.page] || renderHome)();
 }
 const viewBtn = (m, inner) => `<button class="nr-link" data-act="view-meal" data-id="${m.id}">${inner}</button>`;
@@ -2385,7 +2385,11 @@ function saveMealForm() {
 
 // ----- Settings -----
 function renderSettings() {
-  $("nr-p-settings").innerHTML = head("gear", "Settings", "App Settings", "Saved on this device.") + `
+  $("nr-p-settings").innerHTML = head("gear", "Settings", "Settings", "Saved on this device.") + `
+    <div class="nr-setlinks">${SETTINGS_LINKS.map(([k, t, sub]) => `<button class="nr-setlink" data-nr="${k}"><span><b>${e(t)}</b><small>${e(sub)}</small></span>${ic("right")}</button>`).join("")}</div>`;
+}
+function renderCustomize() {
+  $("nr-p-customize").innerHTML = `<button class="nr-back" data-nr="settings">${ic("left")}Settings</button>` + head("gear", "Settings", "Customize App", "Week start, daily calories and protein.") + `
     <div class="nr-form">
       <label for="nr-s-week">Planning week starts on</label>
       <select class="nr-input sq" id="nr-s-week">${DAYS.map((d, i) => `<option value="${i}" ${i === (S.settings.weekStart ?? 3) ? "selected" : ""}>${d}</option>`).join("")}</select>
@@ -2396,26 +2400,11 @@ function renderSettings() {
       <p class="nr-muted">The calorie max is shared with Daily Coach, which never plans a day over it.</p>
       <div class="actions" style="justify-content:space-between"><div style="display:flex;gap:10px;flex-wrap:wrap"><button type="button" class="nr-btn light sm" data-act="reset-sample">Reset to sample meals</button><button type="button" class="nr-btn light sm" data-act="clear-plan">Clear plan</button></div>
         <button type="button" class="nr-btn" data-act="s-save">Save</button></div>
-    </div>
-    <h2 style="margin:36px 0 6px;font-size:20px;font-weight:700;letter-spacing:-.01em">Everything in the app</h2>
-    <p class="nr-muted" style="margin:0 0 14px">Tap any page to open it.</p>
-    <div class="nr-setlinks">${SETTINGS_LINKS.map(([k, t, sub]) => `<button class="nr-setlink" data-nr="${k}"><span><b>${e(t)}</b><small>${e(sub)}</small></span>${ic("right")}</button>`).join("")}</div>`;
+    </div>`;
 }
 const SETTINGS_LINKS = [
-  ["home", "Home", "Today’s meals and totals"],
-  ["meals", "Meals", "Your saved meals and recipes"],
-  ["plan", "Plan", "Drag meals onto your week"],
-  ["grocery", "Grocery", "Your list, plus what’s in your kitchen"],
-  ["assistant", "Help Me Healthy", "Ask for ideas, swaps and plans"],
-  ["coach-today", "Daily Coach · Today", "Tell it what you’re craving, get 3 plans"],
-  ["coach-move", "Daily Coach · Move", "Guided workouts"],
-  ["coach-setup", "Daily Coach · Setup", "Calorie cap, dumbbells, likes and dislikes"],
-  ["nutrition-summary", "Nutrition", "Weekly calories for each day"],
-  ["recipe-ingredients", "Recipes", "Ingredient list for prep"],
-  ["meal-categories", "Categories", "Make and rename your own"],
-  ["cheat", "Cheat Day", "One planned day off the calorie cap"],
-  ["pantry-inventory", "Pantry", "Staples you already have at home"],
-  ["add-meal", "Add Meal", "Name, calories, category, photo"]
+  ["customize", "Customize App", "Week start, daily calories and protein goal"],
+  ["meal-categories", "Categories", "Make and rename your own"]
 ];
 
 // ----- Weekly Nutrition Summary -----
@@ -2748,7 +2737,7 @@ function go(name, push = true) {
   const editing = name === "add-meal" && ui.editId;
   if (editing) document.querySelectorAll("#nr-tabs > button").forEach(b => b.classList.toggle("on", b.dataset.nr === "meals"));
   { const on = document.querySelector("#nr-tabs > button.on"); if (on && on.scrollIntoView) on.scrollIntoView({ block:"nearest", inline:"nearest" }); }
-  $("nr-settings-btn").classList.toggle("on", name === "settings");
+  $("nr-settings-btn").classList.toggle("on", ["settings", "customize", "meal-categories"].includes(name));
   if (coach) { const t = name.split("-")[1] || "today"; showTab(t); }
   else { ui.page = name; render(); }
   if (push) { try { history.replaceState(null, "", "#" + name); } catch {} }
