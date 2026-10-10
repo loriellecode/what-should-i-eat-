@@ -258,6 +258,29 @@ select.nr-input { appearance:none; -webkit-appearance:none; background:#fff url(
 .nr-inkbar button.sz span { display:block; border-radius:50%; background:currentColor; }
 .nr-inkbar svg.i { width:18px; height:18px; }
 
+
+/* small blue accents, the same blue as Daily Coach */
+:root { --n-accent:#3a5df8; --n-accent-soft:#eef1ff; }
+.nr-eyebrow svg.i, .nr-eyebrow span { color:var(--n-accent); }
+.nr-input:focus { border-color:var(--n-accent); box-shadow:0 0 0 3px rgba(58,93,248,.15); }
+.nr-bar i { background:var(--n-accent); } .nr-bar i.over { background:var(--n-red); }
+.nr-day.today { border-color:var(--n-accent); } .nr-day.today .nr-dayhead { background:var(--n-accent-soft); } .nr-day.today .nr-dayhead em { color:var(--n-accent); font-weight:600; }
+.nr-check.on { background:var(--n-accent); border-color:var(--n-accent); }
+.nr-rowbtn.on { color:var(--n-accent); }
+.nr-badge { background:var(--n-accent-soft); color:var(--n-accent); }
+.nr-dh svg.i { color:var(--n-accent); }
+.nr-dh .nr-link:hover, .nr-link[data-act="open-full"]:hover { color:var(--n-accent); }
+.nr-coachlink { background:var(--n-accent-soft); } .nr-coachlink b { color:var(--n-accent); }
+.nr-chip:hover, .nr-tagpick button:hover { border-color:var(--n-accent); }
+.nr-mealchip:hover { color:var(--n-accent); }
+.nr-pm:hover { border-color:#c7d0ff; }
+.nr-daycol.drop .nr-day { outline-color:var(--n-accent); }
+.nr-pop button:hover, .nr-menu button:hover { background:var(--n-accent-soft); }
+.nr-pop button.danger:hover { background:#fef2f2; }
+.nr-dayadd:hover { border-color:var(--n-accent); color:var(--n-accent); background:var(--n-accent-soft); }
+.nr-msg.user { background:var(--n-accent); }
+.nr-sug:hover { background:var(--n-accent-soft); }
+
 /* meal library panel on Plan */
 .nr-lib { position:fixed; top:0; right:0; bottom:0; width:min(360px, 92vw); z-index:45; background:#fff; border-left:1px solid var(--n-line); box-shadow:-20px 0 40px rgba(0,0,0,.08); display:flex; flex-direction:column; gap:10px; padding:16px 16px 0; }
 .nr-lib[hidden] { display:none; }
