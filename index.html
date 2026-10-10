@@ -383,6 +383,14 @@ select.nr-input { appearance:none; -webkit-appearance:none; background:#fff url(
 #coach .dp-change{background:transparent; color:#fff; border:1px solid rgba(255,255,255,.7); border-radius:999px; padding:9px 18px; font:inherit; font-size:.9rem; cursor:pointer;}
 #coach .dp-change:hover{background:rgba(255,255,255,.16);}
 #coach #dayplans{margin-top:18px;}
+#coach .nutg{background:var(--glass); border:1px solid var(--line); border-radius:18px; padding:6px 22px; max-width:820px;}
+#coach .nutg-head, #coach .nutg-row{display:grid; grid-template-columns:minmax(120px,210px) 1fr; gap:18px; padding:14px 0; align-items:baseline;}
+#coach .nutg-head{font-size:.72rem; letter-spacing:.14em; text-transform:uppercase; color:var(--muted); border-bottom:1px solid var(--line);}
+#coach .nutg-row{border-top:1px solid var(--line);}
+#coach .nutg-head + .nutg-row{border-top:0;}
+#coach .nutg-row b{font-size:1.05rem; font-weight:500;}
+#coach .nutg-row span{color:var(--soft);}
+@media (max-width:560px){#coach .nutg-head{display:none;} #coach .nutg-row{grid-template-columns:1fr; gap:3px;}}
 /* Plan: photo tiles with stickers, no cards */
 .nr-daybody { gap:10px; }
 .nr-pm { display:block; position:relative; padding:0; border:0; background:none; border-radius:14px; aspect-ratio:4 / 3; overflow:hidden; cursor:grab; box-shadow:0 1px 3px rgba(0,0,0,.12); }
@@ -835,6 +843,7 @@ select.nr-input { appearance:none; -webkit-appearance:none; background:#fff url(
   <nav class="topnav" id="topnav">
     <button data-go="today">Today</button>
     <button data-go="move">Move</button>
+    <button data-go="nutrients">Nutrients</button>
   </nav>
   <div class="topright"><span id="today"></span><button class="btn-outline" data-go="setup">Setup</button></div>
 </header>
@@ -866,6 +875,22 @@ select.nr-input { appearance:none; -webkit-appearance:none; background:#fff url(
   <div class="tab" data-tab="move" hidden>
     <div class="pagehead"><h2>Time to <b>Move</b></h2><p>Exactly what to do. Press START and follow along.</p></div>
     <section id="move" class="groc"></section>
+  </div>
+
+  <div class="tab" data-tab="nutrients" hidden>
+    <div class="pagehead"><h2>Nutrients <b>Guide</b></h2><p>Foods we can build into your meals.</p></div>
+    <section class="nutg">
+      <div class="nutg-head"><span>Nutrient</span><span>Foods we can build into your meals</span></div>
+      <div class="nutg-row"><b>Protein</b><span>Chicken breast, shrimp, Greek yogurt, eggs, cheese</span></div>
+      <div class="nutg-row"><b>Fiber</b><span>Spinach, broccoli, berries, grapes, sweet potatoes</span></div>
+      <div class="nutg-row"><b>Iron</b><span>Spinach, chicken, beans, fortified cereals</span></div>
+      <div class="nutg-row"><b>Magnesium</b><span>Spinach, chia seeds, nuts, beans</span></div>
+      <div class="nutg-row"><b>B12</b><span>Chicken, shrimp, dairy, eggs</span></div>
+      <div class="nutg-row"><b>B6</b><span>Chicken, potatoes, bananas</span></div>
+      <div class="nutg-row"><b>Folate</b><span>Spinach, broccoli, beans</span></div>
+      <div class="nutg-row"><b>Healthy fats</b><span>Chia seeds, olive oil, nuts, avocado</span></div>
+      <div class="nutg-row"><b>Complex carbohydrates</b><span>Sweet potatoes, beans, oats, whole grains</span></div>
+    </section>
   </div>
 
   <div class="tab" data-tab="setup" hidden>
@@ -916,6 +941,7 @@ select.nr-input { appearance:none; -webkit-appearance:none; background:#fff url(
 <nav class="tabbar" id="tabbar">
   <button data-go="today"><span>🏠</span>Today</button>
   <button data-go="move"><span>🏋🏽‍♀️</span>Move</button>
+  <button data-go="nutrients"><span>🥗</span>Nutrients</button>
   <button data-go="setup"><span>⚙️</span>Setup</button>
 </nav>
 
@@ -1872,7 +1898,7 @@ $("run").addEventListener("click", e => {
 
 
 // ---- Tabs + Today overview -----------------------------------------------
-const TABS = ["today", "move", "setup"];
+const TABS = ["today", "move", "nutrients", "setup"];
 function showTab(name) {
   if (name === "groceries") { if (window.__nrGo) window.__nrGo("grocery"); return; }   // blended into the Nourish Grocery page
   const toPlan = name === "eat"; if (toPlan) name = "today";
