@@ -426,8 +426,10 @@ select.nr-input { appearance:none; -webkit-appearance:none; background:#fff url(
 #coach .pagehead h2{margin:0; font-weight:300; font-size:clamp(2rem,6vw,3rem); line-height:1.15; color:var(--soft);}
 #coach .pagehead h2 b{color:#fff; font-weight:600;}
 #coach .pagehead p{margin:6px 0 0; color:var(--soft); max-width:36em; font-size:.95rem;}
+#coach #plan[hidden]{display:none;}
 #coach .slot, #coach .groc, #coach details, #coach .shop, #coach .note{background:var(--glass); border:1px solid var(--line); border-radius:18px;
     -webkit-backdrop-filter:blur(14px); backdrop-filter:blur(14px);}
+#coach #plan[hidden]{display:none;}
 #coach .slot, #coach .groc, #coach details{padding:18px 20px;}
 #coach .slot h2, #coach .groc h2, #coach .kicker{margin:0; font-size:.74rem; letter-spacing:.14em; font-weight:500; color:var(--muted);}
 #coach .slot .say, #coach .groc .say{margin:3px 0 10px; font-weight:500; font-size:1.4rem; line-height:1.25;}
@@ -758,7 +760,7 @@ select.nr-input { appearance:none; -webkit-appearance:none; background:#fff url(
       </div>
       <div class="stack" id="overview"></div>
     </section>
-    <section id="plan"></section>
+    <section id="plan" hidden></section>
   </div>
 
   <div class="tab" data-tab="move" hidden>
