@@ -640,10 +640,8 @@ select.nr-input { appearance:none; -webkit-appearance:none; background:#fff url(
       <button data-nr="grocery">Grocery</button>
       <button data-nr="assistant">Help Me Healthy</button>
       <button data-nr="coach">Daily Coach</button>
-      <button data-nr="nutrition-summary">Nutrition</button>
       <button data-nr="recipe-ingredients">Recipes</button>
       <button data-nr="cheat">Cheat Day</button>
-      <button data-nr="pantry-inventory">Pantry</button>
       <button data-nr="add-meal">Add Meal</button>
     </nav>
     <button class="nr-settings" id="nr-settings-btn" data-nr="settings"><svg class="i" viewBox="0 0 24 24" id="ic-gear"></svg><span>Settings</span></button>
@@ -683,6 +681,7 @@ select.nr-input { appearance:none; -webkit-appearance:none; background:#fff url(
           <button class="nr-btn light sm" data-act="week-now">This week</button>
           <button class="nr-btn light nr-circle" data-act="week-next" aria-label="Next week"><svg class="i" data-ic="right" viewBox="0 0 24 24"></svg></button>
           <button class="nr-btn light sm" data-act="lib-toggle"><svg class="i" data-ic="fork" viewBox="0 0 24 24"></svg>Meal library</button>
+          <button class="nr-btn light sm" data-nr="nutrition-summary"><svg class="i" data-ic="calendar" viewBox="0 0 24 24"></svg>Nutrition</button>
         </div>
       </div>
       <div class="nr-weekwrap" id="nr-week"></div>
@@ -701,7 +700,7 @@ select.nr-input { appearance:none; -webkit-appearance:none; background:#fff url(
         <div class="nr-eyebrow"><svg class="i" data-ic="cart" viewBox="0 0 24 24"></svg><span>Grocery</span></div>
         <h1 class="nr-h1">Grocery List</h1>
         <p class="nr-sub" id="nr-g-sub" hidden></p></div>
-        <button class="nr-btn light sm" data-act="g-from-plan"><svg class="i" data-ic="calendar" viewBox="0 0 24 24"></svg>Add from this week’s plan</button></div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap"><button class="nr-btn light sm" data-nr="pantry-inventory"><svg class="i" data-ic="cart" viewBox="0 0 24 24"></svg>Pantry</button><button class="nr-btn light sm" data-act="g-from-plan"><svg class="i" data-ic="calendar" viewBox="0 0 24 24"></svg>Add from this week’s plan</button></div></div>
       <div class="nr-tools">
         <div class="nr-field"><svg class="i" data-ic="search" viewBox="0 0 24 24"></svg><input class="nr-input" id="nr-g-q" placeholder="Search ingredients..." autocomplete="off"></div>
         <form class="addwrap" id="nr-g-form"><input class="nr-input" id="nr-g-add" placeholder="Add an item..." autocomplete="off"><button class="nr-btn nr-circle" type="submit" aria-label="Add"><svg class="i" data-ic="plus" viewBox="0 0 24 24"></svg></button></form>
@@ -2732,7 +2731,7 @@ function go(name, push = true) {
   if (!coach && ui.page !== name && !["meal-details", "add-meal"].includes(ui.page)) ui.back = ui.page;
   document.querySelectorAll(".nr-page").forEach(p => p.hidden = coach || p.dataset.page !== name);
   $("coach").hidden = !coach; $("nr-main").hidden = coach;
-  const tab = coach ? "coach" : ["meal-details", "add-meal", "recipe-ingredients", "meal-categories"].includes(name) && !MORE_PAGES.includes(name) ? "meals" : name;
+  const tab = coach ? "coach" : name === "nutrition-summary" ? "plan" : name === "pantry-inventory" ? "grocery" : ["meal-details", "add-meal", "recipe-ingredients", "meal-categories"].includes(name) && !MORE_PAGES.includes(name) ? "meals" : name;
   document.querySelectorAll("#nr-tabs > button").forEach(b => b.classList.toggle("on", b.dataset.nr === tab));
   const editing = name === "add-meal" && ui.editId;
   if (editing) document.querySelectorAll("#nr-tabs > button").forEach(b => b.classList.toggle("on", b.dataset.nr === "meals"));
