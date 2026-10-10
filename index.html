@@ -349,11 +349,19 @@ select.nr-input { appearance:none; -webkit-appearance:none; background:#fff url(
 .nr-dayadd { margin:0 8px 8px; width:calc(100% - 16px); height:34px; font-size:13px; }
 .nr-day .nr-none { padding:14px 0; }
 /* Grocery: list on the left, Daily Coach kitchen panel on the right */
-.nr-gwrap { display:grid; grid-template-columns:minmax(0, 1fr) 370px; gap:28px; align-items:start; margin-top:6px; }
-@media (max-width:1000px){ .nr-gwrap { grid-template-columns:1fr; } }
+.nr-gwrap { display:block; margin-top:6px; }
+.nr-how { list-style:none; margin:18px 0 0; padding:0; display:grid; grid-template-columns:repeat(3, minmax(0,1fr)); gap:12px; }
+@media (max-width:760px){ .nr-how { grid-template-columns:1fr; } }
+.nr-how li { background:var(--n-accent-soft); border-radius:14px; padding:14px 16px; }
+.nr-how b { display:block; font-size:14px; color:var(--n-accent); margin-bottom:4px; }
+.nr-how span { display:block; font-size:13px; color:#52525b; line-height:1.45; }
+.nr-gactions { display:flex; gap:12px; align-items:center; flex-wrap:wrap; margin:16px 0 0; }
+.nr-gactions .addwrap { display:flex; gap:8px; align-items:center; flex:1 1 280px; }
+.nr-gactions .addwrap .nr-input { flex:1; width:auto; }
 .nr-gside { position:sticky; top:84px; max-height:calc(100vh - 100px); overflow-y:auto; padding-right:2px; scrollbar-width:thin; }
 @media (max-width:1000px){ .nr-gside { position:static; max-height:none; } }
 .nr-gsum { background:#fff; border:1px solid var(--n-line); border-radius:16px; padding:16px 18px; margin:16px 0 0; }
+.nr-gsum:empty { display:none; }
 .nr-gsum .row { display:flex; justify-content:space-between; align-items:baseline; gap:12px; flex-wrap:wrap; }
 .nr-gsum b { font-size:22px; letter-spacing:-.02em; }
 .nr-gsum span { color:var(--n-mute); font-size:13px; }
@@ -793,25 +801,30 @@ select.nr-input { appearance:none; -webkit-appearance:none; background:#fff url(
       <div class="nr-head" style="margin-bottom:0"><div>
         <div class="nr-eyebrow"><svg class="i" data-ic="cart" viewBox="0 0 24 24"></svg><span>Grocery</span></div>
         <h1 class="nr-h1">Grocery List</h1>
-        <p class="nr-sub" id="nr-g-sub" hidden></p></div>
-        <div style="display:flex;gap:10px;flex-wrap:wrap"><button class="nr-btn light sm" data-nr="pantry-inventory"><svg class="i" data-ic="cart" viewBox="0 0 24 24"></svg>Pantry</button><button class="nr-btn light sm" data-act="g-from-plan"><svg class="i" data-ic="calendar" viewBox="0 0 24 24"></svg>Add from this week’s plan</button></div></div>
+        <p class="nr-sub" id="nr-g-sub">Your shopping list. It’s built from the meals you put on your Plan.</p></div>
+        <button class="nr-btn light sm" data-nr="pantry-inventory"><svg class="i" data-ic="cart" viewBox="0 0 24 24"></svg>Pantry (what I already have)</button></div>
       <div class="nr-gwrap"><div class="nr-gmain">
+      <ol class="nr-how">
+        <li><b>1. Plan your meals</b><span>Put meals on the Plan page, or tap “Add to Grocery” on any meal.</span></li>
+        <li><b>2. Build the list</b><span>Press “Add ingredients from my plan” below. Matching ingredients are combined into one line.</span></li>
+        <li><b>3. Go shopping</b><span>Tick each item off as it goes in your cart. Tap “Needed for…” to see which meals use it.</span></li>
+      </ol>
       <div class="nr-gsum" id="nr-g-sum"></div>
+      <div class="nr-gactions">
+        <button class="nr-btn" data-act="g-from-plan"><svg class="i" data-ic="calendar" viewBox="0 0 24 24"></svg>Add ingredients from my plan</button>
+        <form class="addwrap" id="nr-g-form"><input class="nr-input" id="nr-g-add" placeholder="Or type your own item and press +" autocomplete="off"><button class="nr-btn nr-circle" type="submit" aria-label="Add item"><svg class="i" data-ic="plus" viewBox="0 0 24 24"></svg></button></form>
+      </div>
       <div class="nr-tools">
-        <div class="nr-field"><svg class="i" data-ic="search" viewBox="0 0 24 24"></svg><input class="nr-input" id="nr-g-q" placeholder="Search ingredients..." autocomplete="off"></div>
-        <form class="addwrap" id="nr-g-form"><input class="nr-input" id="nr-g-add" placeholder="Add an item..." autocomplete="off"><button class="nr-btn nr-circle" type="submit" aria-label="Add"><svg class="i" data-ic="plus" viewBox="0 0 24 24"></svg></button></form>
+        <div class="nr-field"><svg class="i" data-ic="search" viewBox="0 0 24 24"></svg><input class="nr-input" id="nr-g-q" placeholder="Search your list..." autocomplete="off"></div>
         <button class="nr-btn soft" data-act="combine"><svg class="i" data-ic="merge" viewBox="0 0 24 24"></svg>Combine duplicates</button>
+        <button class="nr-btn soft" data-act="g-clear">Clear list</button>
       </div>
       <div class="nr-ggrid" id="nr-g-grid"></div>
       </div>
-      <aside class="nr-gside">
-      <div id="nr-g-coach">
-        <div class="nr-eyebrow"><svg class="i" data-ic="cart" viewBox="0 0 24 24"></svg><span>Daily Coach</span></div>
-        <h2 class="nr-gc-h">Based on your kitchen</h2>
-        <p class="nr-sub">What to buy for the next 7 days from the Daily Coach picks, minus what you already have.</p>
-        <div class="nr-gcols">
+      <aside class="nr-gside" hidden>
+      <div id="nr-g-coach" hidden>
           <section id="groceries" class="groc"></section>
-          <details id="kitchen" open>
+          <details id="kitchen">
             <summary>What’s in your kitchen</summary>
             <div id="stock"></div>
             <form id="addForm" class="addrow" autocomplete="off">
@@ -819,9 +832,7 @@ select.nr-input { appearance:none; -webkit-appearance:none; background:#fff url(
               <input id="addQty" type="number" min="1" value="4" title="servings">
               <button class="go" type="submit">Add</button>
             </form>
-            <small>Numbers are servings. Each meal you eat uses 1 of each ingredient.</small>
           </details>
-        </div>
       </div>
       </aside></div>
     </section>
@@ -1947,10 +1958,6 @@ function renderOverview(items, buy) {
   cards.push(`<button class="ov ${sc.doneToday ? "done" : ""}" data-go="move"><span class="go-link">${!sc.doneToday && sc.isTrainDay ? "Start →" : "Details →"}</span>
     <div class="k">🏋🏽‍♀️ MOVE ${sc.doneToday || !sc.isTrainDay ? "" : "· NOW"}</div><div class="t">${esc(mv)}</div><div class="s">${esc(mvSub)}</div></button>`);
 
-  cards.push(`<button class="ov ${need ? "" : "done"}" data-nr="grocery"><span class="go-link">${need ? "Buy →" : "Kitchen →"}</span>
-    <div class="k">🛒 GROCERIES</div><div class="t">${need ? `You’re low on ${need} thing${need > 1 ? "s" : ""}` : "You’re stocked ✓"}</div>
-    <div class="s">${need ? Object.keys(buy).slice(0, 4).map(n => emoji(n) + " " + cap(n)).join(", ") + (need > 4 ? ` +${need - 4} more` : "") : "Everything for the next 7 days is in your kitchen."}</div></button>`);
-
   $("overview").innerHTML = cards.join("");
 }
 
@@ -2421,9 +2428,9 @@ function fillLib() {
 function renderGrocery() {
   const q = ui.gq.trim().toLowerCase(), all = S.grocery, shown = all.filter(it => !q || it.name.toLowerCase().includes(q) || it.norm.includes(q));
   const left = all.filter(i => !i.purchased).length;
-  $("nr-g-sub").textContent = "";
+
   $("nr-g-sum").innerHTML = all.length ? `<div class="row"><div><b>${left}</b> <span>item${left === 1 ? "" : "s"} left to buy</span></div><span>${all.length - left} of ${all.length} in the cart</span></div><div class="nr-daybar"><i style="width:${(all.length - left) / all.length * 100}%"></i></div>` : "";
-  if (!shown.length) { $("nr-g-grid").innerHTML = `<div class="nr-empty" style="grid-column:1/-1">${all.length ? "Nothing matches." : "Your list is empty."}<br><button class="nr-btn" data-act="g-from-plan">${ic("calendar")}Add from this week’s plan</button></div>`; return; }
+  if (!shown.length) { $("nr-g-grid").innerHTML = `<div class="nr-empty" style="grid-column:1/-1">${all.length ? "Nothing matches." : "Your list is empty. Plan some meals, then press “Add ingredients from my plan”."}<br><button class="nr-btn light" data-nr="plan">${ic("calendar")}Go to Plan</button></div>`; return; }
   $("nr-g-grid").innerHTML = GCATS.map(c => {
     const rows = shown.filter(it => (GCATS.includes(it.cat) ? it.cat : "Other") === c).sort((a, b) => a.purchased - b.purchased || a.name.localeCompare(b.name)); if (!rows.length) return "";
     return `<div class="nr-gcard"><h3>${c}</h3>${rows.map(it => {
@@ -2994,6 +3001,7 @@ document.addEventListener("click", ev => {
     case "cheat-fav-del": { const m = meal(d.id); if (!m) break; S.meals = S.meals.filter(x => x.id !== d.id); for (const k of Object.keys(S.plan)) S.plan[k] = S.plan[k].filter(x => x.mealId !== d.id); save(); renderCheat(); toast(`Removed “${m.name}”`); break; }
     case "cheat-clear": { const k = iso(cheatDate()); S.plan[k] = (S.plan[k] || []).filter(x => !(meal(x.mealId) || { tags:[] }).tags.includes("Cheat Day")); save(); renderCheat(); break; }
     case "g-from-plan": { const r = addPlanToGrocery(weekStartOf(new Date())); renderGrocery(); toast(r.meals ? `From ${r.meals} planned meal${r.meals > 1 ? "s" : ""}: ${r.added} new, ${r.merged} combined` : "No meals on this week’s plan yet"); break; }
+    case "g-clear": if (!S.grocery.length) { toast("The list is already empty"); break; } if (!confirm("Clear your whole grocery list?")) break; S.grocery = []; save(); renderGrocery(); toast("Grocery list cleared"); break;
     case "combine": { const n = combineDuplicates(); save(); renderGrocery(); toast(n ? `Combined ${n} duplicate${n > 1 ? "s" : ""}` : "No duplicates found"); break; }
     case "sug": $("nr-chat-in").value = a.textContent; $("nr-chat-form").requestSubmit(); break;
     case "chat-act": chatAct(d.do, d.arg); break;
