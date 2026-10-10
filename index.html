@@ -283,6 +283,36 @@ select.nr-input { appearance:none; -webkit-appearance:none; background:#fff url(
 .nr-msg.user { background:var(--n-accent); }
 .nr-sug:hover { background:var(--n-accent-soft); }
 
+/* Daily Coach groceries blended into the Grocery page */
+#nr-g-coach .nr-gc-h { color:var(--n-ink); font-size:24px; font-weight:700; letter-spacing:-.02em; margin:6px 0 4px; }
+.nr-gcols { display:grid; grid-template-columns:1fr 1fr; gap:20px; align-items:start; margin-top:18px; }
+@media (max-width:760px){ .nr-gcols { grid-template-columns:1fr; } }
+#nr-g-coach .groc, #nr-g-coach details { background:#fff; border:1px solid var(--n-line); border-radius:16px; padding:18px 20px; }
+#nr-g-coach h2 { margin:0 0 6px; font-size:12px; letter-spacing:.14em; font-weight:600; color:#737373; }
+#nr-g-coach summary { cursor:pointer; font-weight:600; font-size:16px; }
+#nr-g-coach .say { margin:2px 0 6px; font-size:20px; font-weight:600; }
+#nr-g-coach .meta { color:#737373; font-size:13px; margin-top:6px; }
+#nr-g-coach .meta.total { color:var(--n-ink); }
+#nr-g-coach ul, #nr-g-coach #stock { list-style:none; margin:10px 0 0; padding:0; }
+#nr-g-coach .gitem { padding:12px 0; border-top:1px solid var(--n-line); }
+#nr-g-coach .gitem:first-child { border-top:0; }
+#nr-g-coach .gtop, #nr-g-coach .item { display:flex; align-items:center; gap:10px; }
+#nr-g-coach .item { padding:8px 0; border-top:1px solid var(--n-line); }
+#nr-g-coach .item:first-child { border-top:0; }
+#nr-g-coach .nm { flex:1; font-weight:500; }
+#nr-g-coach .q { color:#737373; min-width:2.2em; text-align:center; }
+#nr-g-coach .ginfo { font-size:12.5px; color:#737373; margin-top:3px; padding-left:0; }
+#nr-g-coach .ginfo b { color:var(--n-ink); font-weight:600; }
+#nr-g-coach .ginfo.buy b { color:var(--n-accent); }
+#nr-g-coach button { font:inherit; font-size:13px; padding:6px 14px; border-radius:999px; border:1px solid var(--n-line); background:#fff; color:var(--n-ink); cursor:pointer; }
+#nr-g-coach button:hover { border-color:var(--n-accent); color:var(--n-accent); }
+#nr-g-coach .row2 { display:flex; gap:10px; flex-wrap:wrap; margin-top:14px; }
+#nr-g-coach .row2 .primary { background:#000; color:#fff; border-color:#000; }
+#nr-g-coach .row2 .primary:hover { color:#fff; background:#222; }
+#nr-g-coach .addrow { display:grid; grid-template-columns:1fr 72px auto; gap:8px; margin:12px 0 8px; }
+#nr-g-coach .addrow input { border:1px solid var(--n-line); border-radius:999px; padding:8px 14px; font:inherit; min-width:0; }
+#nr-g-coach .addrow input:focus { outline:0; border-color:var(--n-accent); box-shadow:0 0 0 3px rgba(58,93,248,.15); }
+#nr-g-coach small { color:#737373; font-size:12px; }
 /* meal library panel on Plan */
 .nr-lib { position:fixed; top:0; right:0; bottom:0; width:min(360px, 92vw); z-index:45; background:#fff; border-left:1px solid var(--n-line); box-shadow:-20px 0 40px rgba(0,0,0,.08); display:flex; flex-direction:column; gap:10px; padding:16px 16px 0; }
 .nr-lib[hidden] { display:none; }
@@ -590,7 +620,7 @@ select.nr-input { appearance:none; -webkit-appearance:none; background:#fff url(
           <div class="cap">Daily Coach</div>
           <button data-nr="coach-today" role="menuitem">Today’s picks <small>Tell Daily Coach what you’re craving</small></button>
           <button data-nr="coach-move" role="menuitem">Workouts <small>Guided, with demos and auto-progression</small></button>
-          <button data-nr="coach-groceries" role="menuitem">Kitchen stock <small>What you have, what to buy</small></button>
+          <button data-nr="grocery" role="menuitem">Kitchen stock <small>What you have, what to buy</small></button>
           <button data-nr="coach-setup" role="menuitem">Daily Coach setup <small>Calorie cap, dumbbells, goals</small></button>
         </div>
       </div>
@@ -657,6 +687,24 @@ select.nr-input { appearance:none; -webkit-appearance:none; background:#fff url(
         <button class="nr-btn soft" data-act="combine"><svg class="i" data-ic="merge" viewBox="0 0 24 24"></svg>Combine duplicates</button>
       </div>
       <div class="nr-ggrid" id="nr-g-grid"></div>
+      <div id="nr-g-coach">
+        <div class="nr-eyebrow" style="margin-top:36px"><svg class="i" data-ic="cart" viewBox="0 0 24 24"></svg><span>Daily Coach</span></div>
+        <h2 class="nr-gc-h">Based on your kitchen</h2>
+        <p class="nr-sub">What to buy for the next 7 days from the Daily Coach picks, minus what you already have.</p>
+        <div class="nr-gcols">
+          <section id="groceries" class="groc"></section>
+          <details id="kitchen" open>
+            <summary>What’s in your kitchen</summary>
+            <div id="stock"></div>
+            <form id="addForm" class="addrow" autocomplete="off">
+              <input id="addName" placeholder="Add an item (e.g. rice)" required>
+              <input id="addQty" type="number" min="1" value="4" title="servings">
+              <button class="go" type="submit">Add</button>
+            </form>
+            <small>Numbers are servings. Each meal you eat uses 1 of each ingredient.</small>
+          </details>
+        </div>
+      </div>
     </section>
 
     <section class="nr-page nr-mid" data-page="assistant" hidden>
@@ -686,9 +734,7 @@ select.nr-input { appearance:none; -webkit-appearance:none; background:#fff url(
   <button class="logo" data-go="today">Daily Coach</button>
   <nav class="topnav" id="topnav">
     <button data-go="today">Today</button>
-    <button data-go="eat">Eat</button>
     <button data-go="move">Move</button>
-    <button data-go="groceries">Groceries</button>
   </nav>
   <div class="topright"><span id="today"></span><button class="btn-outline" data-go="setup">Setup</button></div>
 </header>
@@ -712,31 +758,12 @@ select.nr-input { appearance:none; -webkit-appearance:none; background:#fff url(
       </div>
       <div class="stack" id="overview"></div>
     </section>
-  </div>
-
-  <div class="tab" data-tab="eat" hidden>
-    <div class="pagehead"><h2>What to <b>Eat</b></h2><p>Breakfast, lunch, dinner and a snack. Tap “I ate this” as you go.</p></div>
     <section id="plan"></section>
   </div>
 
   <div class="tab" data-tab="move" hidden>
     <div class="pagehead"><h2>Time to <b>Move</b></h2><p>Exactly what to do. Press START and follow along.</p></div>
     <section id="move" class="groc"></section>
-  </div>
-
-  <div class="tab" data-tab="groceries" hidden>
-    <div class="pagehead"><h2>Your <b>Groceries</b></h2><p>What to buy for the next 7 days, based on what’s already in your kitchen.</p></div>
-    <section id="groceries" class="groc"></section>
-    <details id="kitchen" open>
-      <summary>🧺 What’s in your kitchen</summary>
-      <div id="stock"></div>
-      <form id="addForm" class="addrow" autocomplete="off">
-        <input id="addName" placeholder="Add an item (e.g. rice)" required>
-        <input id="addQty" type="number" min="1" value="4" title="servings">
-        <button class="go" type="submit">Add</button>
-      </form>
-      <small>Numbers are servings. Each meal you eat uses 1 of each ingredient.</small>
-    </details>
   </div>
 
   <div class="tab" data-tab="setup" hidden>
@@ -786,9 +813,7 @@ select.nr-input { appearance:none; -webkit-appearance:none; background:#fff url(
 
 <nav class="tabbar" id="tabbar">
   <button data-go="today"><span>🏠</span>Today</button>
-  <button data-go="eat"><span>🍽️</span>Eat</button>
   <button data-go="move"><span>🏋🏽‍♀️</span>Move</button>
-  <button data-go="groceries"><span>🛒</span>Groceries</button>
   <button data-go="setup"><span>⚙️</span>Setup</button>
 </nav>
 
@@ -1743,13 +1768,16 @@ $("run").addEventListener("click", e => {
 
 
 // ---- Tabs + Today overview -----------------------------------------------
-const TABS = ["today", "eat", "move", "groceries", "setup"];
+const TABS = ["today", "move", "setup"];
 function showTab(name) {
+  if (name === "groceries") { if (window.__nrGo) window.__nrGo("grocery"); return; }   // blended into the Nourish Grocery page
+  const toPlan = name === "eat"; if (toPlan) name = "today";
   if (!TABS.includes(name)) name = "today";
   document.querySelectorAll("#coach .tab").forEach(t => t.hidden = t.dataset.tab !== name);
   document.querySelectorAll("#tabbar button, #topnav button").forEach(b => b.classList.toggle("on", b.dataset.go === name));
   try { if (!document.getElementById("coach").hidden) history.replaceState(null, "", "#coach-" + name); } catch {}
   window.scrollTo(0, 0);
+  if (toPlan) { const pl = document.getElementById("plan"); if (pl) pl.scrollIntoView(); }
 }
 
 function renderOverview(items, buy) {
@@ -1771,14 +1799,11 @@ function renderOverview(items, buy) {
   cards.push(`<button class="ov ${sc.doneToday ? "done" : ""}" data-go="move"><span class="go-link">${!sc.doneToday && sc.isTrainDay ? "Start →" : "Details →"}</span>
     <div class="k">🏋🏽‍♀️ MOVE ${sc.doneToday || !sc.isTrainDay ? "" : "· NOW"}</div><div class="t">${esc(mv)}</div><div class="s">${esc(mvSub)}</div></button>`);
 
-  cards.push(`<button class="ov ${need ? "" : "done"}" data-go="groceries"><span class="go-link">${need ? "Buy →" : "Kitchen →"}</span>
+  cards.push(`<button class="ov ${need ? "" : "done"}" data-nr="grocery"><span class="go-link">${need ? "Buy →" : "Kitchen →"}</span>
     <div class="k">🛒 GROCERIES</div><div class="t">${need ? `You’re low on ${need} thing${need > 1 ? "s" : ""}` : "You’re stocked ✓"}</div>
     <div class="s">${need ? Object.keys(buy).slice(0, 4).map(n => emoji(n) + " " + cap(n)).join(", ") + (need > 4 ? ` +${need - 4} more` : "") : "Everything for the next 7 days is in your kitchen."}</div></button>`);
 
   $("overview").innerHTML = cards.join("");
-  const badge = need ? `<i class="badge">${need}</i>` : "";
-  $("tabbar").querySelector('[data-go="groceries"]').innerHTML = `<span>🛒</span>Groceries${badge}`;
-  $("topnav").querySelector('[data-go="groceries"]').innerHTML = `Groceries${badge}`;
 }
 
 document.addEventListener("click", e => {
