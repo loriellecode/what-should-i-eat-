@@ -443,6 +443,8 @@ select.nr-input { appearance:none; -webkit-appearance:none; background:#fff url(
 #coach .dp-nuts{display:flex; flex-wrap:wrap; gap:4px; margin-top:5px;}
 #coach .dp-nuts span{font-size:.68rem; padding:2px 8px; border-radius:999px; background:rgba(255,255,255,.16);}
 #coach .dp-use{margin-top:12px; width:100%; padding:10px 14px; background:transparent; color:#fff; border:1px solid rgba(255,255,255,.7); border-radius:999px; font:inherit; cursor:pointer;}
+#coach .dp-again{display:flex; justify-content:center; margin-top:18px;}
+#coach .dp-again .dp-use{width:auto; padding:11px 28px; background:#fff; color:var(--blue); border-color:#fff; font-weight:500;}
 #coach .dp-use:hover{background:rgba(255,255,255,.16);}
 #coach #todaysum{margin-top:16px; display:grid; gap:10px;}
 #coach .slot, #coach .groc, #coach details, #coach .shop, #coach .note{background:var(--glass); border:1px solid var(--line); border-radius:18px;
@@ -2881,10 +2883,11 @@ window.addEventListener("hashchange", () => go(location.hash.slice(1) || "home",
 
 // ----- 3 plans for the day (Today page) -----
 const DAY_CAP = 900;
+let dpRoll = 0, dpAvoid = new Set();
 function dayPlans(text) {
   const mood = text && text.trim() ? parseMood(text) : null;
   let dis = []; try { dis = ($("dislikes").value || "").toLowerCase().split(/[,;\n]/).map(x => x.trim()).filter(Boolean); } catch {}
-  const cap = Math.min(DAY_CAP, +S.settings.cal || DAY_CAP), seedKey = iso(new Date()) + "|" + (mood ? text.trim().toLowerCase() : "");
+  const cap = Math.min(DAY_CAP, +S.settings.cal || DAY_CAP), seedKey = iso(new Date()) + "|" + dpRoll + "|" + (mood ? text.trim().toLowerCase() : "");
   const pools = { B:[], L:[], D:[], S:[], M:[] };
   for (const m of S.meals) {
     const cal = +m.cal || 0; if (m.tags.includes("Hydration") || !m.ing.length || !cal) continue;
@@ -2906,14 +2909,14 @@ function dayPlans(text) {
   const out = [], used = new Set();
   for (let k = 0; k < 3; k++) {
     let best = null;
-    for (const pass of [0, 1]) {
-    const P = {}; for (const key in pools) P[key] = top(pass ? pools[key] : pools[key].filter(x => !used.has(x.m.id)), 7);
+    for (const pass of [0, 1, 2]) {
+    const P = {}; for (const key in pools) P[key] = top(pass === 2 ? pools[key] : pools[key].filter(x => !used.has(x.m.id) && (pass === 1 || !dpAvoid.has(x.m.id))), 7);
     for (const b of P.B) for (const l of P.L) { if (l.m.id === b.m.id) continue;
       for (const d of P.D) { if (d.m.id === b.m.id || d.m.id === l.m.id) continue;
         for (const sn of P.S) { if ([b, l, d].some(x => x.m.id === sn.m.id)) continue;
           for (const sm of P.M) {
             const tot = b.cal + l.cal + d.cal + sn.cal + sm.cal; if (tot > cap) continue;
-            if (pass && out.some(o => o.items.slice(0, 3).every((x, i) => x[1].m.id === [b, l, d][i].m.id))) continue;
+            if (pass === 2 && out.some(o => o.items.slice(0, 3).every((x, i) => x[1].m.id === [b, l, d][i].m.id))) continue;
             const v = b.sc + l.sc + d.sc + sn.sc + sm.sc + tot / cap * 12;
             if (!best || v > best.v) best = { v, items:[["Breakfast", b], ["Lunch", l], ["Dinner", d], ["Snack", sn], ["Smoothie", sm]], tot };
           } } } }
@@ -2929,10 +2932,11 @@ function dayPlans(text) {
   return { plans:out, cap, mood };
 }
 let dpCache = "";
+
 function renderDayPlans() {
   const box = $("dayplans"); if (!box) return;
   let text = ""; try { text = state.mood && state.mood.day === dayKey() ? state.mood.text : ""; } catch {}
-  const key = text + "|" + S.meals.length + "|" + S.meals.map(m => m.id + m.cal).join(",").length + "|" + ($("dislikes") ? $("dislikes").value : "") + "|" + S.settings.cal + "|" + iso(new Date());
+  const key = text + "|" + S.meals.length + "|" + S.meals.map(m => m.id + m.cal).join(",").length + "|" + ($("dislikes") ? $("dislikes").value : "") + "|" + S.settings.cal + "|" + iso(new Date()) + "|" + dpRoll;
   if (key === dpCache && box.innerHTML) return; dpCache = key;
   const { plans, cap, mood } = dayPlans(text);
   if (!plans.length) { box.innerHTML = `<div class="dp-head"><h2>Plans for today</h2><p>I couldn’t fit a full day under ${cap} calories with those picks. Try a different mood or add lighter meals in Meals.</p></div>`; return; }
@@ -2942,11 +2946,13 @@ function renderDayPlans() {
       ${pl.items.map(([lab, it]) => `<div class="dp-row"><div class="dp-slot">${lab}</div><div class="dp-name">${e(it.m.name)}</div>
         <div class="dp-meta">${it.cal} kcal · ${+it.m.pro || 0} g protein${it.m.time ? ` · ${it.m.time} min` : ""}</div>
         <div class="dp-nuts">${nutrientsOf(it.m).map(n => `<span>${e(n)}</span>`).join("")}</div></div>`).join("")}
-      <button class="dp-use" data-dp="${i}">Add this plan to today</button></article>`).join("")}</div>`;
+      <button class="dp-use" data-dp="${i}">Add this plan to today</button></article>`).join("")}</div>
+    <div class="dp-again"><button class="dp-use" data-dp-again>I wanna try again</button></div>`;
   box._plans = plans;
 }
 window.__nrPlans = renderDayPlans;
 document.addEventListener("click", ev => {
+  if (ev.target.closest("[data-dp-again]")) { const cur = $("dayplans")._plans || []; dpAvoid = new Set(cur.flatMap(pl => pl.items.map(x => x[1].m.id))); dpRoll++; renderDayPlans(); return; }
   const b = ev.target.closest("[data-dp]"); if (!b) return;
   const pl = $("dayplans")._plans && $("dayplans")._plans[+b.dataset.dp]; if (!pl) return;
   const d = today0(); planned(d).forEach(x => { const a = dayPlan(d); const i = a.findIndex(y => y.id === x.p.id); if (i >= 0) a.splice(i, 1); });
