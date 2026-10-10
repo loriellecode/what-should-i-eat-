@@ -314,6 +314,14 @@ select.nr-input { appearance:none; -webkit-appearance:none; background:#fff url(
 #nr-g-coach .addrow input { border:1px solid var(--n-line); border-radius:999px; padding:8px 14px; font:inherit; min-width:0; }
 #nr-g-coach .addrow input:focus { outline:0; border-color:var(--n-accent); box-shadow:0 0 0 3px rgba(58,93,248,.15); }
 #nr-g-coach small { color:#737373; font-size:12px; }
+.nr-setlinks { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px; }
+@media (max-width:640px){ .nr-setlinks { grid-template-columns:1fr; } }
+.nr-setlink { display:flex; align-items:center; justify-content:space-between; gap:12px; text-align:left; background:#fff; border:1px solid var(--n-line); border-radius:14px; padding:14px 16px; cursor:pointer; font:inherit; color:var(--n-ink); }
+.nr-setlink b { display:block; font-size:15px; font-weight:600; }
+.nr-setlink small { display:block; color:#737373; font-size:12.5px; margin-top:2px; }
+.nr-setlink svg.i { width:18px; height:18px; color:#a3a3a3; flex:none; }
+.nr-setlink:hover { border-color:var(--n-accent); }
+.nr-setlink:hover svg.i { color:var(--n-accent); }
 /* meal library panel on Plan */
 .nr-lib { position:fixed; top:0; right:0; bottom:0; width:min(360px, 92vw); z-index:45; background:#fff; border-left:1px solid var(--n-line); box-shadow:-20px 0 40px rgba(0,0,0,.08); display:flex; flex-direction:column; gap:10px; padding:16px 16px 0; }
 .nr-lib[hidden] { display:none; }
@@ -2388,8 +2396,27 @@ function renderSettings() {
       <p class="nr-muted">The calorie max is shared with Daily Coach, which never plans a day over it.</p>
       <div class="actions" style="justify-content:space-between"><div style="display:flex;gap:10px;flex-wrap:wrap"><button type="button" class="nr-btn light sm" data-act="reset-sample">Reset to sample meals</button><button type="button" class="nr-btn light sm" data-act="clear-plan">Clear plan</button></div>
         <button type="button" class="nr-btn" data-act="s-save">Save</button></div>
-    </div>`;
+    </div>
+    <h2 style="margin:36px 0 6px;font-size:20px;font-weight:700;letter-spacing:-.01em">Everything in the app</h2>
+    <p class="nr-muted" style="margin:0 0 14px">Tap any page to open it.</p>
+    <div class="nr-setlinks">${SETTINGS_LINKS.map(([k, t, sub]) => `<button class="nr-setlink" data-nr="${k}"><span><b>${e(t)}</b><small>${e(sub)}</small></span>${ic("right")}</button>`).join("")}</div>`;
 }
+const SETTINGS_LINKS = [
+  ["home", "Home", "Today’s meals and totals"],
+  ["meals", "Meals", "Your saved meals and recipes"],
+  ["plan", "Plan", "Drag meals onto your week"],
+  ["grocery", "Grocery", "Your list, plus what’s in your kitchen"],
+  ["assistant", "Help Me Healthy", "Ask for ideas, swaps and plans"],
+  ["coach-today", "Daily Coach · Today", "Tell it what you’re craving, get 3 plans"],
+  ["coach-move", "Daily Coach · Move", "Guided workouts"],
+  ["coach-setup", "Daily Coach · Setup", "Calorie cap, dumbbells, likes and dislikes"],
+  ["nutrition-summary", "Nutrition", "Weekly calories for each day"],
+  ["recipe-ingredients", "Recipes", "Ingredient list for prep"],
+  ["meal-categories", "Categories", "Make and rename your own"],
+  ["cheat", "Cheat Day", "One planned day off the calorie cap"],
+  ["pantry-inventory", "Pantry", "Staples you already have at home"],
+  ["add-meal", "Add Meal", "Name, calories, category, photo"]
+];
 
 // ----- Weekly Nutrition Summary -----
 function renderSummary() {
