@@ -427,9 +427,11 @@ select.nr-input { appearance:none; -webkit-appearance:none; background:#fff url(
 #coach .pagehead h2 b{color:#fff; font-weight:600;}
 #coach .pagehead p{margin:6px 0 0; color:var(--soft); max-width:36em; font-size:.95rem;}
 #coach #plan[hidden]{display:none;}
+#coach #todaysum{margin-top:16px; display:grid; gap:10px;}
 #coach .slot, #coach .groc, #coach details, #coach .shop, #coach .note{background:var(--glass); border:1px solid var(--line); border-radius:18px;
     -webkit-backdrop-filter:blur(14px); backdrop-filter:blur(14px);}
 #coach #plan[hidden]{display:none;}
+#coach #todaysum{margin-top:16px; display:grid; gap:10px;}
 #coach .slot, #coach .groc, #coach details{padding:18px 20px;}
 #coach .slot h2, #coach .groc h2, #coach .kicker{margin:0; font-size:.74rem; letter-spacing:.14em; font-weight:500; color:var(--muted);}
 #coach .slot .say, #coach .groc .say{margin:3px 0 10px; font-weight:500; font-size:1.4rem; line-height:1.25;}
@@ -760,6 +762,7 @@ select.nr-input { appearance:none; -webkit-appearance:none; background:#fff url(
       </div>
       <div class="stack" id="overview"></div>
     </section>
+    <div id="todaysum"></div>
     <section id="plan" hidden></section>
   </div>
 
@@ -1159,7 +1162,7 @@ function render() {
     : `<div class="moodbar"><span>Tell the Today page what you’re craving and these meals will follow.</span> <button class="linkbtn" data-go="today">Set my mood</button></div>`;
 
   const limitBar = st.limit ? `<div class="moodbar">Daily limit: <b>${st.limit} kcal</b>${st.eatCal ? ` · eaten so far ${Math.round(st.eatCal)}` : ""} · your picks add up to <b id="pickCal">…</b></div>` : "";
-  $("plan").innerHTML = moodBar + limitBar + items.map(({ slot, options, pick }) => {
+  $("plan").innerHTML = moodBar + items.map(({ slot, options, pick }) => {
     if (!options.length) return `<section class="mealgroup"><div class="mg-head"><h3>${slot.label}</h3></div><div class="note">Nothing fits your limits. Try more time, a bigger budget, or fewer dislikes.</div></section>`;
     cal += pick.meal.cal; pro += pick.meal.pro;
     return `<section class="mealgroup"><div class="mg-head"><h3>${slot.label}</h3><span>${slot.key === "snack" ? "Have this if you’re hungry" : "Pick one"} · tap a card</span></div>
@@ -1174,7 +1177,8 @@ function render() {
           <button class="eat" data-slot="${slot.key}" data-meal="${esc(o.meal.name)}">✓ I ate this</button>
         </article>`).join("")}</div></section>`;
   }).join("") +
-  (items.some(i => i.pick) ? `<div class="note">Your picks today: <b>${cal} kcal</b>, <b>${pro} g protein</b>${st.limit ? ` · limit ${st.limit} kcal${cal + st.eatCal > st.limit ? " (over)" : ""}` : ""}.</div>` : "");
+  "";
+  $("todaysum").innerHTML = limitBar + (items.some(i => i.pick) ? `<div class="note">Your picks today: <b>${cal} kcal</b>, <b>${pro} g protein</b>${st.limit ? ` · limit ${st.limit} kcal${cal + st.eatCal > st.limit ? " (over)" : ""}` : ""}.</div>` : "");
   const pc = $("pickCal"); if (pc) pc.textContent = cal + " kcal";
   $("calNote").textContent = +$("calLimit").value && +$("calLimit").value < 1200
     ? "Under about 1,200 kcal a day is very low, especially with workouts. It’s worth checking with a doctor or dietitian." : "";
