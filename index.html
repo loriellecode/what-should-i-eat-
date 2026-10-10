@@ -95,6 +95,8 @@ select.nr-input { appearance:none; -webkit-appearance:none; background:#fff url(
 .nr-pill.light { background:#fff; border:1px solid var(--n-line); }
 .nr-dots { background:none; border:0; width:28px; height:28px; border-radius:50%; cursor:pointer; color:var(--n-mute); display:flex; align-items:center; justify-content:center; padding:0; }
 .nr-dots:hover { background:var(--n-soft); }
+.nr-nuts { display:flex; flex-wrap:wrap; gap:4px; margin:8px 0 0; }
+.nr-nut { font-size:11px; line-height:1; padding:4px 8px; border-radius:999px; background:var(--n-accent-soft,#eef1ff); color:var(--n-accent,#3a5df8); font-weight:500; }
 .nr-desc { color:#737373; font-size:13px; line-height:1.5; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
 .nr-empty { border:1.5px dashed #e3e3e3; border-radius:20px; padding:64px 24px; text-align:center; color:var(--n-mute); font-size:15px; }
 .nr-empty .nr-btn { margin-top:20px; }
@@ -2137,6 +2139,23 @@ function renderHome() {
   $("nr-home-body").innerHTML = html;
 }
 
+const NUTS = [
+  ["Protein", /chicken|turkey|beef|steak|pork|egg|tuna|salmon|shrimp|fish|cod|tofu|tempeh|yog|greek|cottage|cheese|whey|protein|lentil|bean|chickpea|edamame|milk|jerky|ham|bacon|sausage/],
+  ["Complex Carbs", /oat|rice|quinoa|bread|wheat|whole|pasta|potato|yam|barley|tortilla|wrap|bean|lentil|chickpea|corn|cereal|granola|couscous|banana/],
+  ["Healthy Fats", /avocado|olive|almond|walnut|cashew|pecan|peanut|nut|seed|chia|flax|salmon|tuna|sardine|egg|tahini|coconut|guac/],
+  ["B-Complex (B12, B6, Folate)", /egg|chicken|turkey|beef|salmon|tuna|fish|shrimp|pork|milk|yog|cheese|spinach|kale|lentil|bean|chickpea|avocado|asparagus|broccoli|banana|liver|fortified|cereal|oat/],
+  ["Iron", /beef|steak|spinach|kale|lentil|bean|chickpea|tofu|tempeh|oat|quinoa|turkey|egg|shrimp|sardine|pumpkin seed|cashew|molasses/],
+  ["Magnesium", /spinach|kale|almond|cashew|pumpkin seed|chia|flax|avocado|banana|oat|quinoa|black bean|bean|edamame|tofu|yog|dark chocolate|cacao|brown rice|whole wheat|peanut|salmon/],
+  ["Fiber", /oat|bean|lentil|chickpea|chia|flax|berry|berries|apple|pear|broccoli|spinach|kale|carrot|avocado|quinoa|brown rice|whole|vegetable|salad|lettuce|tomato|pepper|cabbage|sweet potato|banana|raspberr|pea\b|peas|corn|almond|granola/]
+];
+function nutrientsOf(m) {
+  const txt = m.ing.map(i => i.name).join(" | ").toLowerCase();
+  if (!txt) return [];
+  const out = NUTS.filter(([, re]) => re.test(txt)).map(n => n[0]);
+  if (m.pro >= 15 && !out.includes("Protein")) out.unshift("Protein");
+  return out;
+}
+const nutHTML = m => { const n = nutrientsOf(m); return n.length ? `<div class="nr-nuts" aria-label="Nutrients">${n.map(x => `<span class="nr-nut">${e(x)}</span>`).join("")}</div>` : ""; };
 const FILTERS = {
   "All": () => true,
   "Easy Meal Prep": m => m.tags.some(t => /meal prep/i.test(t)),
@@ -2154,7 +2173,7 @@ function renderMeals() {
       <div class="nr-photo">${viewBtn(m, photoHTML(m))}<button class="nr-btn nr-circle nr-add" data-act="add-meal" data-id="${m.id}" aria-label="Add to plan">${ic("plus")}</button>${m.tags[0] ? `<span class="nr-tag">${e(m.tags[0])}</span>` : ""}</div>
       <div class="nr-cbody"><h3 class="nr-ctitle">${viewBtn(m, e(m.name))}</h3>
         <div class="nr-crow"><span class="nr-pill">${calText(m)}</span><button class="nr-dots" data-act="meal-menu" data-id="${m.id}" aria-label="More">${ic("dots")}</button></div>
-        <p class="nr-desc">${e(m.desc && !m.desc.startsWith("*") ? m.desc : m.ing.map(ingText).join(", ") || m.desc || "")}</p></div></article>`).join("")
+        <p class="nr-desc">${e(m.desc && !m.desc.startsWith("*") ? m.desc : m.ing.map(ingText).join(", ") || m.desc || "")}</p>${nutHTML(m)}</div></article>`).join("")
     : `<div class="nr-empty" style="grid-column:1/-1">No meals match.<br><button class="nr-btn" data-act="new-meal">${ic("plus")}New Meal</button></div>`;
 }
 
@@ -2222,7 +2241,7 @@ function renderDetails() {
       <div>
         <div class="nr-eyebrow">${ic("fork")}<span>Meal Details</span></div>
         <h1 class="nr-h1">${e(m.name)}</h1>
-        <div class="nr-detail-meta"><span class="nr-pill">${calText(m)}</span>${m.pro ? `<span class="nr-pill">${m.pro} g protein</span>` : ""}${m.tags.map(t => `<span class="nr-pill light">${e(t)}</span>`).join("")}</div>
+        <div class="nr-detail-meta"><span class="nr-pill">${calText(m)}</span>${m.pro ? `<span class="nr-pill">${m.pro} g protein</span>` : ""}${m.tags.map(t => `<span class="nr-pill light">${e(t)}</span>`).join("")}</div>${nutHTML(m)}
         ${m.calEst ? `<p class="nr-muted">Calories are estimated from the ingredients. Edit the meal to enter your own number.</p>` : ""}
         <div class="nr-detail-actions">
           <button class="nr-btn" data-act="add-meal" data-id="${m.id}">${ic("calendar")}Add to Plan</button>
