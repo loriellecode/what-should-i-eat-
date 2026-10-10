@@ -640,9 +640,7 @@ select.nr-input { appearance:none; -webkit-appearance:none; background:#fff url(
       <button data-nr="grocery">Grocery</button>
       <button data-nr="assistant">Help Me Healthy</button>
       <button data-nr="coach">Daily Coach</button>
-      <button data-nr="recipe-ingredients">Recipes</button>
       <button data-nr="cheat">Cheat Day</button>
-      <button data-nr="add-meal">Add Meal</button>
     </nav>
     <button class="nr-settings" id="nr-settings-btn" data-nr="settings"><svg class="i" viewBox="0 0 24 24" id="ic-gear"></svg><span>Settings</span></button>
   </header>
@@ -740,7 +738,6 @@ select.nr-input { appearance:none; -webkit-appearance:none; background:#fff url(
     <section class="nr-page nr-narrow" data-page="settings" hidden id="nr-p-settings"></section>
     <section class="nr-page nr-narrow" data-page="customize" hidden id="nr-p-customize"></section>
     <section class="nr-page nr-narrow" data-page="nutrition-summary" hidden id="nr-p-nutrition-summary"></section>
-    <section class="nr-page nr-narrow" data-page="recipe-ingredients" hidden id="nr-p-recipe-ingredients"></section>
     <section class="nr-page nr-narrow" data-page="meal-categories" hidden id="nr-p-meal-categories"></section>
     <section class="nr-page nr-narrow" data-page="pantry-inventory" hidden id="nr-p-pantry-inventory"></section>
     <section class="nr-page nr-narrow" data-page="cheat" hidden id="nr-p-cheat"></section>
@@ -2154,11 +2151,11 @@ function addPlanToGrocery(start) {
 }
 
 // ---------- rendering ----------
-const PAGES = ["home", "meals", "plan", "grocery", "assistant", "meal-details", "add-meal", "settings", "nutrition-summary", "recipe-ingredients", "meal-categories", "pantry-inventory", "cheat", "customize"];
-const MORE_PAGES = ["nutrition-summary", "recipe-ingredients", "meal-categories", "pantry-inventory", "cheat", "add-meal"];
+const PAGES = ["home", "meals", "plan", "grocery", "assistant", "meal-details", "add-meal", "settings", "nutrition-summary", "meal-categories", "pantry-inventory", "cheat", "customize"];
+const MORE_PAGES = ["nutrition-summary", "meal-categories", "pantry-inventory", "cheat"];
 function render() {
   ({ home:renderHome, meals:renderMeals, plan:renderPlan, grocery:renderGrocery, assistant:renderChat, "meal-details":renderDetails, "add-meal":renderForm, settings:renderSettings, customize:renderCustomize,
-    "nutrition-summary":renderSummary, "recipe-ingredients":renderRecipe, "meal-categories":renderCats, "pantry-inventory":renderPantry, cheat:renderCheat }[ui.page] || renderHome)();
+    "nutrition-summary":renderSummary, "meal-categories":renderCats, "pantry-inventory":renderPantry, cheat:renderCheat }[ui.page] || renderHome)();
 }
 const viewBtn = (m, inner) => `<button class="nr-link" data-act="view-meal" data-id="${m.id}">${inner}</button>`;
 const head = (icon, eyebrow, title, sub, right = "") => `<div class="nr-head"><div><div class="nr-eyebrow">${ic(icon)}<span>${e(eyebrow)}</span></div><h1 class="nr-h1">${e(title)}</h1>${sub ? `<p class="nr-sub">${sub}</p>` : ""}</div>${right}</div>`;
@@ -2418,17 +2415,6 @@ function renderSummary() {
       <div class="nr-sumcal">${x.est ? "~" : ""}${x.cal} cal</div></div>`).join("")}
       <div class="nr-sumtotal"><span>Week total <b>${week} cal</b></span><span>Average on planned days <b>${withMeals ? Math.round(week / withMeals) : 0} cal</b></span><span>Daily max <b>${goal || "none"}</b></span></div>
     </div>${tot.some(x => x.est) ? `<p class="nr-muted">~ means a meal on that day has estimated calories.</p>` : ""}`;
-}
-
-// ----- Recipe Ingredients -----
-function renderRecipe() {
-  if (!meal(ui.recipeId)) { const t = planned(new Date())[0]; ui.recipeId = t ? t.m.id : (S.meals[0] || {}).id; }
-  const m = meal(ui.recipeId);
-  $("nr-p-recipe-ingredients").innerHTML = head("fork", "Recipe Ingredients", "Prep list", "Pick a meal to see what goes in it. Tick things off as you prep.") + `
-    <select class="nr-input sq" id="nr-r-meal" style="max-width:520px">${S.meals.map(x => `<option value="${x.id}" ${m && x.id === m.id ? "selected" : ""}>${e(x.name)}</option>`).join("")}</select>
-    ${m ? `<div class="nr-gcard" style="margin-top:22px"><h3>${e(m.name)} <span class="nr-muted" style="font-size:1rem;font-weight:400">${calText(m)}</span></h3>
-      ${m.ing.length ? m.ing.map(i => `<div class="nr-gi"><div class="nr-gtop ${ui.prep.has(m.id + i.id) ? "checked" : ""}"><button class="nr-check ${ui.prep.has(m.id + i.id) ? "on" : ""}" data-act="prep" data-k="${m.id + i.id}" aria-label="Done">${ic("check")}</button><span class="nm">${e(ingText(i))}</span></div></div>`).join("") : `<p class="nr-muted">This meal has no ingredients yet.</p>`}
-      <div class="actions" style="justify-content:flex-start;margin-top:16px"><button class="nr-btn light sm" data-act="m-grocery" data-id="${m.id}">${ic("cart")}Add to Grocery</button><button class="nr-btn light sm" data-act="view-meal" data-id="${m.id}">Meal details</button><button class="nr-btn light sm" data-act="edit-meal" data-id="${m.id}">${ic("edit")}Edit ingredients</button></div></div>` : ""}`;
 }
 
 // ----- Categories -----
@@ -2731,7 +2717,7 @@ function go(name, push = true) {
   if (!coach && ui.page !== name && !["meal-details", "add-meal"].includes(ui.page)) ui.back = ui.page;
   document.querySelectorAll(".nr-page").forEach(p => p.hidden = coach || p.dataset.page !== name);
   $("coach").hidden = !coach; $("nr-main").hidden = coach;
-  const tab = coach ? "coach" : name === "nutrition-summary" ? "plan" : name === "pantry-inventory" ? "grocery" : ["meal-details", "add-meal", "recipe-ingredients", "meal-categories"].includes(name) && !MORE_PAGES.includes(name) ? "meals" : name;
+  const tab = coach ? "coach" : name === "nutrition-summary" ? "plan" : name === "pantry-inventory" ? "grocery" : ["meal-details", "add-meal"].includes(name) ? "meals" : name;
   document.querySelectorAll("#nr-tabs > button").forEach(b => b.classList.toggle("on", b.dataset.nr === tab));
   const editing = name === "add-meal" && ui.editId;
   if (editing) document.querySelectorAll("#nr-tabs > button").forEach(b => b.classList.toggle("on", b.dataset.nr === "meals"));
@@ -2808,7 +2794,6 @@ document.addEventListener("click", ev => {
     case "sug": $("nr-chat-in").value = a.textContent; $("nr-chat-form").requestSubmit(); break;
     case "chat-act": chatAct(d.do, d.arg); break;
     case "chat-clear": S.chat = []; save(); renderChat(); break;
-    case "prep": if (ui.prep.has(d.k)) ui.prep.delete(d.k); else ui.prep.add(d.k); renderRecipe(); break;
     case "cat-del": { const c = S.cats[+d.i]; S.cats.splice(+d.i, 1); S.meals.forEach(m => m.tags = m.tags.filter(x => x !== c)); if (ui.tag === c) ui.tag = "All"; save(); renderCats(); toast(`Deleted category ${c}`); break; }
     case "pan-del": S.pantry = S.pantry.filter(p => p.id !== d.id); save(); renderPantry(); break;
     case "s-save": {
@@ -2858,7 +2843,6 @@ document.addEventListener("input", ev => {
 document.addEventListener("change", ev => {
   const id = ev.target.id;
   if (id === "nr-m-photo" && ev.target.files[0]) photoToData(ev.target.files[0], d => { ui.form.photo = d; $("nr-m-url").value = ""; paintPrev(); toast("Photo added"); });
-  else if (id === "nr-r-meal") { ui.recipeId = ev.target.value; renderRecipe(); }
   else if (ev.target.dataset && ev.target.dataset.cat != null) {
     const i = +ev.target.dataset.cat, old = S.cats[i], v = ev.target.value.trim();
     if (!v || v === old) { ev.target.value = old; return; }
