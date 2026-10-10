@@ -2140,19 +2140,18 @@ function renderHome() {
 }
 
 const NUTS = [
-  ["Protein", /chicken|turkey|beef|steak|pork|egg|tuna|salmon|shrimp|fish|cod|tofu|tempeh|yog|greek|cottage|cheese|whey|protein|lentil|bean|chickpea|edamame|milk|jerky|ham|bacon|sausage/],
-  ["Complex Carbs", /oat|rice|quinoa|bread|wheat|whole|pasta|potato|yam|barley|tortilla|wrap|bean|lentil|chickpea|corn|cereal|granola|couscous|banana/],
-  ["Healthy Fats", /avocado|olive|almond|walnut|cashew|pecan|peanut|nut|seed|chia|flax|salmon|tuna|sardine|egg|tahini|coconut|guac/],
-  ["B-Complex (B12, B6, Folate)", /egg|chicken|turkey|beef|salmon|tuna|fish|shrimp|pork|milk|yog|cheese|spinach|kale|lentil|bean|chickpea|avocado|asparagus|broccoli|banana|liver|fortified|cereal|oat/],
-  ["Iron", /beef|steak|spinach|kale|lentil|bean|chickpea|tofu|tempeh|oat|quinoa|turkey|egg|shrimp|sardine|pumpkin seed|cashew|molasses/],
-  ["Magnesium", /spinach|kale|almond|cashew|pumpkin seed|chia|flax|avocado|banana|oat|quinoa|black bean|bean|edamame|tofu|yog|dark chocolate|cacao|brown rice|whole wheat|peanut|salmon/],
-  ["Fiber", /oat|bean|lentil|chickpea|chia|flax|berry|berries|apple|pear|broccoli|spinach|kale|carrot|avocado|quinoa|brown rice|whole|vegetable|salad|lettuce|tomato|pepper|cabbage|sweet potato|banana|raspberr|pea\b|peas|corn|almond|granola/]
+  ["Protein", /chicken|turkey|beef|steak|pork|\begg|tuna|salmon|shrimp|\bfish|\bcod\b|tofu|tempeh|yogh?urt|cottage|cheese|whey|protein|lentil|beans?\b|chickpea|edamame|\bham\b|sausage/],
+  ["Complex Carbs", /oat|brown rice|\brice|quinoa|whole.?(wheat|grain)|bread|toast|pasta|potato|\byam|barley|tortilla|\bwrap|lentil|beans?\b|chickpea|\bcorn\b|granola|couscous/],
+  ["Healthy Fats", /avocado|olive|almond|walnut|cashew|pecan|peanut|\bnuts?\b|seeds?\b|chia|flax|salmon|tuna|sardine|\begg|tahini|coconut|guac/],
+  ["B-Complex (B12, B6, Folate)", /\begg|chicken|turkey|beef|salmon|tuna|\bfish|shrimp|pork|milk|yogh?urt|cheese|spinach|kale|lentil|beans?\b|chickpea|asparagus|broccoli|banana|liver/],
+  ["Iron", /beef|steak|spinach|kale|lentil|beans?\b|chickpea|tofu|tempeh|oat|quinoa|turkey|shrimp|sardine|pumpkin seed|cashew/],
+  ["Magnesium", /spinach|kale|almond|cashew|pumpkin seed|chia|flax|avocado|banana|oat|quinoa|beans?\b|edamame|tofu|dark chocolate|cacao|brown rice|whole.?wheat|peanut|salmon/],
+  ["Fiber", /oat|beans?\b|lentil|chickpea|chia|flax|berry|berries|apple|\bpear|broccoli|spinach|kale|carrot|avocado|quinoa|brown rice|whole.?(wheat|grain)|sweet potato|banana|raspberr|\bpeas?\b|almond|granola/]
 ];
 function nutrientsOf(m) {
   const txt = m.ing.map(i => i.name).join(" | ").toLowerCase();
   if (!txt) return [];
   const out = NUTS.filter(([, re]) => re.test(txt)).map(n => n[0]);
-  if (m.pro >= 15 && !out.includes("Protein")) out.unshift("Protein");
   return out;
 }
 const nutHTML = m => { const n = nutrientsOf(m); return n.length ? `<div class="nr-nuts" aria-label="Nutrients">${n.map(x => `<span class="nr-nut">${e(x)}</span>`).join("")}</div>` : ""; };
