@@ -25,10 +25,11 @@ body { margin:0; background:var(--n-bg); color:var(--n-ink); font:400 14px/1.5 v
 #nr svg.i { width:16px; height:16px; fill:none; stroke:currentColor; stroke-width:1.9; stroke-linecap:round; stroke-linejoin:round; flex:0 0 auto; }
 
 /* top bar */
-.nr-nav { position:sticky; top:0; z-index:40; background:#fff; border-bottom:1px solid var(--n-line); height:64px; display:flex; align-items:center; gap:28px; padding:0 24px; }
+.nr-nav { position:sticky; top:0; z-index:40; background:#fff; border-bottom:1px solid var(--n-line); height:64px; display:flex; align-items:center; gap:20px; padding:0 24px; }
 .nr-logo { background:none; border:0; padding:0; cursor:pointer; font-size:20px; line-height:1; font-weight:800; letter-spacing:-.05em; }
-.nr-tabs { display:flex; align-items:center; gap:4px; min-width:0; }
-.nr-tabs > button, .nr-more > button { background:none; border:0; border-radius:999px; height:36px; padding:0 16px; font-size:14px; font-weight:500; color:#666; cursor:pointer; white-space:nowrap; display:flex; align-items:center; gap:6px; }
+.nr-tabs { display:flex; align-items:center; gap:2px; min-width:0; flex:1; overflow-x:auto; scrollbar-width:none; }
+.nr-tabs::-webkit-scrollbar { display:none; }
+.nr-tabs > button, .nr-more > button { background:none; border:0; border-radius:999px; height:34px; padding:0 8px; font-size:13px; font-weight:500; color:#666; cursor:pointer; white-space:nowrap; display:flex; align-items:center; gap:6px; }
 .nr-tabs > button:hover, .nr-more > button:hover { background:var(--n-soft); }
 .nr-tabs > button.on, .nr-more > button.on { background:var(--n-black); color:#fff; }
 .nr-more { position:relative; }
@@ -366,7 +367,7 @@ select.nr-input { appearance:none; -webkit-appearance:none; background:#fff url(
   .nr-settings span { display:none; }
   .nr-tabs { order:3; flex:1 1 100%; overflow-x:auto; scrollbar-width:none; }
   .nr-tabs::-webkit-scrollbar { display:none; }
-  .nr-tabs > button, .nr-more { flex:0 0 auto; }
+  .nr-tabs > button { flex:0 0 auto; }
   .nr-main { padding:20px 16px 48px; }
   .nr-grid { grid-template-columns:repeat(2, minmax(0, 1fr)); }
   .nr-ggrid { grid-template-columns:1fr; }
@@ -631,23 +632,12 @@ select.nr-input { appearance:none; -webkit-appearance:none; background:#fff url(
       <button data-nr="grocery">Grocery</button>
       <button data-nr="assistant">Help Me Healthy</button>
       <button data-nr="coach">Daily Coach</button>
-      <div class="nr-more">
-        <button type="button" id="nr-more-btn" aria-haspopup="menu" aria-expanded="false">More <svg class="i" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg></button>
-        <div class="nr-menu" id="nr-more-menu" role="menu" hidden>
-          <div class="cap">Nourish</div>
-          <button data-nr="nutrition-summary" role="menuitem">Weekly Nutrition Summary <small>Calories for each day of your plan</small></button>
-          <button data-nr="recipe-ingredients" role="menuitem">Recipe Ingredients <small>Ingredient list for prep</small></button>
-          <button data-nr="meal-categories" role="menuitem">Categories <small>Make and rename your own</small></button>
-          <button data-nr="cheat" role="menuitem">Cheat Day <small>One planned day off the calorie cap</small></button>
-          <button data-nr="pantry-inventory" role="menuitem">Pantry Inventory <small>Staples you already have at home</small></button>
-          <button data-nr="add-meal" role="menuitem">Add New Meal <small>Name, calories, category, photo</small></button>
-          <div class="cap">Daily Coach</div>
-          <button data-nr="coach-today" role="menuitem">Today’s picks <small>Tell Daily Coach what you’re craving</small></button>
-          <button data-nr="coach-move" role="menuitem">Workouts <small>Guided, with demos and auto-progression</small></button>
-          <button data-nr="grocery" role="menuitem">Kitchen stock <small>What you have, what to buy</small></button>
-          <button data-nr="coach-setup" role="menuitem">Daily Coach setup <small>Calorie cap, dumbbells, goals</small></button>
-        </div>
-      </div>
+      <button data-nr="nutrition-summary">Nutrition</button>
+      <button data-nr="recipe-ingredients">Recipes</button>
+      <button data-nr="meal-categories">Categories</button>
+      <button data-nr="cheat">Cheat Day</button>
+      <button data-nr="pantry-inventory">Pantry</button>
+      <button data-nr="add-meal">Add Meal</button>
     </nav>
     <button class="nr-settings" id="nr-settings-btn" data-nr="settings"><svg class="i" viewBox="0 0 24 24" id="ic-gear"></svg><span>Settings</span></button>
   </header>
@@ -2719,7 +2709,7 @@ function movePlan(from, pid, to, index) {
 
 // ---------- routing ----------
 function go(name, push = true) {
-  closePop(); $("nr-more-menu").hidden = true;
+  closePop();
   if (name === "coach") name = "coach-today";
   const coach = name.startsWith("coach");
   if (!coach && !PAGES.includes(name)) name = "home";
@@ -2730,7 +2720,7 @@ function go(name, push = true) {
   document.querySelectorAll("#nr-tabs > button").forEach(b => b.classList.toggle("on", b.dataset.nr === tab));
   const editing = name === "add-meal" && ui.editId;
   if (editing) document.querySelectorAll("#nr-tabs > button").forEach(b => b.classList.toggle("on", b.dataset.nr === "meals"));
-  $("nr-more-btn").classList.toggle("on", !coach && MORE_PAGES.includes(name) && !editing);
+  { const on = document.querySelector("#nr-tabs > button.on"); if (on && on.scrollIntoView) on.scrollIntoView({ block:"nearest", inline:"nearest" }); }
   $("nr-settings-btn").classList.toggle("on", name === "settings");
   if (coach) { const t = name.split("-")[1] || "today"; showTab(t); }
   else { ui.page = name; render(); }
@@ -2747,15 +2737,9 @@ const edit = id => { ui.editId = id; remember("nr-edit", id); go("add-meal"); };
 // ---------- events ----------
 document.addEventListener("click", ev => {
   const t = ev.target;
-  if (!t.closest(".nr-more")) $("nr-more-menu").hidden = true;
   if (!t.closest("#nr-pop") && !t.closest('[data-act$="-menu"]')) closePop();
   if (t === modal) return closeModal();
   const nav = t.closest("[data-nr]"); if (nav) { if (nav.dataset.nr === "add-meal") { ui.editId = null; remember("nr-edit", ""); } go(nav.dataset.nr); return; }
-  if (t.closest("#nr-more-btn")) {
-    const m = $("nr-more-menu"), btn = $("nr-more-btn"); m.hidden = !m.hidden; btn.setAttribute("aria-expanded", String(!m.hidden));
-    if (!m.hidden) { const r = btn.getBoundingClientRect(); m.style.top = (r.bottom + 8) + "px"; m.style.left = Math.max(8, Math.min(innerWidth - m.offsetWidth - 8, r.left)) + "px"; }
-    return;
-  }
   const a = t.closest("[data-act]"); if (!a) return;
   const d = a.dataset, act = d.act;
   switch (act) {
@@ -2878,7 +2862,7 @@ $("nr-chat-form").addEventListener("submit", ev => {
   ev.preventDefault(); const v = $("nr-chat-in").value.trim(); if (!v) return; $("nr-chat-in").value = "";
   S.chat.push({ role:"user", text:v }); save(); renderChat(); setTimeout(() => handle(v), 200);
 });
-document.addEventListener("keydown", ev => { if ((ev.key === "Enter" || ev.key === " ") && ev.target.matches && ev.target.matches('span[role="button"][data-act]')) { ev.preventDefault(); ev.target.click(); return; } if (ev.key === "Escape") { closePop(); $("nr-more-menu").hidden = true; if (!modal.hidden) closeModal(); } });
+document.addEventListener("keydown", ev => { if ((ev.key === "Enter" || ev.key === " ") && ev.target.matches && ev.target.matches('span[role="button"][data-act]')) { ev.preventDefault(); ev.target.click(); return; } if (ev.key === "Escape") { closePop(); if (!modal.hidden) closeModal(); } });
 window.addEventListener("hashchange", () => go(location.hash.slice(1) || "home", false));
 
 // ----- 3 plans for the day (Today page) -----
