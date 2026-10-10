@@ -1,7 +1,7 @@
 // Offline support: the whole app is one HTML file plus a few icons. After the first visit
 // everything is served from the device, so it opens with no Wi-Fi or hotspot and uses no data.
 // When a connection is available, a newer version is fetched quietly and used next time.
-const CACHE = "nourish-v4";
+const CACHE = "nourish-v5";
 const FILES = ["./", "./index.html", "./manifest.webmanifest", "./icon-192.png", "./icon-512.png", "./apple-touch-icon.png"];
 
 self.addEventListener("install", e => {

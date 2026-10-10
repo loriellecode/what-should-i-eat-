@@ -2137,10 +2137,19 @@ function renderHome() {
   $("nr-home-body").innerHTML = html;
 }
 
+const FILTERS = {
+  "All": () => true,
+  "Easy Meal Prep": m => m.tags.some(t => /meal prep/i.test(t)),
+  "Breakfast": m => m.tags.includes("Breakfast"),
+  "Lunch": m => m.tags.includes("Lunch"),
+  "Dinner": m => m.tags.includes("Dinner"),
+  "Smoothies & Snacks": m => m.tags.includes("Smoothies") || m.tags.includes("Snacks")
+};
 function renderMeals() {
-  $("nr-chips").innerHTML = ["All", ...S.cats].map(t => `<button class="nr-chip ${ui.tag === t ? "on" : ""}" data-act="tag" data-tag="${e(t)}">${e(t)}</button>`).join("");
+  if (!FILTERS[ui.tag]) ui.tag = "All";
+  $("nr-chips").innerHTML = Object.keys(FILTERS).map(t => `<button class="nr-chip ${ui.tag === t ? "on" : ""}" data-act="tag" data-tag="${e(t)}">${e(t)}</button>`).join("");
   const q = ui.q.trim().toLowerCase();
-  const list = S.meals.filter(m => (ui.tag === "All" || m.tags.includes(ui.tag)) && (!q || m.name.toLowerCase().includes(q) || m.ing.some(i => i.name.toLowerCase().includes(q)) || m.tags.some(t => t.toLowerCase().includes(q))));
+  const list = S.meals.filter(m => FILTERS[ui.tag](m) && (!q || m.name.toLowerCase().includes(q) || m.ing.some(i => i.name.toLowerCase().includes(q)) || m.tags.some(t => t.toLowerCase().includes(q))));
   $("nr-grid").innerHTML = list.length ? list.map(m => `<article class="nr-card">
       <div class="nr-photo">${viewBtn(m, photoHTML(m))}<button class="nr-btn nr-circle nr-add" data-act="add-meal" data-id="${m.id}" aria-label="Add to plan">${ic("plus")}</button>${m.tags[0] ? `<span class="nr-tag">${e(m.tags[0])}</span>` : ""}</div>
       <div class="nr-cbody"><h3 class="nr-ctitle">${viewBtn(m, e(m.name))}</h3>
@@ -2231,7 +2240,7 @@ function renderDetails() {
 // ----- Add / Edit Meal -----
 function renderForm() {
   const box = $("nr-p-add-meal"), m = ui.editId ? meal(ui.editId) : null;
-  ui.form = { tags:m ? [...m.tags] : (ui.tag !== "All" ? [ui.tag] : []), photo:m ? m.photo : null };
+  ui.form = { tags:m ? [...m.tags] : (S.cats.includes(ui.tag) ? [ui.tag] : ui.tag === "Easy Meal Prep" && S.cats.includes("Meal Prep") ? ["Meal Prep"] : []), photo:m ? m.photo : null };
   box.innerHTML = `<button class="nr-back" data-act="back">${ic("left")}Back</button>` + head("fork", "Meal Book", m ? "Edit Meal" : "Add New Meal", "Only the name is required.") + `
     <form class="nr-form" id="nr-mform" autocomplete="off">
       <label for="nr-m-name">Name</label><input class="nr-input sq" id="nr-m-name" required value="${e(m ? m.name : "")}" placeholder="e.g. Chicken Rice Bowl">
