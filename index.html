@@ -371,6 +371,21 @@ select.nr-input { appearance:none; -webkit-appearance:none; background:#fff url(
 #nr-g-coach .nr-gc-h { font-size:20px; }
 #nr-g-coach .nr-sub { font-size:13px; margin:0; }
 #nr-g-coach .groc, #nr-g-coach details { padding:14px 16px; }
+/* Plan: photo tiles with stickers, no cards */
+.nr-daybody { gap:10px; }
+.nr-pm { display:block; position:relative; padding:0; border:0; background:none; border-radius:14px; aspect-ratio:4 / 3; overflow:hidden; cursor:grab; box-shadow:0 1px 3px rgba(0,0,0,.12); }
+.nr-pm:hover { border:0; box-shadow:0 3px 10px rgba(58,93,248,.28); }
+.nr-pm .nr-ph { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-size:2.9rem; background:#eee; }
+.nr-pm .nr-ph img { width:100%; height:100%; object-fit:cover; display:block; -webkit-user-drag:none; user-select:none; }
+.nr-pm .nr-ph span { filter:drop-shadow(0 4px 6px rgba(0,0,0,.18)); }
+.nr-stk { position:absolute; z-index:2; font-size:11px; line-height:1; font-weight:600; padding:5px 8px; border-radius:999px; pointer-events:none; white-space:nowrap; box-shadow:0 1px 3px rgba(0,0,0,.2); }
+.nr-stk-type { left:7px; top:7px; background:#fff; color:var(--n-ink); }
+.nr-stk-cal { left:7px; bottom:7px; background:rgba(17,17,17,.82); color:#fff; }
+.nr-stk-done { right:7px; bottom:7px; background:#1f9d55; color:#fff; padding:4px; display:flex; }
+.nr-stk-done svg.i { width:13px; height:13px; }
+.nr-pm .nr-dots { position:absolute; top:5px; right:5px; width:26px; height:26px; opacity:1; background:rgba(255,255,255,.92); border-radius:50%; z-index:3; display:flex; align-items:center; justify-content:center; box-shadow:0 1px 3px rgba(0,0,0,.2); }
+.nr-pm.done .nr-ph { filter:saturate(.5) brightness(.9); }
+.nr-pm.drop-before { box-shadow:0 -3px 0 var(--n-accent); }
 /* meal library panel on Plan */
 .nr-lib { position:fixed; top:0; right:0; bottom:0; width:min(360px, 92vw); z-index:45; background:#fff; border-left:1px solid var(--n-line); box-shadow:-20px 0 40px rgba(0,0,0,.08); display:flex; flex-direction:column; gap:10px; padding:16px 16px 0; }
 .nr-lib[hidden] { display:none; }
@@ -763,9 +778,7 @@ select.nr-input { appearance:none; -webkit-appearance:none; background:#fff url(
         <h2 class="nr-gc-h">Based on your kitchen</h2>
         <p class="nr-sub">What to buy for the next 7 days from the Daily Coach picks, minus what you already have.</p>
         <div class="nr-gcols">
-          <section id="groceries" class="groc">
-      </aside></div>
-    </section>
+          <section id="groceries" class="groc"></section>
           <details id="kitchen" open>
             <summary>What’s in your kitchen</summary>
             <div id="stock"></div>
@@ -778,6 +791,7 @@ select.nr-input { appearance:none; -webkit-appearance:none; background:#fff url(
           </details>
         </div>
       </div>
+      </aside></div>
     </section>
 
     <section class="nr-page nr-mid" data-page="assistant" hidden>
@@ -2291,10 +2305,10 @@ function renderPlan() {
         <div class="nr-dtot"><b>${sumCal(list)}</b> cal<div class="nr-dm">${list.length} meal${list.length === 1 ? "" : "s"}</div></div></div>
         <div class="nr-daybar"><i class="${S.settings.cal && sumCal(list) > S.settings.cal ? "over" : ""}" style="width:${Math.min(100, S.settings.cal ? sumCal(list) / S.settings.cal * 100 : 0)}%"></i></div></div>
       <div class="nr-daybody">${list.length ? list.map(x => `<div class="nr-pm ${x.p.done ? "done" : ""}" draggable="true" data-drag="${x.p.id}" data-from="${k}">
-        ${GRIP}
-        <span class="nr-link" role="button" tabindex="0" data-act="view-meal" data-id="${x.m.id}"><span class="nr-thumb">${photoHTML(x.m, false)}</span></span>
-        <span class="nr-link nm" role="button" tabindex="0" data-act="view-meal" data-id="${x.m.id}"><b>${e(x.m.name)}</b><span>${x.m.cal == null || x.m.cal === "" ? "" : calText(x.m)}</span></span>
-        <span class="nr-type">${e(typeOf(x))}</span>
+        <span class="nr-link nr-ph" role="button" tabindex="0" data-act="view-meal" data-id="${x.m.id}" aria-label="${e(x.m.name)}" title="${e(x.m.name)}">${photoHTML(x.m, false)}</span>
+        <span class="nr-stk nr-stk-type">${e(typeOf(x))}</span>
+        <span class="nr-stk nr-stk-cal">${x.m.cal == null || x.m.cal === "" ? "— cal" : `${x.m.calEst ? "~" : ""}${x.m.cal} cal`}</span>
+        ${x.p.done ? `<span class="nr-stk nr-stk-done">${ic("check")}</span>` : ""}
         <button class="nr-dots" data-act="plan-menu" data-date="${k}" data-pid="${x.p.id}" aria-label="More">${ic("dots")}</button></div>`).join("") : `<div class="nr-none">No meals</div>`}</div></div>
       <button class="nr-dayadd" data-act="pick-meal" data-date="${k}">+ Add meal</button></div>`;
   }).join("");
