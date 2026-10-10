@@ -2167,7 +2167,8 @@ const proOf = name => { const n = normName(name); const k = Object.keys(PRO).fin
 const kcalOf = name => { const f = ingInfo(normName(name)) || ingInfo(String(name).toLowerCase()); return f ? f.kcal : 0; };
 const estimateCal = ing => ing.reduce((a, i) => a + kcalOf(i.name), 0);
 
-function seed() {
+// the built-in sample meals: no longer loaded into the app (kept only so tests can fill the library)
+function sampleSeed() {
   const meals = MEALS.map(m => {
     const tags = new Set(m.slots.map(s => ({ breakfast:"Breakfast", lunch:"Lunch", dinner:"Dinner", snack:"Snacks" }[s])));
     if (/smoothie/i.test(m.name)) tags.add("Smoothies");
@@ -2184,7 +2185,20 @@ function seed() {
   return { v:2, meals, plan:{}, grocery:[], pantry:[], cats:[...TAGS], chat:[],
     settings:{ cal:+(document.getElementById("calLimit") || {}).value || 900, pro:67, weekStart:3 } };
 }
-function load() { try { const s = JSON.parse(localStorage.getItem(KEY) || "null"); if (s && s.meals) return s; } catch {} return seed(); }
+function seed() {
+  return { v:2, noSamples:true, meals:[], plan:{}, grocery:[], pantry:[], cats:[...TAGS], chat:[],
+    settings:{ cal:+(document.getElementById("calLimit") || {}).value || 900, pro:67, weekStart:3 } };
+}
+// one-time clean-up: drop the placeholder meals that older versions saved on this device
+function dropSamples(st) {
+  if (st.noSamples) return st;
+  const names = new Set(sampleSeed().meals.map(m => m.name.toLowerCase())), gone = new Set(st.meals.filter(m => names.has(m.name.toLowerCase())).map(m => m.id));
+  st.meals = st.meals.filter(m => !gone.has(m.id));
+  for (const k of Object.keys(st.plan || {})) { st.plan[k] = st.plan[k].filter(x => !gone.has(x.mealId)); if (!st.plan[k].length) delete st.plan[k]; }
+  st.grocery = (st.grocery || []).map(g => ({ ...g, sources:(g.sources || []).filter(id => !gone.has(id)) })).filter(g => g.manual || g.sources.length || g.purchased);
+  st.noSamples = true; return st;
+}
+function load() { try { const s = JSON.parse(localStorage.getItem(KEY) || "null"); if (s && s.meals) return dropSamples(s); } catch {} return seed(); }
 let S = load();
 const save = () => { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch { toast("Couldn’t save. Storage may be full (large photos use the most)."); } };
 const meal = id => S.meals.find(m => m.id === id);
@@ -2369,7 +2383,7 @@ function renderMeals() {
   const q = ui.q.trim().toLowerCase();
   const list = S.meals.filter(m => FILTERS[ui.tag](m) && (!q || m.name.toLowerCase().includes(q) || m.ing.some(i => i.name.toLowerCase().includes(q)) || m.tags.some(t => t.toLowerCase().includes(q))));
   $("nr-grid").innerHTML = list.length ? list.map(mealCard).join("")
-    : `<div class="nr-empty" style="grid-column:1/-1">No meals match.<br><button class="nr-btn" data-act="new-meal">${ic("plus")}New Meal</button></div>`;
+    : `<div class="nr-empty" style="grid-column:1/-1">${S.meals.length ? "No meals match." : "No meals yet. Add your first meal to get started."}<br><button class="nr-btn" data-act="new-meal">${ic("plus")}New Meal</button></div>`;
 }
 
 const GRIP = '<svg class="nr-grip" viewBox="0 0 12 18" aria-hidden="true"><g fill="currentColor"><circle cx="3" cy="3" r="1.4"/><circle cx="9" cy="3" r="1.4"/><circle cx="3" cy="9" r="1.4"/><circle cx="9" cy="9" r="1.4"/><circle cx="3" cy="15" r="1.4"/><circle cx="9" cy="15" r="1.4"/></g></svg>';
@@ -2566,7 +2580,7 @@ function renderCustomize() {
         <div><label for="nr-s-pro">Daily protein goal (g)</label><input class="nr-input sq" id="nr-s-pro" type="number" min="0" value="${S.settings.pro}"></div>
       </div>
       <p class="nr-muted">The calorie max is shared with Daily Coach, which never plans a day over it.</p>
-      <div class="actions" style="justify-content:space-between"><div style="display:flex;gap:10px;flex-wrap:wrap"><button type="button" class="nr-btn light sm" data-act="reset-sample">Reset to sample meals</button><button type="button" class="nr-btn light sm" data-act="clear-plan">Clear plan</button></div>
+      <div class="actions" style="justify-content:space-between"><div style="display:flex;gap:10px;flex-wrap:wrap"><button type="button" class="nr-btn light sm" data-act="reset-sample">Remove all meals</button><button type="button" class="nr-btn light sm" data-act="clear-plan">Clear plan</button></div>
         <button type="button" class="nr-btn" data-act="s-save">Save</button></div>
     </div>`;
 }
@@ -2990,7 +3004,7 @@ document.addEventListener("click", ev => {
       S.settings.weekStart = +$("nr-s-week").value; S.settings.cal = +$("nr-s-cal").value || 0; S.settings.pro = +$("nr-s-pro").value || 0; ui.week = weekStartOf(new Date()); save();
       try { const el = document.getElementById("calLimit"); if (el) { el.value = S.settings.cal || ""; update(); } } catch {}
       toast("Settings saved"); break; }
-    case "reset-sample": S = seed(); save(); render(); toast("Sample meals restored"); break;
+    case "reset-sample": if (!confirm("Remove every meal and your whole plan?")) break; S = seed(); save(); render(); toast("All meals removed"); break;
     case "clear-plan": S.plan = {}; save(); render(); toast("Plan cleared"); break;
   }
 });
@@ -3114,7 +3128,7 @@ function renderDayPlans() {
   const key = text + "|" + S.meals.length + "|" + S.meals.map(m => m.id + m.cal).join(",").length + "|" + ($("dislikes") ? $("dislikes").value : "") + "|" + S.settings.cal + "|" + iso(new Date()) + "|" + dpRoll;
   if (key === dpCache && box.innerHTML) return; dpCache = key;
   const { plans, cap, mood } = dayPlans(text);
-  if (!plans.length) { box.innerHTML = `<div class="dp-head"><h2>Plans for today</h2><p>I couldn’t fit a full day under ${cap} calories with those picks. Try a different mood or add lighter meals in Meals.</p></div>`; return; }
+  if (!plans.length) { box.innerHTML = `<div class="dp-top"><div class="dp-head"><h2>Plans for today</h2><p>${S.meals.length ? `I couldn’t fit a full day under ${cap} calories with those picks. Try a different mood or add lighter meals in Meals.` : "You haven’t added any meals yet. Add some in Meals and I’ll build your plans from them."}</p></div><button class="dp-change" data-dp-reset>Change what I feel like</button></div>`; return; }
   box.innerHTML = `<div class="dp-top"><div class="dp-head"><h2>3 plans for today</h2><p>${mood && mood.chips.length ? `Built around “${e(mood.chips.join(", "))}”, ` : ""}each one is a breakfast, lunch, dinner, snacks and smoothies, ${cap} calories or less.</p></div><button class="dp-change" data-dp-reset>Change what I feel like</button></div>
     <div class="dp-grid">${plans.map((pl, i) => `<article class="dp-card"><h3>Plan ${i + 1}</h3>
       <div class="dp-tot"><b>${pl.tot} kcal</b> of ${cap} · <b>${pl.items.reduce((a, x) => a + (+x[1].m.pro || 0), 0)} g</b> protein</div>
@@ -3135,7 +3149,7 @@ document.addEventListener("click", ev => {
   pl.items.forEach(([lab, it]) => addToPlan(it.m.id, d, lab === "Smoothie" ? "Smoothie" : lab));
   toast("Added to Home"); render();
 });
-window.__nr = { dayPlans, get ink() { return ink; }, get S() { return S; }, handle, go, autoplan, planned, seed, normName, parseIng, catOf, reset() { S = seed(); save(); render(); } };
+window.__nr = { loadSample() { S = sampleSeed(); S.noSamples = true; save(); render(); }, dayPlans, get ink() { return ink; }, get S() { return S; }, handle, go, autoplan, planned, seed, normName, parseIng, catOf, reset() { S = seed(); save(); render(); } };
 
 
 // ---------- drawing annotations: pen, highlighter, eraser on any page; saved per page on this device ----------
