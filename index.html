@@ -404,13 +404,13 @@ select.nr-input { appearance:none; -webkit-appearance:none; background:#fff url(
 .nr-collhead h2 { margin:0; font-size:21px; font-weight:700; letter-spacing:-.02em; }
 .nr-rail { display:flex; gap:16px; overflow-x:auto; padding:2px 2px 14px; scroll-snap-type:x proximity; scrollbar-width:thin; }
 .nr-rail .nr-card { flex:0 0 250px; scroll-snap-align:start; }
-#coach .howto{background:rgba(5,12,60,.55); border:1px solid var(--line); border-radius:18px; padding:8px 26px; max-width:860px;}
-#coach .howto-step{display:grid; grid-template-columns:36px 1fr; gap:18px; padding:24px 0; border-top:1px solid var(--line);}
+#coach .howto{background:rgba(5,12,60,.55); border:1px solid var(--line); border-radius:14px; padding:4px 18px; max-width:720px;}
+#coach .howto-step{display:grid; grid-template-columns:26px 1fr; gap:12px; padding:12px 0; border-top:1px solid var(--line);}
 #coach .howto-step:first-child{border-top:0;}
-#coach .howto-ic{color:#4ade80; padding-top:2px;}
-#coach .howto-step h3{margin:0 0 8px; font-size:1.35rem; font-weight:600; line-height:1.25;}
-#coach .howto-step p{margin:0; font-size:1.08rem; line-height:1.55; color:var(--soft); max-width:none;}
-@media (max-width:560px){#coach .howto{padding:4px 18px;} #coach .howto-step{gap:12px; padding:18px 0;} #coach .howto-step h3{font-size:1.15rem;} #coach .howto-step p{font-size:1rem;}}
+#coach .howto-ic{color:#4ade80; padding-top:1px;} #coach .howto-ic svg{width:22px; height:22px;}
+#coach .howto-step h3{margin:0 0 3px; font-size:1.02rem; font-weight:600; line-height:1.25;}
+#coach .howto-step p{margin:0; font-size:.88rem; line-height:1.45; color:var(--soft); max-width:none;}
+@media (max-width:560px){#coach .howto{padding:2px 14px;} #coach .howto-step{gap:10px; padding:10px 0;} #coach .howto-step h3{font-size:.98rem;} #coach .howto-step p{font-size:.86rem;}}
 .nr-recipe { margin-top:24px; }
 .nr-rstats { display:flex; gap:28px; flex-wrap:wrap; align-items:flex-end; }
 .nr-rstats > div > span { display:block; color:var(--n-mute); font-size:13px; margin-bottom:4px; }
@@ -451,6 +451,26 @@ select.nr-input { appearance:none; -webkit-appearance:none; background:#fff url(
 .nr-presets button { text-align:left; background:#fff; border:1.5px solid var(--n-line); border-radius:14px; padding:12px 14px; cursor:pointer; font:inherit; color:var(--n-ink); }
 .nr-presets button b { display:block; font-size:14px; } .nr-presets button small { color:var(--n-mute); font-size:12px; }
 .nr-presets button.on { border-color:var(--n-accent); background:var(--n-accent-soft); }
+/* ---- coach back button + setup questionnaire ---- */
+#coach .coach-back{display:block; text-align:left; margin-right:auto; background:none; border:0; color:#fff; font:inherit; font-size:.95rem; cursor:pointer; padding:6px 2px 10px; opacity:.9;}
+#coach .quest .q{padding:14px 0; border-top:1px solid var(--line);} #coach .quest .q:first-child{border-top:0; padding-top:0;}
+#coach .quest h3{margin:0 0 6px; font-size:1rem; font-weight:600;} #coach .quest .qh{margin:0 0 8px; font-size:.82rem; color:var(--soft);}
+#coach .quest .qrow{margin-top:4px;} #coach .quest .qrow span{display:block; font-size:.85rem; color:var(--soft);}
+#coach .qchips{display:flex; flex-wrap:wrap; gap:7px; margin-bottom:8px;}
+#coach .qchip{background:transparent; color:#fff; border:1px solid var(--line); border-radius:999px; padding:7px 13px; font:inherit; font-size:.88rem; cursor:pointer; min-height:36px;}
+#coach .qchip.on{background:#fff; color:var(--btn-ink); border-color:#fff; font-weight:500;}
+/* ---- meals pagination ---- */
+.nr-chiprow{display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:10px 16px;}
+.nr-pager{display:flex; flex-wrap:wrap; gap:6px; align-items:center; margin-left:auto;} .nr-pager span{font-size:12.5px; color:var(--n-mute); margin-right:4px;}
+.nr-pager button{min-width:36px; height:36px; padding:0 10px; border-radius:10px; border:1.5px solid var(--n-line); background:#fff; font:inherit; font-size:14px; cursor:pointer; color:var(--n-ink);}
+.nr-pager button.on{background:var(--n-ink); color:#fff; border-color:var(--n-ink);}
+/* ---- nutrition alerts and suggestions ---- */
+.nr-alerts{display:flex; flex-wrap:wrap; gap:5px; margin:8px 0 0;} .nr-alert{display:inline-flex; align-items:center; gap:4px; height:22px; padding:0 9px; border-radius:999px; font-size:11.5px; font-weight:600; background:#fff4e0; color:#8a5a00; border:1px solid #f0d9a8; white-space:nowrap;}
+.nr-sugs{display:grid; gap:10px; margin-top:6px;} .nr-sug{border:1px solid var(--n-line); border-radius:14px; padding:12px 14px; background:#fff;} .nr-sug b{display:block; font-size:15px;} .nr-sug p{margin:5px 0 0; font-size:13px; color:var(--n-mute);} .nr-sug p em{font-style:normal; color:var(--n-ink); font-weight:600;}
+.nr-sug .row{display:flex; gap:8px; margin-top:10px; flex-wrap:wrap;}
+.nr-gsug{margin-top:10px;} .nr-gsug > summary{cursor:pointer; list-style:none; display:inline-flex; align-items:center; gap:6px; height:38px; padding:0 14px; border-radius:999px; border:1.5px solid var(--n-line); background:#fff; font-weight:600; font-size:14px;} .nr-gsug > summary::-webkit-details-marker{display:none;} .nr-gsug[open] > summary{background:var(--n-ink); color:#fff; border-color:var(--n-ink);}
+.nr-gsug .nr-sugs{margin-top:12px; max-width:720px;}
+.nr-cheatph{position:relative; aspect-ratio:16/10; overflow:hidden; border-radius:14px 14px 0 0; background:#f1f2f5; display:flex; align-items:center; justify-content:center; font-size:56px;} .nr-cheatph img{position:absolute; inset:0; width:100%; height:100%; object-fit:cover;}
 .nr-comp.warn { background:#fff4e0; color:#8a5a00; }
 .nr-compl.warn { background:#fff4e0; color:#6b4500; border:1px solid #f0d9a8; } .nr-compl.over { background:#fdecec; color:#8f1d12; border:1px solid #f1bcb6; }
 .nr-sect { margin:18px 0 0; font-size:18px; } .nr-sect:first-child { margin-top:4px; }
@@ -544,6 +564,15 @@ select.nr-input { appearance:none; -webkit-appearance:none; background:#fff url(
   .nr-tools { flex-wrap:wrap; }
 }
 @media (max-width:560px) { .nr-grid { grid-template-columns:1fr; } .nr-h1 { font-size:30px; } }
+/* iPad: three compact columns, smaller photos and headings so nothing feels oversized */
+@media (min-width:561px) and (max-width:1100px) {
+  .nr-grid { grid-template-columns:repeat(3, minmax(0, 1fr)); gap:12px; }
+  .nr-photo { aspect-ratio:16 / 11; } .nr-photo .em { transform-origin:center; zoom:.72; }
+  .nr-h1 { font-size:30px; } .nr-ctitle { font-size:15px; } .nr-desc { font-size:13px; }
+  .nr-main { padding:18px 20px 40px; }
+  .nr-detail { grid-template-columns:minmax(220px, 300px) 1fr; gap:20px; } .nr-detail-photo { aspect-ratio:1 / 1; }
+  .nr-btn { font-size:14px; }
+}
 
 /* ---------- Daily Coach (the original app), scoped to #coach ---------- */
 @font-face{ font-family:"Lexend"; font-weight:100 900; font-style:normal; font-display:swap;
@@ -823,7 +852,7 @@ select.nr-input { appearance:none; -webkit-appearance:none; background:#fff url(
         <div style="display:flex;gap:10px;flex-wrap:wrap"><button class="nr-btn light" data-act="sel-mode" id="nr-selbtn"><svg class="i" data-ic="check" viewBox="0 0 24 24"></svg>Select meals</button><button class="nr-btn light" data-nr="discover"><svg class="i" data-ic="compass" viewBox="0 0 24 24"></svg>Discover</button><button class="nr-btn" data-act="new-meal"><svg class="i" data-ic="plus" viewBox="0 0 24 24"></svg>New Meal</button></div>
       </div>
       <div class="nr-field" style="max-width:447px;flex:none"><svg class="i" data-ic="search" viewBox="0 0 24 24"></svg><input class="nr-input" id="nr-meal-q" placeholder="Search meals..." autocomplete="off"></div>
-      <div class="nr-chips" id="nr-chips"></div>
+      <div class="nr-chiprow"><div class="nr-chips" id="nr-chips"></div><div class="nr-pager" id="nr-pager" role="navigation" aria-label="Meal pages"></div></div>
       <div class="nr-grid" id="nr-grid"></div>
     </section>
 
@@ -876,6 +905,7 @@ select.nr-input { appearance:none; -webkit-appearance:none; background:#fff url(
         <button class="nr-btn soft" data-act="g-copy">Copy / share list</button>
         <button class="nr-btn soft" data-act="g-clear">Clear list</button>
       </div>
+      <details class="nr-gsug" id="nr-g-sug"><summary>💡 Suggestions</summary><div class="nr-sugs" id="nr-g-sugs"></div></details>
       <div class="nr-ggrid" id="nr-g-grid"></div>
       </div>
       <aside class="nr-gside" hidden>
@@ -956,11 +986,13 @@ select.nr-input { appearance:none; -webkit-appearance:none; background:#fff url(
   </div>
 
   <div class="tab" data-tab="move" hidden>
+    <button type="button" class="coach-back" data-cback aria-label="Back">‹ Back</button>
     <div class="pagehead"><h2>Time to <b>Move</b></h2><p>Exactly what to do. Press START and follow along.</p></div>
     <section id="move" class="groc"></section>
   </div>
 
   <div class="tab" data-tab="nutrients" hidden>
+    <button type="button" class="coach-back" data-cback aria-label="Back">‹ Back</button>
     <div class="pagehead"><h2>Nutrients <b>Guide</b></h2><p>Foods we can build into your meals.</p></div>
     <section class="nutg">
       <div class="nutg-head"><span>Nutrient</span><span>Foods we can build into your meals</span></div>
@@ -977,6 +1009,7 @@ select.nr-input { appearance:none; -webkit-appearance:none; background:#fff url(
   </div>
 
   <div class="tab" data-tab="start" hidden>
+    <button type="button" class="coach-back" data-cback aria-label="Back">‹ Back</button>
     <div class="pagehead"><h2>How to <b>Start</b></h2><p>Small steps, in this order.</p></div>
     <section class="howto">
       <div class="howto-step"><span class="howto-ic"><svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 3v7a2.5 2.5 0 0 0 2.5 2.5V21M9.5 3v7.5"/><path d="M19 3v18M19 3c-1.8 1.4-2.5 4-2.5 7H19"/></svg></span><div><h3>1. Establish your meal routine first</h3><p>Start with meals you already enjoy: cheesy chicken pita sandwiches, smoothies, chicken tacos, shrimp, and seasoned vegetables. You don't need to eat stereotypical breakfast foods or force yourself to like meals you dislike.</p></div></div>
@@ -988,45 +1021,32 @@ select.nr-input { appearance:none; -webkit-appearance:none; background:#fff url(
   </div>
 
   <div class="tab" data-tab="setup" hidden>
+    <button type="button" class="coach-back" data-cback aria-label="Back">‹ Back</button>
     <div class="pagehead"><h2><b>Setup</b></h2><p>Tell it once. It remembers.</p></div>
     <section id="setup" class="groc">
-    <form id="form" autocomplete="off">
-      <label>Foods you like <small>(optional)</small><input id="likes" placeholder="pasta, salmon"></label>
-      <label>Foods you dislike / avoid<input id="dislikes" placeholder="mushrooms, tofu"></label>
-      <div class="row">
-        <label>Budget per meal ($)<input id="budget" type="number" min="1" step="0.5" value="8"></label>
-        <label>Time per meal (min)<input id="time" type="number" min="5" step="5" value="30"></label>
+    <form id="form" autocomplete="off" class="quest">
+      <div class="q"><h3>1. Foods you like</h3><p class="qh">Tap all that apply.</p><div class="qchips" data-multi="likes" data-opts="chicken,shrimp,salmon,eggs,beef,turkey,cheese,Greek yogurt,rice,pasta,potatoes,beans,spinach,broccoli,berries,bananas,peanut butter,avocado,tofu,mushrooms"></div>
+        <input id="likes" placeholder="Anything else? Separate with commas"></div>
+      <div class="q"><h3>2. Foods you dislike</h3><p class="qh">Tap all that apply. These are left out of your plans.</p><div class="qchips" data-multi="dislikes" data-opts="chicken,shrimp,salmon,eggs,beef,turkey,cheese,Greek yogurt,rice,pasta,potatoes,beans,spinach,broccoli,berries,bananas,peanut butter,avocado,tofu,mushrooms"></div>
+        <input id="dislikes" placeholder="Anything else? Separate with commas"></div>
+      <div class="q"><h3>3. Weekly grocery budget</h3><label class="qrow"><span>$ per week</span><input id="budgetWeek" type="number" min="10" step="5" value="100"></label></div>
+      <div class="q"><h3>4. Time per meal</h3><label class="qrow"><span>Time I want to spend cooking</span><select id="time"><option value="10">10 minutes</option><option value="15">15 minutes</option><option value="20">20 minutes</option><option value="30" selected>30 minutes</option><option value="45">45 minutes</option><option value="60">60 minutes</option><option value="90">90 minutes</option></select></label></div>
+      <div class="q"><h3>5. Training experience</h3><label class="qrow"><span>Where I am now</span>
+        <select id="level"><option value="new" selected>Beginner</option><option value="some">Some experience</option><option value="exp">Intermediate</option><option value="adv">Advanced</option><option value="none">Not currently training</option></select></label></div>
+      <div class="q"><h3>6. Workouts per week</h3><label class="qrow"><span>Days I want to work out</span>
+        <select id="daysPerWeek"><option>1</option><option>2</option><option>3</option><option value="4" selected>4</option><option>5</option><option>6</option><option>7</option></select></label></div>
+      <div class="q"><h3>7. Dumbbells you own</h3><label class="qrow"><span>Weight of each dumbbell (lb)</span><input id="dumbbells" value="7"></label>
+        <p class="qh">Currently 7 lb each. Change it any time. For more than one weight, separate them with commas.</p></div>
+      <div class="q"><h3>8. Maximum daily calories</h3><label class="qrow"><span>My ceiling</span><input id="calLimit" type="number" min="0" step="50" value="900" placeholder="e.g. 900"></label><small id="calNote"></small></div>
+      <div class="q"><h3>9. Average daily calorie goal</h3><label class="qrow"><span>What I aim for on a typical day</span><input id="calAvg" type="number" min="0" step="50" value="" placeholder="e.g. 800"></label>
+        <p class="qh">Separate from your maximum. Plans aim for this number and never go over the maximum.</p></div>
+      <div class="q"><h3>10. Fitness goals</h3><p class="qh">Tap all that apply.</p><div class="qchips" data-multi="goals" data-opts="Weight loss,Muscle building,Strength,Endurance,Flexibility,General fitness,Consistency,Maintaining fitness"></div><input id="goals" type="hidden" value="General fitness"></div>
+      <div hidden>
+        <select id="goal"><option value="lose">Lose fat</option><option value="maintain" selected>Maintain</option><option value="muscle">Build muscle</option><option value="gain">Gain weight</option></select>
+        <input type="checkbox" id="m_breakfast" checked><input type="checkbox" id="m_lunch" checked><input type="checkbox" id="m_dinner" checked><input type="checkbox" id="m_snack" checked>
+        <input id="eaten"><input id="eatenCal" type="number" value="0"><input id="eatenPro" type="number" value="0">
       </div>
-      <div class="row">
-        <label>Training experience
-          <select id="level"><option value="new" selected>Just starting</option><option value="some">Some experience</option><option value="exp">Experienced</option></select></label>
-        <label>Workouts per week
-          <select id="daysPerWeek"><option value="3">3</option><option value="4" selected>4</option><option value="5">5</option></select></label>
-      </div>
-      <label>Dumbbells you own <small>(lb, comma separated)</small>
-        <input id="dumbbells" value="5,8,10,12,15,20,25,30,35,40,50"></label>
-      <label>Max calories per day <small>(optional, leave blank for none)</small>
-        <input id="calLimit" type="number" min="0" step="50" value="900" placeholder="e.g. 900"></label>
-      <small id="calNote"></small>
-      <label>Fitness goal
-        <select id="goal">
-          <option value="lose">Lose fat</option>
-          <option value="maintain" selected>Maintain</option>
-          <option value="muscle">Build muscle</option>
-          <option value="gain">Gain weight</option>
-        </select></label>
-      <div class="checks"><small>Meals I still need today</small><br>
-        <label><input type="checkbox" id="m_breakfast" checked> Breakfast</label>
-        <label><input type="checkbox" id="m_lunch" checked> Lunch</label>
-        <label><input type="checkbox" id="m_dinner" checked> Dinner</label>
-        <label><input type="checkbox" id="m_snack" checked> Snack</label>
-      </div>
-      <label>Already eaten today <small>(foods)</small><input id="eaten" placeholder="oatmeal, banana"></label>
-      <div class="row">
-        <label>Calories so far<input id="eatenCal" type="number" min="0" value="0"></label>
-        <label>Protein so far (g)<input id="eatenPro" type="number" min="0" value="0"></label>
-      </div>
-      <button class="go" type="submit">Save &amp; update today</button>
+      <button class="go" type="submit">Save my answers</button>
     </form>
     </section>
   </div>
@@ -1275,7 +1295,7 @@ function settings(offset) {
   const v = id => $(id).value;
   const goal = v("goal"), today = offset === 0;
   const limit = +v("calLimit") || 0;                                   // hard daily cap, 0 = none
-  const g = limit ? { cal: limit, pro: Math.round(limit * 0.3 / 4) } : GOALS[goal];
+  const avg = +v("calAvg") || 0, g = limit ? { cal: avg && avg < limit ? avg : limit, pro: Math.round((avg && avg < limit ? avg : limit) * 0.3 / 4) } : (+v("calAvg") ? { cal:+v("calAvg"), pro:Math.round(+v("calAvg") * 0.3 / 4) } : GOALS[goal]);
   const snackCal = limit ? 100 : SNACK_CAL, snackPro = limit ? 5 : SNACK_PRO;
   const want = Object.fromEntries(SLOTS.map(s => [s.key, today ? $("m_" + s.key).checked : true]));
   const mains = SLOTS.filter(s => s.share && want[s.key]);
@@ -1290,7 +1310,7 @@ function settings(offset) {
   const moodOn = today && state.mood && state.mood.day === dayKey() && state.mood.text.trim();
   return {
     likes: list(v("likes")), dislikes: list(v("dislikes")), eatenFoods: today ? list(v("eaten")) : [],
-    budget: +v("budget") || 999, time: +v("time") || 999, goal, want, targets, day,
+    budget: (+v("budgetWeek") ? +v("budgetWeek") / 21 : 0) || 999, time: +v("time") || 999, goal, want, targets, day,
     yesterday: pickHistory()[dayKey(addDays(offset - 1))] || [],
     remCal, remPro, limit, eatCal, missPenalty: strict() ? 60 : 2,
     mood: moodOn ? parseMood(state.mood.text) : null,
@@ -1459,7 +1479,7 @@ function renderStock() {
 }
 
 // ---- Persistence ---------------------------------------------------------
-const FIELDS = ["calLimit","likes","dislikes","budget","time","goal","eaten","eatenCal","eatenPro","level","daysPerWeek","dumbbells"];
+const FIELDS = ["calLimit","calAvg","likes","dislikes","budgetWeek","time","goal","goals","eaten","eatenCal","eatenPro","level","daysPerWeek","dumbbells"];
 const CHECKS = SLOTS.map(s => "m_" + s.key);
 const KEY = "wsie-v3", HKEY = "wsie-history", SKEY = "wsie-stock", FKEY = "wsie-fit";
 function save() {
@@ -1493,6 +1513,7 @@ function load() {
       found = true;
     }
   } catch {}
+  try { if (!localStorage.getItem("wsie-q1")) { $("dumbbells").value = "7"; localStorage.setItem("wsie-q1", "1"); } } catch {}
   return found;
 }
 function pickHistory() { try { return JSON.parse(localStorage.getItem(HKEY) || "{}"); } catch { return {}; } }
@@ -1568,9 +1589,9 @@ const WORKOUTS = {
   full:   { title:"Full Body",    moves:["thruster","row","pushup","hinge","climber"], walk:true },
 };
 const CYCLE = ["lower", "upper", "cardio", "full"];
-const TRAIN_DAYS = { 3:[1,3,5], 4:[1,2,4,6], 5:[1,2,3,5,6] };   // getDay(): 0 = Sunday
+const TRAIN_DAYS = { 1:[3], 2:[2,5], 3:[1,3,5], 4:[1,2,4,6], 5:[1,2,3,5,6], 6:[1,2,3,4,5,6], 7:[0,1,2,3,4,5,6] };   // getDay(): 0 = Sunday
 const DOW = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
-const LEVEL = { new:1, some:1.5, exp:2 };
+const LEVEL = { new:1, some:1.5, exp:2, adv:2.5, none:1 };
 
 const fit = { prog:{}, walk:{ min:10, incline:0, speed:3 }, iv:{ rounds:5, fast:45 }, log:[] };
 const IV_EASY = 60;
@@ -1994,10 +2015,13 @@ $("run").addEventListener("click", e => {
 
 // ---- Tabs + Today overview -----------------------------------------------
 const TABS = ["today", "move", "nutrients", "start", "setup"];
-function showTab(name) {
+const coachNav = { hist:[], cur:"today" };
+function showTab(name, isBack) {
   if (name === "groceries") { if (window.__nrGo) window.__nrGo("grocery"); return; }   // blended into the Nourish Grocery page
   const toPlan = name === "eat"; if (toPlan) name = "today";
   if (!TABS.includes(name)) name = "today";
+  if (!isBack && coachNav.cur !== name) { coachNav.hist.push(coachNav.cur); if (coachNav.hist.length > 20) coachNav.hist.shift(); }
+  coachNav.cur = name;
   document.querySelectorAll("#coach .tab").forEach(t => t.hidden = t.dataset.tab !== name);
   document.querySelectorAll("#tabbar button, #topnav button").forEach(b => b.classList.toggle("on", b.dataset.go === name));
   try { if (!document.getElementById("coach").hidden) history.replaceState(null, "", "#coach-" + name); } catch {}
@@ -2020,6 +2044,7 @@ function renderOverview(items, buy) {
 }
 
 document.addEventListener("click", e => {
+  if (e.target.closest("[data-cback]")) { const prev = coachNav.hist.pop() || "today"; showTab(prev === coachNav.cur ? "today" : prev, true); return; }
   const g = e.target.closest("[data-go]"); if (g) showTab(g.dataset.go);
 });
 
@@ -2056,6 +2081,27 @@ document.addEventListener("click", e => {
   if (act === "a" || act === "b") { svg.dataset.hold = act; btns.forEach(x => set(x, x === b)); }
 });
 document.addEventListener("keydown", e => { if (e.key === "Escape" && !$("demo").hidden) closeDemo(); });
+
+// ---- Setup questionnaire: tap-to-select chips that write into the saved fields ----
+const GOAL_MAP = g => { const l = list(g); return l.includes("weight loss") ? "lose" : l.includes("muscle building") || l.includes("strength") ? "muscle" : "maintain"; };
+function paintQuest() {
+  document.querySelectorAll("#form .qchips").forEach(box => {
+    const id = box.dataset.multi, cur = list($(id).value);
+    const opts = box.dataset.opts.split(",");
+    const extra = cur.filter(c => !opts.some(o => o.toLowerCase() === c) && id === "goals");
+    box.innerHTML = [...opts, ...extra.map(cap)].map(o => `<button type="button" class="qchip ${cur.includes(o.toLowerCase()) ? "on" : ""}" data-q="${id}" data-v="${esc(o)}" aria-pressed="${cur.includes(o.toLowerCase())}">${esc(cap(o))}</button>`).join("");
+  });
+}
+document.addEventListener("click", ev => {
+  const b = ev.target.closest && ev.target.closest(".qchip"); if (!b) return;
+  const id = b.dataset.q, v = b.dataset.v.toLowerCase(), inp = $(id), cur = list(inp.value);
+  inp.value = (cur.includes(v) ? cur.filter(x => x !== v) : [...cur, v]).map(x => id === "goals" ? cap(x) : x).join(", ");
+  if (id === "goals") $("goal").value = GOAL_MAP(inp.value);
+  if (id === "likes") { const o = list($("dislikes").value).filter(x => x !== v); $("dislikes").value = o.join(", "); }
+  if (id === "dislikes") { const o = list($("likes").value).filter(x => x !== v); $("likes").value = o.join(", "); }
+  paintQuest(); save();
+});
+$("form").addEventListener("input", () => { $("goal").value = GOAL_MAP($("goals").value); paintQuest(); save(); });
 
 // ---- Events --------------------------------------------------------------
 const update = () => { save(); render(); };
@@ -2113,6 +2159,7 @@ $("addForm").addEventListener("submit", e => {
   $("addName").value = ""; update();
 });
 load();
+paintQuest(); $("goal").value = GOAL_MAP($("goals").value);
 render();
 showTab("today");   // defaults already give a full plan; Setup is one tap away
 </script>
@@ -2537,6 +2584,14 @@ function statusOf(m) {
   const label = key === "ver" ? "Verified" : key === "over" ? "Over limit" : k.est;
   return { key, label, tot, limit:k.limit, margin:k.limit - tot, need };
 }
+// "high" = 20% or more of the FDA daily value in one serving. Only for foods whose data is verified (every label entered) and the nutrient is actually known.
+const ALERT_RULES = [["sod", "High sodium", 460], ["sat", "High saturated fat", 4], ["add", "High added sugar", 10]];
+function alertsOf(m) {
+  if (!m.r || !m.r.kind || statusOf(m).key !== "ver") return [];
+  const x = exTotals(m);
+  return ALERT_RULES.filter(([k, , th]) => { const t = x[NUTX.findIndex(n => n[0] === k)]; return t && !t.part && t.v >= th; }).map(a => a[1]);
+}
+const alertHTML = m => { const a = alertsOf(m); return a.length ? `<div class="nr-alerts" aria-label="Nutrition alerts">${a.map(t => `<span class="nr-alert" title="20% or more of the daily value in one serving">⚠ ${e(t)}</span>`).join("")}</div>` : ""; };
 const missOf = m => NUK5.map((_, k) => usedIng(m).some(x => x.i.nu[k] == null));
 // sum of the values that are known; "part" marks a total that is only a minimum because some ingredient has no value (never counted as zero)
 const exTotals = m => { const u = usedIng(m), sv = m.r.servings || 1; return NUTX.map((x, k) => { const known = u.filter(y => y.i.ex && y.i.ex[k] != null); return known.length ? { v:known.reduce((a, y) => a + y.i.ex[k], 0) / sv, part:known.length < u.length } : null; }); };
@@ -2608,6 +2663,7 @@ function kindBlock(m) {
       <div><span>Difficulty</span><b>${e(r.difficulty)}</b></div></div>
     <p class="nr-muted" style="margin:8px 0 0"><b>Equipment:</b> ${e((r.equipment || []).join(", ") || "None")}${q.portion ? ` · <b>Serving:</b> ${e(q.portion)}` : ""}</p>
     ${statusBox(m, st)}
+    ${alertHTML(m)}
     <div class="nr-rmacros">${cell("calories", v[0], 0, "", 0)}${cell("protein", v[1], 1, " g", 1)}${cell("carbs", v[2], 2, " g", 1)}${cell("fat", v[3], 3, " g", 1)}${cell("fiber", v[4], 4, " g", 1)}</div>
     <p class="nr-muted" style="margin:6px 0 0">Per serving${picked.length ? `, including: ${e(picked.join(", "))}` : hasOpt ? ", without the optional ingredients" : ""}.${miss.some(Boolean) ? " “n/a” means the value is not known yet (it depends on a label you have not entered), not zero." : ""}${st.key === "ver" ? "" : " Approximate (~) until the labels are confirmed."}</p>
     ${sv !== 1 ? `<p style="margin:8px 0 0"><b>For ${sv} servings:</b> ${approx}${Math.round(v[0] * sv)} calories${miss[1] ? "" : `, ${approx}${fxn(v[1] * sv, 1)} g protein`}${miss[2] ? "" : `, ${approx}${fxn(v[2] * sv, 1)} g carbs`}${miss[3] ? "" : `, ${approx}${fxn(v[3] * sv, 1)} g fat`}. The ${st.limit}-calorie limit is per serving.</p>` : ""}
@@ -2822,13 +2878,48 @@ const calOf = x => { const q = itemPreset(x); return (q ? q.sum.cal : (+x.m.cal 
 const proOfItem = x => { const q = itemPreset(x); return (q ? q.sum.pro : (+x.m.pro || 0)) * ((x.p && x.p.sv) || 1); };
 const sumCal = list => list.reduce((a, x) => a + calOf(x), 0);
 const sumPro = list => list.reduce((a, x) => a + proOfItem(x), 0);
-function addToPlan(mealId, date, slot, index) {
+// ----- meal suggestions that reuse ingredients -----
+const NOT_SHOP = new Set(["water", "ice", "salt", "black pepper", "cooking spray", "pepper"]);
+const ingKeys = m => { const out = new Map(); (m.ing || []).forEach(i => { if (i.fixed || i.opt) return; const k = normName(i.name); if (k && !NOT_SHOP.has(k) && !out.has(k)) out.set(k, displayName(i.name)); }); return out; };
+// have: Set of ingredient keys already in hand; returns meals sharing at least one, with what overlaps and what is still needed
+function shareSuggest(have, skipIds, max) {
+  const out = [];
+  for (const m of S.meals) {
+    if (skipIds.has(m.id) || m.tags.includes("Hydration")) continue;
+    const keys = ingKeys(m); if (!keys.size) continue;
+    const overlap = [...keys].filter(([k]) => have.has(k)).map(([, n]) => n), need = [...keys].filter(([k]) => !have.has(k)).map(([, n]) => n);
+    if (overlap.length) out.push({ m, overlap, need });
+  }
+  return out.sort((a, b) => b.overlap.length - a.overlap.length || a.need.length - b.need.length || a.m.name.localeCompare(b.m.name)).slice(0, max);
+}
+const sugRow = (x, acts) => `<div class="nr-sug"><b>${e(x.m.name)}</b><p><em>Uses what you have:</em> ${e(x.overlap.join(", "))}</p><p><em>Still needed:</em> ${x.need.length ? e(x.need.join(", ")) : "nothing else"}</p><div class="row">${acts}</div></div>`;
+const planCount = () => Object.values(S.plan).reduce((a, l) => a + l.length, 0);
+let sugCtx = null;
+function runSuggest() {
+  if (!sugCtx) return; const c = sugCtx; sugCtx = null;
+  const wk = iso(weekStartOf(c.date)); S.sugSeen = S.sugSeen || {}; if (S.sugSeen[wk]) return;       // once per planning week
+  const base = meal(c.id); if (!base) return;
+  const inPlan = new Set(Object.values(S.plan).flat().map(p => p.mealId));
+  const list = shareSuggest(new Set(ingKeys(base).keys()), new Set([...inPlan, base.id]), 3); if (!list.length) return;
+  S.sugSeen[wk] = true; save(); sugCtx = { date:c.date, ids:list.map(x => x.m.id), base:base.id };
+  paintSuggest(list);
+}
+function paintSuggest(list) {
+  const base = meal(sugCtx.base);
+  openModal(`<div class="nr-mhead"><h2>Meals that use the same ingredients</h2><button class="nr-mx" data-act="sug-dismiss" aria-label="Close">${ic("x")}</button></div>
+    <p class="s" style="margin-top:-8px">You added ${e(base ? base.name : "a meal")}. These share ingredients with it.</p>
+    <div class="nr-sugs">${list.map(x => sugRow(x, `<button class="nr-btn light sm" data-act="sug-view" data-id="${x.m.id}">View</button><button class="nr-btn sm" data-act="sug-add" data-id="${x.m.id}">${ic("plus")}Add to plan</button>`)).join("")}</div>
+    <div class="actions"><button class="nr-btn light" data-act="sug-dismiss">No thanks</button></div>`);
+}
+function addToPlan(mealId, date, slot, index, quiet) {
   const m = meal(mealId); if (!m) return;
   const sl = slot == null ? slotOf(m) : slot, arr = dayPlan(date), item = { id:uid(), mealId, slot:sl, done:false };
   if (m.r && m.r.kind && arr.some(p => p.mealId === mealId)) { toast(`${m.name} is already on ${dayLabel(date)}. Change its servings instead.`); return false; }
   const pk = presetFor(m, sl); if (pk) item.pk = pk;
+  const wasEmpty = planCount() === 0;
   if (index == null || index > arr.length) arr.push(item); else arr.splice(index, 0, item);
-  save(); return true;
+  save(); if (wasEmpty && !quiet) { sugCtx = { id:mealId, date }; setTimeout(runSuggest, 120); }
+  return true;
 }
 function toast(msg) { const t = $("nr-toast"); t.textContent = msg; t.hidden = false; clearTimeout(toast.t); toast.t = setTimeout(() => t.hidden = true, 2600); }
 const dayLabel = d => { const t = iso(new Date()), i = iso(d); return i === t ? "Today" : i === iso(addD(new Date(), 1)) ? "Tomorrow" : `${DAYS[d.getDay()]}, ${MONTHS[d.getMonth()]} ${d.getDate()}`; };
@@ -2846,8 +2937,11 @@ function addPlanToGrocery(start) {
 const PAGES = ["home", "meals", "plan", "grocery", "assistant", "meal-details", "add-meal", "settings", "nutrition-summary", "meal-categories", "pantry-inventory", "cheat", "customize", "discover"];
 const MORE_PAGES = ["nutrition-summary", "meal-categories", "pantry-inventory", "cheat"];
 function render() {
+  const BACKS = { "nutrition-summary":["plan", "Plan"], "meal-categories":["settings", "Settings"], "pantry-inventory":["grocery", "Grocery"], cheat:["settings", "Settings"] };
   ({ home:renderHome, meals:renderMeals, plan:renderPlan, grocery:renderGrocery, assistant:renderChat, "meal-details":renderDetails, "add-meal":renderForm, settings:renderSettings, customize:renderCustomize, discover:renderDiscover,
     "nutrition-summary":renderSummary, "meal-categories":renderCats, "pantry-inventory":renderPantry, cheat:renderCheat }[ui.page] || renderHome)();
+  { const bk = BACKS[ui.page], pg = bk && document.querySelector(`.nr-page[data-page="${ui.page}"]`);
+    if (pg && !pg.querySelector(".nr-back")) pg.insertAdjacentHTML("afterbegin", `<button class="nr-back" data-act="back" data-fb="${bk[0]}">${ic("left")}${bk[1]}</button>`); }
   renderSelBar();
 }
 const viewBtn = (m, inner) => `<button class="nr-link" data-act="view-meal" data-id="${m.id}">${inner}</button>`;
@@ -2902,7 +2996,8 @@ const FILTERS = {
   "Breakfast": m => m.tags.includes("Breakfast"),
   "Lunch": m => m.tags.includes("Lunch"),
   "Dinner": m => m.tags.includes("Dinner"),
-  "Smoothies & Snacks": m => m.tags.includes("Smoothies") || m.tags.includes("Snacks")
+  "Smoothies": m => m.tags.includes("Smoothies"),
+  "Snacks": m => m.tags.includes("Snacks")
 };
 const compBadge = m => { if (m.r && m.r.kind) { const st = statusOf(m), p = recipeNutr(m).v[1], na = missOf(m)[1];
     return `${na ? "" : `<span class="nr-pill light">${st.key === "ver" ? "" : "~"}${Math.round(p)} g protein</span>`}<span class="nr-comp ${st.key === "ver" ? "ok" : st.key === "over" ? "bad" : "warn"}" title="${e(st.key === "ver" ? "Every ingredient counted" : st.key === "over" ? "Above the calorie limit" : "Not confirmed: needs a product label")}">${st.key === "ver" ? "✓ " : st.key === "over" ? "! " : ""}${st.label}</span>`; }
@@ -2913,7 +3008,7 @@ const mealCard = m => `<article class="nr-card ${ui.selMode && (S.sel || []).inc
       <div class="nr-photo">${ui.selMode ? `<button class="nr-selbox ${(S.sel || []).includes(m.id) ? "on" : ""}" data-act="sel-toggle" data-id="${m.id}" aria-label="Select ${e(m.name)}" aria-pressed="${(S.sel || []).includes(m.id)}">${ic("check")}</button>` : ""}${viewBtn(m, photoHTML(m))}<button class="nr-btn nr-circle nr-add" data-act="add-meal" data-id="${m.id}" aria-label="Add to plan">${ic("plus")}</button>${m.tags[0] ? `<span class="nr-tag">${e(m.tags[0])}</span>` : ""}</div>
       <div class="nr-cbody"><h3 class="nr-ctitle">${viewBtn(m, e(m.name))}</h3>
         <div class="nr-crow"><span class="nr-pill">${calText(m)}</span>${compBadge(m)}<button class="nr-dots" data-act="meal-menu" data-id="${m.id}" aria-label="More">${ic("dots")}</button></div>
-        <p class="nr-desc">${e(m.desc && !m.desc.startsWith("*") ? m.desc : m.ing.map(ingText).join(", ") || m.desc || "")}</p>${nutHTML(m)}</div></article>`;
+        <p class="nr-desc">${e(m.desc && !m.desc.startsWith("*") ? m.desc : m.ing.map(ingText).join(", ") || m.desc || "")}</p>${alertHTML(m)}${nutHTML(m)}</div></article>`;
 // ----- Discover: collections of meals -----
 const optOn = (m, idx) => !!(ui.opt[m.id] && ui.opt[m.id].has(idx));
 const servOf = m => (ui.scale && ui.scale[m.id]) || m.r.servings;
@@ -2966,8 +3061,12 @@ function renderMeals() {
   $("nr-chips").innerHTML = Object.keys(FILTERS).map(t => `<button class="nr-chip ${ui.tag === t ? "on" : ""}" data-act="tag" data-tag="${e(t)}">${e(t)}</button>`).join("");
   const q = ui.q.trim().toLowerCase();
   const list = S.meals.filter(m => FILTERS[ui.tag](m) && (!q || m.name.toLowerCase().includes(q) || m.ing.some(i => i.name.toLowerCase().includes(q)) || m.tags.some(t => t.toLowerCase().includes(q))));
+  const PER = ui.per || window.__PER || 10, pages = Math.max(1, Math.ceil(list.length / PER)), pk = ui.tag + "|" + q;
+  ui.pg = ui.pg || {}; const pg = Math.min(Math.max(1, ui.pg[pk] || 1), pages); ui.pg[pk] = pg;
+  $("nr-pager").innerHTML = pages > 1 ? `<span>Page ${pg} of ${pages}</span>` + Array.from({ length:pages }, (_, i) => `<button class="${i + 1 === pg ? "on" : ""}" data-act="pg" data-p="${i + 1}" aria-label="Page ${i + 1}" ${i + 1 === pg ? 'aria-current="page"' : ""}>${i + 1}</button>`).join("") : "";
+  const all = list; list.splice(0, list.length, ...all.slice((pg - 1) * PER, pg * PER));
   const SECT = [["Water-based smoothies", m => m.r && m.r.kind === "smoothie" && m.tags.includes("Water-Based")], ["Creamy protein smoothies", m => m.r && m.r.kind === "smoothie" && !m.tags.includes("Water-Based")], ["Snacks", m => m.r && m.r.kind === "snack"], ["Other smoothies and snacks", m => !(m.r && m.r.kind)]];
-  const sectioned = ui.tag === "Smoothies & Snacks" && list.some(m => m.r && m.r.kind);
+  const sectioned = ui.tag === "Smoothies" && list.some(m => m.r && m.r.kind);
   $("nr-grid").innerHTML = sectioned ? SECT.map(([t, f]) => { const ls = list.filter(f); return ls.length ? `<h2 class="nr-sect" style="grid-column:1/-1">${e(t)} <span class="nr-muted">${ls.length}</span></h2>` + ls.map(mealCard).join("") : ""; }).join("")
     : list.length ? list.map(mealCard).join("")
     : `<div class="nr-empty" style="grid-column:1/-1">${S.meals.length ? "No meals match." : "No meals yet. Add your first meal to get started."}<br><button class="nr-btn" data-act="new-meal">${ic("plus")}New Meal</button></div>`;
@@ -3005,7 +3104,15 @@ function fillLib() {
      <button class="nr-btn nr-circle sm" data-act="lib-add" data-id="${m.id}" aria-label="Add ${e(m.name)}">${ic("plus")}</button></div>`).join("") || `<div class="nr-none">No meals match.</div>`;
 }
 
+function renderGroceryIdeas() {
+  const box = $("nr-g-sugs"); if (!box) return;
+  const have = new Set([...S.grocery.map(g => g.norm), ...S.pantry.map(p => p.norm)]), onList = new Set(S.grocery.flatMap(g => g.sources));
+  if (!S.grocery.length) { box.innerHTML = `<p class="nr-muted" style="margin:0">Add some items or meals to your list and I’ll suggest meals that reuse them.</p>`; return; }
+  const list = shareSuggest(have, onList, 6);
+  box.innerHTML = list.length ? list.map(x => sugRow(x, `<button class="nr-btn light sm" data-act="gsug-view" data-id="${x.m.id}">View</button><button class="nr-btn sm" data-act="gsug-add" data-id="${x.m.id}">${ic("cart")}Add to list</button>`).replace("Uses what you have:", "Already on your list:")).join("") + `<p class="nr-muted" style="margin:0;font-size:12.5px">Ranked by how much of your list each meal reuses, then by how little extra you would buy.</p>` : `<p class="nr-muted" style="margin:0">No saved meal shares ingredients with your list yet.</p>`;
+}
 function renderGrocery() {
+  renderGroceryIdeas();
   const q = ui.gq.trim().toLowerCase(), all = S.grocery, shown = all.filter(it => !q || it.name.toLowerCase().includes(q) || it.norm.includes(q));
   const left = all.filter(i => !i.purchased).length;
 
@@ -3057,14 +3164,18 @@ function addCheatMeal(name, ingStrs, cal) {
   if (!S.cats.includes("Cheat Day")) S.cats.push("Cheat Day");
   save(); return m;
 }
-function addCheatModal() {
-  openModal(`<div class="nr-mhead"><h2>Add cheat meal</h2><button class="nr-mx" data-act="close-modal" aria-label="Close">${ic("x")}</button></div>
+function addCheatModal(id) {
+  const m = id ? meal(id) : null; ui.chEdit = m ? m.id : null; ui.chPhoto = m ? m.photo : null;
+  openModal(`<div class="nr-mhead"><h2>${m ? "Edit cheat meal" : "Add cheat meal"}</h2><button class="nr-mx" data-act="close-modal" aria-label="Close">${ic("x")}</button></div>
     <p class="s" style="margin-top:-8px">Save a favorite so it’s ready on your cheat day.</p>
-    <label for="nr-ch-name">Name</label><input class="nr-input sq" id="nr-ch-name" placeholder="e.g. Pepperoni pizza" autocomplete="off" style="margin-bottom:14px">
-    <label for="nr-ch-cal">Calories (optional)</label><input class="nr-input sq" id="nr-ch-cal" type="number" min="0" placeholder="e.g. 800" style="margin-bottom:14px">
-    <label for="nr-ch-ing">What’s in it (optional, comma separated)</label><input class="nr-input sq" id="nr-ch-ing" placeholder="pizza dough, cheese, pepperoni" autocomplete="off">
-    <div class="actions"><button class="nr-btn light" data-act="close-modal">Cancel</button><button class="nr-btn" data-act="cheat-save">Add cheat meal</button></div>`);
+    <label for="nr-ch-name">Meal name</label><input class="nr-input sq" id="nr-ch-name" placeholder="e.g. Pepperoni pizza" autocomplete="off" value="${e(m ? m.name : "")}" style="margin-bottom:14px">
+    <label>Photo</label><div class="nr-photorow" style="margin-bottom:14px"><div class="nr-photoprev" id="nr-ch-prev"></div><div class="nr-photoctl"><label class="nr-btn light sm nr-file">${ic("plus")}Upload photo<input type="file" id="nr-ch-photo" accept="image/*"></label><button type="button" class="nr-btn light sm" data-act="cheat-nophoto">Remove photo</button></div></div>
+    <div class="row2"><div><label for="nr-ch-cal">Calories</label><input class="nr-input sq" id="nr-ch-cal" type="number" min="0" inputmode="numeric" placeholder="e.g. 800" value="${m && m.cal != null ? m.cal : ""}"></div>
+      <div><label for="nr-ch-price">Price ($)</label><input class="nr-input sq" id="nr-ch-price" type="number" min="0" step="0.01" inputmode="decimal" placeholder="e.g. 14.50" value="${m && m.price != null ? m.price : ""}"></div></div>
+    <div class="actions"><button class="nr-btn light" data-act="close-modal">Cancel</button><button class="nr-btn" data-act="cheat-save">${m ? "Save changes" : "Add cheat meal"}</button></div>`);
+  paintChPrev();
 }
+function paintChPrev() { const p = $("nr-ch-prev"); if (p) p.innerHTML = ui.chPhoto ? `<img src="${e(ui.chPhoto)}" alt="">` : `<span class="nr-muted">No photo</span>`; }
 function cheatDate() {
   const want = S.settings.cheatDay ?? 6, t = today0(); return addD(t, (want - t.getDay() + 7) % 7);
 }
@@ -3076,14 +3187,14 @@ function renderCheat() {
       <div class="nr-chips" style="margin:6px 0 14px">${DAYS.map((n, i) => `<button class="nr-chip ${i === want ? "on" : ""}" data-act="cheat-day" data-d="${i}">${n.slice(0, 3)}</button>`).join("")}</div>
       <p style="margin:0"><b>${isToday ? "Today is your cheat day." : `${DAYS[d.getDay()]} is your cheat day`}</b> ${isToday ? "The 900 calorie limit is paused. Enjoy it." : `· ${away} day${away === 1 ? "" : "s"} away. Other days stay at 900 calories or less.`}</p>
     </div>
-    <div class="nr-gcard" style="margin-top:18px"><h3>${DAYS[d.getDay()]}’s plan${list.length ? ` · ${cal} cal` : ""}</h3>
-      ${list.length ? `<ul class="nr-ilist">${list.map(x => `<li><span>${e(x.m.name)}</span><span class="nr-muted">${calText(x.m)}</span></li>`).join("")}</ul>
+    <div class="nr-gcard" style="margin-top:18px"><h3>${DAYS[d.getDay()]}’s plan${list.length ? ` · ${cal} cal` : ""}${list.some(x => x.m.price != null) ? ` · $${list.reduce((a, x) => a + (+x.m.price || 0), 0).toFixed(2)}` : ""}</h3>
+      ${list.length ? `<ul class="nr-ilist">${list.map(x => `<li><span>${e(x.m.name)}</span><span class="nr-muted">${calText(x.m)}${x.m.price != null ? ` · $${(+x.m.price).toFixed(2)}` : ""}</span></li>`).join("")}</ul>
         <button class="nr-btn light sm" style="margin-top:12px" data-act="cheat-clear">Clear cheat meals</button>` : `<p class="nr-muted" style="margin:0">Nothing picked yet. Choose from the ideas below.</p>`}</div>
-    ${favs.length ? `<h3 style="margin:26px 0 12px;font-size:18px">My favorite cheat meals</h3>
-    <div class="nr-grid" style="grid-template-columns:repeat(auto-fill,minmax(250px,1fr))">${favs.map(m => `<article class="nr-card"><div class="nr-cbody">
-      <div style="font-size:34px;line-height:1">${mealEmoji(m)}</div><h3 class="nr-ctitle" style="margin-top:8px">${e(m.name)}</h3>
-      <div class="nr-crow"><span class="nr-pill">${calText(m)}</span></div>${m.ing.length ? `<p class="nr-desc">${e(m.ing.map(i => i.name).join(", "))}</p>` : ""}
-      <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap"><button class="nr-btn light sm" data-act="cheat-fav-add" data-id="${m.id}">${ic("plus")}Add to ${DAYS[d.getDay()]}</button><button class="nr-btn light sm danger" data-act="cheat-fav-del" data-id="${m.id}">Remove</button></div></div></article>`).join("")}</div>` : ""}
+    ${favs.length ? `<h3 style="margin:26px 0 12px;font-size:18px">My cheat meals <span class="nr-muted" style="font-size:13px;font-weight:500">${favs.length} saved${favs.some(m => m.price != null) ? ` · $${favs.reduce((a, m) => a + (+m.price || 0), 0).toFixed(2)} if you had them all` : ""}</span></h3>
+    <div class="nr-grid" style="grid-template-columns:repeat(auto-fill,minmax(250px,1fr))">${favs.map(m => `<article class="nr-card"><div class="nr-cheatph">${m.photo ? `<img src="${e(m.photo)}" alt="${e(m.name)}">` : mealEmoji(m)}</div><div class="nr-cbody">
+      <h3 class="nr-ctitle">${e(m.name)}</h3>
+      <div class="nr-crow"><span class="nr-pill">${m.cal == null || m.cal === "" ? "— cal" : `${m.cal} cal`}</span><span class="nr-pill light">${m.price != null ? `$${(+m.price).toFixed(2)}` : "No price"}</span></div>${m.ing.length ? `<p class="nr-desc">${e(m.ing.map(i => i.name).join(", "))}</p>` : ""}
+      <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap"><button class="nr-btn light sm" data-act="cheat-fav-add" data-id="${m.id}">${ic("plus")}Add to ${DAYS[d.getDay()]}</button><button class="nr-btn light sm" data-act="cheat-edit" data-id="${m.id}">${ic("edit")}Edit</button><button class="nr-btn light sm danger" data-act="cheat-fav-del" data-id="${m.id}">Remove</button></div></div></article>`).join("")}</div>` : ""}
     <h3 style="margin:26px 0 12px;font-size:18px">Cheat meal ideas</h3>
     <div class="nr-grid" style="grid-template-columns:repeat(auto-fill,minmax(250px,1fr))">${CHEAT.map((c, i) => `<article class="nr-card"><div class="nr-cbody">
       <div style="font-size:34px;line-height:1">${c.emoji}</div><h3 class="nr-ctitle" style="margin-top:8px">${e(c.name)}</h3>
@@ -3313,7 +3424,7 @@ function autoplan(text) {
       const skip = [...Object.keys(used).filter(k => used[k] >= 2), ...todayIds];
       const pool = suggest(slot, text, 8, skip, 0).filter(m => (+m.cal || 0) <= room);
       const pick = pool[0] || suggest(slot, "", 30, todayIds).sort((a, b) => a.cal - b.cal)[0];
-      if (pick) { addToPlan(pick.id, d, slot); todayIds.push(pick.id); used[pick.id] = (used[pick.id] || 0) + 1; budget -= +pick.cal || 0; }
+      if (pick) { addToPlan(pick.id, d, slot, undefined, true); todayIds.push(pick.id); used[pick.id] = (used[pick.id] || 0) + 1; budget -= +pick.cal || 0; }
     });
     filled++;
   }
@@ -3551,7 +3662,7 @@ function go(name, push = true) {
   if (name === "coach") name = "coach-today";
   const coach = name.startsWith("coach");
   if (!coach && !PAGES.includes(name)) name = "home";
-  if (!coach && ui.page !== name && !["meal-details", "add-meal"].includes(ui.page)) ui.back = ui.page;
+  if (!coach && ui.page !== name && !["meal-details", "add-meal"].includes(ui.page)) { ui.back = ui.page; ui.backReal = true; }
   document.querySelectorAll(".nr-page").forEach(p => p.hidden = coach || p.dataset.page !== name);
   $("coach").hidden = !coach; $("nr-main").hidden = coach;
   const tab = coach ? "coach" : name === "nutrition-summary" ? "plan" : name === "pantry-inventory" ? "grocery" : ["meal-details", "add-meal", "discover"].includes(name) ? "meals" : name;
@@ -3586,10 +3697,19 @@ document.addEventListener("click", ev => {
   const d = a.dataset, act = d.act;
   switch (act) {
     case "close-modal": closeModal(); break;
-    case "back": if (ui.page === "add-meal" && ui.editId && meal(ui.editId)) view(ui.editId); else go(ui.back && ui.back !== ui.page ? ui.back : "meals"); break;
+    case "back": if (ui.page === "add-meal" && ui.editId && meal(ui.editId)) view(ui.editId); else go(ui.back && ui.back !== ui.page && (ui.backReal || !d.fb) ? ui.back : (d.fb || "meals")); break;
     case "view-meal": closePop(); openDetail(d.id); break;
     case "open-full": closeModal(); openFull(d.id); break;
+    case "sug-dismiss": sugCtx = null; closeModal(); break;
+    case "sug-view": sugCtx = null; closeModal(); openFull(d.id); break;
+    case "sug-add": { const c = sugCtx; const m = meal(d.id); if (!c || !m) break; const ok = addToPlan(m.id, c.date, null, undefined, true);
+      if (ok !== false) toast(`Added ${m.name} to ${dayLabel(c.date)}`); c.ids = c.ids.filter(i => i !== m.id); render();
+      if (c.ids.length) { const inPlan = new Set(Object.values(S.plan).flat().map(p => p.mealId)); const list = shareSuggest(new Set(ingKeys(meal(c.base)).keys()), new Set([...inPlan, c.base]), 3).filter(x => c.ids.includes(x.m.id)); if (list.length) { paintSuggest(list); break; } }
+      sugCtx = null; closeModal(); break; }
+    case "gsug-add": { const m = meal(d.id); if (!m) break; mealToGrocery(m.id); save(); renderGrocery(); break; }
+    case "gsug-view": openFull(d.id); break;
     case "tag": ui.tag = d.tag; renderMeals(); break;
+    case "pg": { const pk = ui.tag + "|" + ui.q.trim().toLowerCase(); ui.pg = ui.pg || {}; ui.pg[pk] = +d.p; renderMeals(); const g = $("nr-chips"); if (g && g.scrollIntoView) g.scrollIntoView({ block:"nearest" }); break; }
     case "new-meal": ui.editId = null; remember("nr-edit", ""); go("add-meal"); break;
     case "edit-meal": closePop(); edit(d.id); break;
     case "m-tag": { const i = ui.form.tags.indexOf(d.tag); if (i < 0) ui.form.tags.push(d.tag); else ui.form.tags.splice(i, 1); a.classList.toggle("on"); break; }
@@ -3662,8 +3782,16 @@ document.addEventListener("click", ev => {
       if (!m) { m = { id:uid(), name:c.name, tags:["Cheat Day"], cal:c.cal, calEst:false, pro:c.pro, time:0, ing:c.ing.map(x => seedIng(x[0], x[1])), desc:c.desc, photo:null, emoji:c.emoji }; S.meals.push(m); if (!S.cats.includes("Cheat Day")) S.cats.push("Cheat Day"); }
       addToPlan(m.id, cheatDate(), "Other"); toast(`Added to ${DAYS[cheatDate().getDay()]}`); renderCheat(); break; }
     case "cheat-new": addCheatModal(); break;
-    case "cheat-save": { const nm = $("nr-ch-name").value.trim(); if (!nm) { toast("Give it a name"); break; } const c = $("nr-ch-cal").value;
-      const m = addCheatMeal(nm, $("nr-ch-ing").value.trim() ? splitList($("nr-ch-ing").value) : [], c !== "" ? +c : null); closeModal(); toast(`Added “${m.name}” to your cheat meals`); renderCheat(); break; }
+    case "cheat-edit": addCheatModal(d.id); break;
+    case "cheat-nophoto": ui.chPhoto = null; paintChPrev(); break;
+    case "cheat-save": { const nm = $("nr-ch-name").value.trim(); if (!nm) { toast("Give it a name"); break; } const c = $("nr-ch-cal").value, pr = $("nr-ch-price").value;
+      if (c !== "" && !(+c >= 0)) { toast("Calories must be a number"); break; } if (pr !== "" && !(+pr >= 0)) { toast("Price must be a number"); break; }
+      let m = ui.chEdit && meal(ui.chEdit);
+      if (m) { m.name = nm; m.cal = c !== "" ? +c : null; m.calEst = false; }
+      else m = addCheatMeal(nm, [], c !== "" ? +c : null);
+      m.name = nm; if (c !== "") { m.cal = +c; m.calEst = false; }
+      m.price = pr !== "" ? Math.round(+pr * 100) / 100 : null; m.photo = ui.chPhoto || null;
+      const wasEdit = !!ui.chEdit; ui.chEdit = null; ui.chPhoto = null; save(); closeModal(); toast(wasEdit ? `Saved “${m.name}”` : `Added “${m.name}” to your cheat meals`); renderCheat(); break; }
     case "cheat-fav-add": { addToPlan(d.id, cheatDate(), "Other"); toast(`Added to ${DAYS[cheatDate().getDay()]}`); renderCheat(); break; }
     case "cheat-fav-del": { const m = meal(d.id); if (!m) break; S.meals = S.meals.filter(x => x.id !== d.id); for (const k of Object.keys(S.plan)) S.plan[k] = S.plan[k].filter(x => x.mealId !== d.id); save(); renderCheat(); toast(`Removed “${m.name}”`); break; }
     case "cheat-clear": { const k = iso(cheatDate()); S.plan[k] = (S.plan[k] || []).filter(x => !(meal(x.mealId) || { tags:[] }).tags.includes("Cheat Day")); save(); renderCheat(); break; }
@@ -3721,6 +3849,7 @@ document.addEventListener("input", ev => {
 });
 document.addEventListener("change", ev => {
   const id = ev.target.id;
+  if (id === "nr-ch-photo" && ev.target.files[0]) photoToData(ev.target.files[0], dd => { ui.chPhoto = dd; paintChPrev(); toast("Photo added"); });
   if (id === "nr-m-photo2" && ev.target.files[0]) { const mm = meal(ev.target.dataset.id); photoToData(ev.target.files[0], dd => { if (mm) { mm.photo = dd; save(); renderDetails(); toast("Photo added"); } }); }
   if (id === "nr-m-photo" && ev.target.files[0]) photoToData(ev.target.files[0], d => { ui.form.photo = d; $("nr-m-url").value = ""; paintPrev(); toast("Photo added"); });
   else if (ev.target.dataset && ev.target.dataset.cat != null) {
@@ -3822,11 +3951,16 @@ document.addEventListener("click", ev => {
   if (ev.target.closest("[data-dp-again]")) { const cur = $("dayplans")._plans || []; dpAvoid = new Set(cur.flatMap(pl => pl.items.map(x => x[1].m.id))); dpRoll++; renderDayPlans(); return; }
   const b = ev.target.closest("[data-dp]"); if (!b) return;
   const pl = $("dayplans")._plans && $("dayplans")._plans[+b.dataset.dp]; if (!pl) return;
-  const d = today0(); planned(d).forEach(x => { const a = dayPlan(d); const i = a.findIndex(y => y.id === x.p.id); if (i >= 0) a.splice(i, 1); });
-  pl.items.forEach(([lab, it]) => addToPlan(it.m.id, d, lab === "Smoothie" ? "Smoothie" : lab));
-  toast("Added to Home"); render();
+  const d = today0();
+  const want = pl.items.map(([lab, it]) => lab + ":" + it.m.id).sort().join("|"), have = planned(d).map(x => (x.p.slot || "") + ":" + x.m.id).sort().join("|");
+  if (want === have) { toast("That plan is already on Home"); b.textContent = "Added ✓"; b.disabled = true; showTab("today", true); return; }   // no duplicate additions
+  planned(d).forEach(x => { const a = dayPlan(d); const i = a.findIndex(y => y.id === x.p.id); if (i >= 0) a.splice(i, 1); });
+  pl.items.forEach(([lab, it]) => addToPlan(it.m.id, d, lab === "Smoothie" ? "Smoothie" : lab, undefined, true));
+  toast("Added to Home"); b.textContent = "Added ✓"; b.disabled = true;
+  render(); try { update(); } catch {}                               // refresh Today with the updated plan, same day
+  showTab("today", true); window.scrollTo(0, 0);
 });
-window.__nr = { status() { return S.meals.filter(m => m.r && m.r.kind).map(m => ({ sid:m.r.sid, k:m.r.kind, wb:m.tags.includes("Water-Based"), key:statusOf(m).key })); }, addMealGrocery(id, sc = 1) { const m = meal(id); const r = addMealToGrocery(m, sc, null); save(); return r; }, addPlan(id, d) { return addToPlan(id, d); }, sumCal, applyLabels, loadSample() { S = sampleSeed(); S.noSamples = true; S.recipePack1 = true; S.recipePack2 = true; S.recipePack3 = true; S.recipePack4 = true; S.labels = {}; save(); render(); }, dayPlans, get ink() { return ink; }, get S() { return S; }, handle, go, autoplan, planned, seed, normName, parseIng, catOf, reset() { S = seed(); save(); render(); } };
+window.__nr = { setPer(n) { ui.per = n; renderMeals(); }, status() { return S.meals.filter(m => m.r && m.r.kind).map(m => ({ sid:m.r.sid, k:m.r.kind, wb:m.tags.includes("Water-Based"), key:statusOf(m).key })); }, addMealGrocery(id, sc = 1) { const m = meal(id); const r = addMealToGrocery(m, sc, null); save(); return r; }, addPlan(id, d) { return addToPlan(id, d); }, sumCal, applyLabels, loadSample() { S = sampleSeed(); S.noSamples = true; S.recipePack1 = true; S.recipePack2 = true; S.recipePack3 = true; S.recipePack4 = true; S.labels = {}; save(); render(); }, dayPlans, get ink() { return ink; }, get S() { return S; }, handle, go, autoplan, planned, seed, normName, parseIng, catOf, reset() { S = seed(); save(); render(); } };
 
 
 // ---------- drawing annotations: pen, highlighter, eraser on any page; saved per page on this device ----------
