@@ -1,6 +1,6 @@
 {
-  "name": "Nourish",
-  "short_name": "Nourish",
+  "name": "nourish",
+  "short_name": "nourish",
   "description": "Meal planning, groceries and workouts. Works offline.",
   "start_url": "./",
   "scope": "./",
